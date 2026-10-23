@@ -96,3 +96,13 @@ Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), 
 | Preservación/migración | `ev2_migration.migrate_ev2`; `test_old_units_are_never_relabelled`, `test_migration_preserves_every_existing_table_row`. Fotos, IDs y relaciones preservados. |
 
 Los valores son parámetros asumidos académicamente conforme a EV2; no se solicita validación externa para esta evaluación. Las alertas no son diagnósticos. Las definiciones oficiales de HU/CA se conservan en CRITERIOS_OFICIALES.md; sus detalles cuantitativos anteriores deben leerse con las correcciones EV2 de esta tabla. HU-09 sigue pendiente, sin declarar aceptación municipal.
+
+## Evidencia de la corrección final de sensores
+
+| Alcance | Evidencia adicional |
+|---|---|
+| HU-01: alta/edición de sensores y ubicaciones | `tests/test_final_fixes.py`: formularios HTML reales, opciones internas, selección persistida y permisos de los tres roles. Creación/edición comprobada también en navegador. `tests/frontend.test.cjs`: componentes habilitados en ficha sin selector de puente y filtro conservado en los demás formularios. |
+| HU-01: conservación del piloto | `demo_locations.complete_demo_locations`, CLI `configure-demo-locations`: solo códigos originales simulados con ubicación pendiente. Pruebas de idempotencia, ubicación manual conservada, componentes reconocidos, exclusión de registros ajenos y reglas/asociaciones sin cambios. |
+| HU-08: automatización y recuperación | `test_real_provider_and_periodic_worker_restart_recovery`: proveedor y worker en procesos separados, intervalo real de 1 s, ambos puentes, deduplicación, desconexión/reinicio, alertas EV2 y consulta manual. |
+
+Resultado conjunto: 51 pruebas Python y 3 JavaScript aprobadas. HU-09 y la integración con hardware real conservan el estado previamente documentado.

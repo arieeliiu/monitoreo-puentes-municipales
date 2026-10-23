@@ -154,7 +154,7 @@
 <h2>Sensores asociados</h2>
 <div class="row-link">
 <strong>DEM-01-VIBRACION</strong>
-<small>Variable: Aceleración vertical pico · m/s² · Tablero · Ubicación específica: Apoyo central</small>
+<small>Variable: Aceleración vertical pico · m/s² · Tablero · Ubicación específica: Tablero: cara inferior, centro del vano, eje longitudinal</small>
 <details>
 <summary>Editar</summary>
 <form>
@@ -162,7 +162,7 @@
 <input type="hidden" name="id" value="1">
 <label>Código<input name="code" type="text" value="DEM-01-VIBRACION" required >
 </label>
-<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central" required >
+<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Tablero: cara inferior, centro del vano, eje longitudinal" required >
 </label>
 <label>Referencia de inclinación (°)<input name="reference_value" type="number" value=""  step=any>
 </label>
@@ -173,8 +173,8 @@
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="Aceleración vertical pico" selected>Aceleración vertical pico</option>
-<option value="Inclinación" >Inclinación</option>
+<option value="vibracion" selected>Aceleración vertical pico</option>
+<option value="inclinacion" >Inclinación</option>
 </select>
 </label>
 <button disabled>Guardar sensor</button>
@@ -183,7 +183,7 @@
 </div>
 <div class="row-link">
 <strong>DEM-01-INCLINACION</strong>
-<small>Variable: Inclinación · ° · Tablero · Ubicación específica: Apoyo central</small>
+<small>Variable: Inclinación · ° · Tablero · Ubicación específica: Tablero: borde lateral, extremo junto al estribo de acceso</small>
 <small>Referencia: 0.0 °</small>
 <details>
 <summary>Editar</summary>
@@ -192,7 +192,7 @@
 <input type="hidden" name="id" value="2">
 <label>Código<input name="code" type="text" value="DEM-01-INCLINACION" required >
 </label>
-<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central" required >
+<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Tablero: borde lateral, extremo junto al estribo de acceso" required >
 </label>
 <label>Referencia de inclinación (°)<input name="reference_value" type="number" value="0.0"  step=any>
 </label>
@@ -203,8 +203,8 @@
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="Aceleración vertical pico" >Aceleración vertical pico</option>
-<option value="Inclinación" selected>Inclinación</option>
+<option value="vibracion" >Aceleración vertical pico</option>
+<option value="inclinacion" selected>Inclinación</option>
 </select>
 </label>
 <button disabled>Guardar sensor</button>
@@ -227,8 +227,8 @@
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="Aceleración vertical pico">Aceleración vertical pico (m/s²)</option>
-<option value="Inclinación">Inclinación (°)</option>
+<option value="vibracion">Aceleración vertical pico (m/s²)</option>
+<option value="inclinacion">Inclinación (°)</option>
 </select>
 </label>
 <button disabled>Asociar sensor</button>

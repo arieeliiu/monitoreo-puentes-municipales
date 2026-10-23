@@ -5,6 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app import create_app
 from migrations import migrate
+from demo_locations import complete_demo_locations
 
 def build():
     (ROOT/'docs').mkdir(exist_ok=True)
@@ -16,7 +17,7 @@ def build():
         db.executemany('INSERT INTO components VALUES(?,?,?)',[(1,1,'Tablero'),(2,2,'Tablero')])
         for bid in (1,2):
             for kind,unit in [('vibracion','m/s²'),('inclinacion','°')]:
-                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'DEM-0{bid}-{kind.upper()}',kind,unit,'Apoyo central',0 if kind=='inclinacion' else None))
+                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'DEM-0{bid}-{kind.upper()}',kind,unit,'Pendiente de precisar',0 if kind=='inclinacion' else None))
         stamp='2026-10-22T13:00:00+00:00'
         db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,author_id,created_at,comparison,severity,standard,unit) VALUES(1,'vibracion',1.0,'Aceleración vertical pico',1,1,?,'gte','Alerta','EV2','m/s²')",(stamp,))
         db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification) VALUES(1,1.0,'m/s²',?,'valido',1,'mockup-1',?,'Evaluada','EV2')",(stamp,stamp))
@@ -27,6 +28,7 @@ def build():
         db.execute("INSERT INTO inspection_plans(bridge_id,component_id,inspector_id,planned_date,description,author_id,created_at) VALUES(2,2,2,'2026-11-23','Inspección preventiva',1,?)",(stamp,))
         for bid in (1,2):
             for name in ['Viga','Estribo']: db.execute('INSERT INTO components(bridge_id,name) VALUES(?,?)',(bid,name))
+        complete_demo_locations(db)
         db.commit();db.close()
         app=create_app({'TESTING':True,'DATABASE':str(database),'UPLOAD_FOLDER':str(Path(temp)/'photos'),'SECRET_KEY':'mockup-not-a-session-key'})
         client=app.test_client()

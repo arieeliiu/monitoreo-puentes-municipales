@@ -32,6 +32,18 @@ Detener web, worker IoT y proveedor simulado y respaldar **toda** la carpeta `in
 - `configure-ev2-demo` agrega los componentes faltantes Tablero/Viga/Estribo en puentes marcados como demostración. Normaliza el antiguo nombre «Tablero · prueba» a «Tablero», conservando ID y relaciones; no borra otros componentes. No agrega sensores físicos adicionales: los cuatro existentes siguen configurables.
 - En sensores de inclinación de demostración sin referencia se configura el valor simulado del JSON; no sobrescribe referencias ya definidas ni modifica sensores de puentes reales. Agrega únicamente configuraciones EV2 nunca definidas; no reactiva niveles que DOM desactivó ni sobrescribe sus cambios.
 
+## Ubicaciones del piloto y formularios de sensores
+
+DOM crea y edita sensores desde la ficha del puente. Las opciones muestran los nombres EV2 y envían `vibracion` / `inclinacion`; la edición conserva la selección. El selector de componentes de esa ficha queda habilitado sin exigir un segundo selector de puente.
+
+Para completar únicamente ubicaciones pendientes en una instalación existente:
+
+```powershell
+.\.venv\Scripts\python.exe -m flask --app app configure-demo-locations
+```
+
+La operación es idempotente y solo alcanza los cuatro códigos originales `DEM-01/02-VIBRACION/INCLINACION`, en sus puentes marcados como simulados, cuando la ubicación está vacía o dice «Pendiente de precisar». Usa posiciones específicas según el componente actual Tablero, Viga o Estribo (ver `demo_locations.py`). Conserva ubicaciones manuales, códigos personalizados, componentes desconocidos, asociaciones, referencias, datos históricos y umbrales. No agrega sensores ni los redistribuye: los cuatro sensores originales siguen asociados a sus tableros. Las posiciones son parte de la configuración simulada del piloto. `seed-demo` y `configure-ev2-demo` también completan estas ubicaciones.
+
 ## Criterios de medición y niveles EV2
 
 | Nivel | Aceleración vertical pico (m/s²) | Cambio absoluto de inclinación (°) |
@@ -93,6 +105,8 @@ Interfaz: solo una indicación discreta «Entorno de demostración» por pantall
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -v
+# Regresión JavaScript: Node.js 18+ (solo para pruebas; no requerido por la aplicación)
+node --test tests/frontend.test.cjs
 .\.venv\Scripts\python.exe tools/build_mockups.py
 ```
 

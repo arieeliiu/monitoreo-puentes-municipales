@@ -1,5 +1,5 @@
 document.querySelectorAll('form').forEach(form=>{
-  const bridge=form.querySelector('[data-bridge]');
+  const bridge=form.querySelector('select[data-bridge]');
   const components=form.querySelector('[data-components]');
   if(bridge && components){
     const update=()=>{for(const option of components.options){option.hidden=!!option.value && option.dataset.bridge!==bridge.value;option.disabled=option.hidden;}if(components.selectedOptions[0]?.disabled)components.value='';};

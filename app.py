@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 import click
 from migrations import migrate
+from demo_locations import complete_demo_locations
 from provider_client import fetch_measurements
 from polling import run_polling, interval_seconds, single_worker
 from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory
@@ -565,7 +566,16 @@ def create_app(config=None):
             for condition,severity in config['visual'].items():
                 if not one("SELECT id FROM rules WHERE bridge_id=? AND kind='visual' AND condition=? AND standard='EV2'",(b['id'],condition)):
                     insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,simulated=1,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
+        complete_demo_locations(db())
         audit('Actualizar demostración EV2','bridges',None);db().commit()
+
+    @app.cli.command('configure-demo-locations')
+    def demo_locations_command():
+        changed=complete_demo_locations(db())
+        if changed:
+            audit('Completar ubicaciones del piloto','sensors',None,f'{changed} ubicaciones completadas')
+        db().commit()
+        click.echo(f'Ubicaciones de demostración completadas: {changed}.')
 
     @app.cli.command('configure-ev2-demo')
     def demo_ev2_command():

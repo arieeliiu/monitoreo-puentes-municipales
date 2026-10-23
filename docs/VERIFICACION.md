@@ -4,7 +4,7 @@ Fecha: 23/10/2026. Referencia funcional: alcance EV2 actualizado del 22/10/2026,
 
 ## Suite automatizada
 
-`python -m unittest discover -v`: **45 pruebas aprobadas, 0 fallos** en la instalación del escritorio. Se conservan 36 casos de regresión (actualizados solo donde EV2 cambia unidades, comparaciones o interfaz) y se añaden 9 casos EV2. No se cuentan duplicados por herencia.
+`python -m unittest discover -v`: **51 pruebas Python aprobadas, 0 fallos** en la instalación del escritorio. Se conservan 36 casos de regresión (actualizados solo donde EV2 cambia unidades, comparaciones o interfaz) y se añaden 9 casos EV2 y 6 casos de corrección final. No se cuentan duplicados por herencia.
 
 | Caso EV2 | Resultado verificado |
 |---|---|
@@ -19,6 +19,20 @@ Fecha: 23/10/2026. Referencia funcional: alcance EV2 actualizado del 22/10/2026,
 | test_fresh_demo_has_three_components_per_bridge | Instalación desde cero, seed-demo funcional, dos puentes con exactamente Tablero/Viga/Estribo, cuatro sensores configurables y referencias simuladas. |
 
 La regresión conserva controles de permisos, CSRF, escape HTML, fotos opcionales/privadas y validación de archivos, persistencia, filtros, mantenimiento y trazabilidad sin cierre automático. También prueba el worker periódico (ciclos con reloj controlado), recuperación de desconexión y reintentos HTTP, singleton, identidad puente/variable, rechazo de registros inconsistentes y errores auditados. Mockups comprobados contra las vistas actuales.
+
+## Corrección final de sensores y verificación IoT
+
+Resultado: **54 pruebas aprobadas** (51 Python + 3 JavaScript), sin fallos. Comandos: `python -m unittest discover -v` y `node --test tests/frontend.test.cjs` (Node.js 18+). Las pruebas usan bases temporales; no incorporan sensores ni mediciones de prueba a la base del usuario.
+
+- `templates/bridge.html`: los valores de ambos selectores pasan de etiquetas visibles a identificadores internos. Pruebas de creación y edición extraen los controles, opciones seleccionadas y CSRF de formularios renderizados, los envían y comprueban persistencia y respuesta. Incluyen ambos tipos y cambio de tipo sin mediciones.
+- `static/app.js`: la revisión en navegador detectó que `[data-bridge]` también coincidía con un `<option>` de componente. En la ficha, esto deshabilitaba todos los componentes e impedía crear sensores. Ahora solo se usa `select[data-bridge]`. Las tres pruebas JavaScript ejecutan el script real con controles DOM simulados: ficha sin selector de puente, filtros con selector y actualización de unidades EV2.
+- Permisos: DOM crea/edita; Inspector y Mantención ven la ficha sin formularios y sus envíos de alta/edición reciben 403. La regresión existente comprueba los cinco módulos, programación y permisos particulares de cada rol.
+- Ubicaciones: `configure-demo-locations` completa solo los cuatro códigos originales simulados con ubicación pendiente/vacía y componente reconocido. Se comprueban Tablero/Viga/Estribo, conservación de una ubicación manual, IDs/asociaciones/referencias/reglas, repetición sin cambios y exclusión de sensores ajenos al piloto/componentes desconocidos.
+- IoT con procesos reales: inicia el worker de intervalo 1 s sin proveedor, comprueba error auditado, inicia `mock_provider.py`, recibe cuatro registros de ambos puentes y cuatro alertas Alerta según EV2. Consultas periódicas repetidas mantienen cuatro registros/alertas. Detiene y reinicia el proveedor, verifica web disponible y worker vivo, y recibe el nuevo lote hasta ocho registros/alertas. La consulta manual posterior tampoco duplica. No se simulan el reloj ni las respuestas HTTP en este caso. Los límites Atención/Alerta/Crítico y la severidad máxima siguen cubiertos por los casos EV2.
+- Interfaz real: en navegador y base aislada, DOM creó UI-VIBRACION en Viga y UI-INCLINACION en Estribo, editó sus ubicaciones y la referencia a 11,25°, guardó y vio los datos actualizados. Ambos formularios de edición conservaron su tipo seleccionado. Esos sensores de verificación no pertenecen a la instalación del usuario.
+- Mockups: se regenera únicamente el documento existente desde las plantillas, reflejando valores de opciones corregidos y ubicaciones iniciales específicas; no se agregan pantallas ni se rediseñan los cinco módulos.
+
+La configuración local de ubicaciones se aplica con respaldo SQLite privado y comparación de todos los registros: solo cambian ubicaciones pendientes elegibles y se añade la auditoría correspondiente. No modifica umbrales ni asociaciones. Proveedor y worker utilizados para verificar se detienen al terminar; su arranque operativo continúa documentado en README.
 
 ## Defectos corregidos durante la verificación
 
