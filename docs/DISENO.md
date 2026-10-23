@@ -28,4 +28,6 @@ Datos de demostración inicial: dos puentes ficticios y sensores sin mediciones;
 - Panel: sensores separados de condiciones visuales, pendientes, próxima programación y última inspección por puente; acceso a fotos y observaciones.
 - Mantenimiento → Filtrar por puente, respetando asignación del personal. Alerta muestra por separado la ausencia de inspección y de tarea.
 
-Los mockups HTML originales muestran el diseño base. Los flujos de esta sección y las plantillas ejecutables corresponden a las correcciones actuales. Término EDT 1.4.5/1.4.6: 24/11/2026; presentación: 26/11/2026.
+Los mockups HTML se regeneran desde las plantillas actuales con tools/build_mockups.py. Incluyen las cinco funcionalidades, registro visual como inspector, programación y panel ampliado. Término EDT 1.4.5/1.4.6: 24/11/2026; presentación: 26/11/2026.
+
+Captura IoT: el proceso poll-provider consulta periódicamente sin interacción; DOM conserva el botón manual. Ambas vías registran errores de identidad y evitan duplicados. El intervalo se configura por entorno o CLI.

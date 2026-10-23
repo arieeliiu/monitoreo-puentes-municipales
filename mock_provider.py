@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 def demo_records():
     stamp=datetime.now(timezone.utc).isoformat()
-    return [dict(external_id=f'academico-{stamp}-{bridge}-{kind}',sensor_code=f'DEM-0{bridge}-{kind.upper()}',
+    return [dict(external_id=f'academico-{stamp}-{bridge}-{kind}',bridge_code=f'DEM-0{bridge}',kind=kind,sensor_code=f'DEM-0{bridge}-{kind.upper()}',
                  value=value,unit=unit,measured_at=stamp,status='valido',simulated=True)
             for bridge in (1,2) for kind,unit,value in [('vibracion','mm/s',7),('inclinacion','°',-3)]]
 

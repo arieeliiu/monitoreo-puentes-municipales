@@ -58,7 +58,7 @@ class CorrectionsTests(SystemTests):
     def test_provider_http_end_to_end_two_bridges_dedup_and_errors(self):
         self.db.execute("INSERT INTO sensors(component_id,code,kind,unit) VALUES(2,'S3','inclinacion','°')");self.db.commit()
         self.rule();self.rule('inclinacion',bridge_id='2',comparison='abs_gt',threshold='2')
-        records=[self.measurement(external_id='provider-a',simulated=True),self.measurement(external_id='provider-b',sensor_code='S3',unit='°',value='-3',simulated=True),self.measurement(external_id='provider-bad',unit='wrong',simulated=True)]
+        records=[self.measurement(external_id='provider-a',bridge_code='P1',kind='vibracion',simulated=True),self.measurement(external_id='provider-b',bridge_code='P2',kind='inclinacion',sensor_code='S3',unit='°',value='-3',simulated=True),self.measurement(external_id='provider-bad',bridge_code='P1',kind='vibracion',unit='wrong',simulated=True)]
         server=make_server(port=0,records=records);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         try:
             self.app.config['PROVIDER_URL']=f'http://127.0.0.1:{server.server_port}/measurements'

@@ -91,3 +91,16 @@ Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), 
 - Fotos siguen siendo opcionales y privadas. Las tareas no cierran alertas automáticamente.
 
 No se declara validación estructural, proveedor físico ni aceptación HU-09. Código, simulaciones y trazabilidad verificables están disponibles en el repositorio.
+
+
+## Verificación adicional: captura automática, identidad y mockups
+
+| Área / CA relacionados | Corrección y evidencia nueva |
+|---|---|
+| HU-04 CA-04.1–04.4 | Vibración: umbral finito >= 0, error visible y rechazo sin insertar. `app.rules`; `test_vibration_nonnegative_finite_threshold`. Se mantienen supuestos académicos y comparaciones de inclinación. |
+| HU-02 CA-02.2, CA-02.8; HU-08 CA-08.2, CA-08.5, CA-08.6 | Contrato proveedor exige bridge_code/kind coherentes con sensor/componente/puente. `app.validate_identity`, `mock_provider.demo_records`; `test_provider_rejects_inconsistent_and_missing_identity_with_evidence`, `test_provider_default_json_includes_two_bridges_and_types`. |
+| HU-08 CA-08.3, CA-08.4, CA-08.7, CA-08.8 | Worker periódico configurable, manual conservado, reintentos y recuperación; evidencia de errores persistida. `app.poll_command`, `polling.run_polling`; `test_automatic_worker_recovers_and_deduplicates_real_http`, `test_worker_interval_environment_lock_and_bad_json`. Solo entorno simulado. |
+| Compatibilidad HU-02 | API anterior sigue operativa y valida identidad opcional. `test_optional_api_identity_is_validated_without_breaking_legacy`. |
+| EDT 1.2.1 / HU-05 / HU-06 | Mockups generados de las vistas reales, con inspector, programación y panel ampliado. `tools/build_mockups.py`; `test_mockups_cover_current_real_views`. |
+
+Esta evidencia complementa las filas individuales anteriores; no cambia la línea de base ni declara integración real o aceptación HU-09.

@@ -53,7 +53,7 @@ Las contraseñas se piden sin eco y requieren 12 caracteres como mínimo. No hay
 
 ## Integración IoT y simulador
 
-Arquitectura principal: Sensor → plataforma IoT del proveedor → API del proveedor → cliente municipal (consulta manual o CLI). Existe un proveedor ficticio independiente y un cliente pull implementados; **no hay proveedor ni conexión real verificada**. El proveedor futuro deberá exponer su API y acordar la adaptación al contrato descrito; la API receptora se conserva como alternativa. El sistema no instala sensores ni predice fallas.
+Arquitectura principal: Sensor → plataforma IoT del proveedor → API del proveedor → cliente municipal (consulta manual o worker periódico). Existe un proveedor ficticio independiente y un cliente pull implementados; **no hay proveedor ni conexión real verificada**. El proveedor futuro deberá exponer su API y acordar la adaptación al contrato descrito; la API receptora se conserva como alternativa. El sistema no instala sensores ni predice fallas.
 
 ```powershell
 $env:IOT_API_KEY = 'reemplazar-por-un-secreto-largo-y-aleatorio'
@@ -128,7 +128,7 @@ $env:PROVIDER_URL='http://127.0.0.1:5100/measurements'
 .\.venv\Scripts\python.exe -m flask --app app pull-provider
 ```
 
-La obtención es manual, sin scheduler automático. Puede ejecutarse el comando desde un programador externo si se necesita periodicidad. `PROVIDER_TOKEN` es opcional para un futuro proveedor. La respuesta es `{"simulated":true,"measurements":[...]}` con los registros del contrato descrito arriba. El proveedor ficticio entrega cuatro mediciones (dos variables por cada puente DEM-01 y DEM-02), valores arbitrarios **7 mm/s y −3°**, no referencias seguras. El lote mantiene IDs durante su ejecución; consultar de nuevo cuenta duplicados sin volver a insertarlos. Reiniciar proveedor crea otro lote. Timeout 3 segundos por intento, máximo 3 intentos con espera exponencial 0,2 / 0,4 segundos ante desconexiones, HTTP 429 y 5xx. Otros 4xx o JSON inválido se informan sin reintento. Cada registro inválido se informa y no impide guardar otros válidos. Cada recepción válida comparte la lógica de validación, evaluación y auditoría; siempre se conserva `simulated=true`. La API receptora anterior se mantiene por compatibilidad, pero ya no representa el flujo principal del piloto.
+La obtención puede ser manual o automática mediante el worker periódico `poll-provider` descrito abajo. `PROVIDER_TOKEN` es opcional para un futuro proveedor. La respuesta es `{"simulated":true,"measurements":[...]}` con los registros del contrato descrito arriba. El proveedor ficticio entrega cuatro mediciones (dos variables por cada puente DEM-01 y DEM-02), valores arbitrarios **7 mm/s y −3°**, no referencias seguras. El lote mantiene IDs durante su ejecución; consultar de nuevo cuenta duplicados sin volver a insertarlos. Reiniciar proveedor crea otro lote. Timeout 3 segundos por intento, máximo 3 intentos con espera exponencial 0,2 / 0,4 segundos ante desconexiones, HTTP 429 y 5xx. Otros 4xx o JSON inválido se informan sin reintento. Cada registro inválido se informa y no impide guardar otros válidos. Cada recepción válida comparte la lógica de validación, evaluación y auditoría; siempre se conserva `simulated=true`. La API receptora anterior se mantiene por compatibilidad, pero ya no representa el flujo principal del piloto.
 
 ### Reglas e inclinaciones negativas
 
@@ -139,3 +139,58 @@ Para el piloto ficticio elegir **Magnitud absoluta > umbral**, con un umbral aca
 DOM → Inspecciones programadas: puente, componente, inspector, fecha y descripción. Estados Programada, Cancelada, Realizada. DOM puede cancelar mientras esté programada. El inspector asignado selecciona la programación al registrar una inspección del mismo puente y componente; se vincula el resultado y sus fotos opcionales y se cambia a Realizada en la misma transacción. No se permite reutilizar la programación ni registrar su resultado como otro inspector o DOM. Se mantienen inspecciones no programadas.
 
 El panel separa sensores de condiciones visuales y muestra actividades no completadas (solo asignadas para Mantención), próximas inspecciones programadas, última inspección visual de cada puente y enlaces a fotografías/observaciones. Mantenimiento permite filtro por puente conservando la restricción del personal asignado. La ficha de alerta informa por separado falta de inspección vinculada (origen visual o nota con inspección) y falta de tarea relacionada. Tener inspecciones en el mismo puente no las vincula implícitamente. Las tareas nunca cierran la alerta automáticamente.
+
+
+## Captura periódica automática y contrato IoT completo
+
+El worker vive en **otro proceso**, no en cada hilo/proceso del servidor WSGI. La web sigue respondiendo cuando el proveedor falla. No hay que pulsar el botón en cada ciclo. La consulta manual DOM y `pull-provider` se conservan.
+
+1. Iniciar el proveedor ficticio con `.\.venv\Scripts\python.exe mock_provider.py --port 5100`.
+2. Iniciar la web con `start.ps1` o Waitress, como antes.
+3. En otra terminal, iniciar el worker (permanece consultando hasta Ctrl+C):
+
+```powershell
+$env:PROVIDER_URL = 'http://127.0.0.1:5100/measurements'
+$env:IOT_POLL_INTERVAL = '60'
+.\.venv\Scripts\python.exe -m flask --app app poll-provider
+# Alternativa con prioridad sobre la variable de entorno:
+.\.venv\Scripts\python.exe -m flask --app app poll-provider --interval 15
+# O mediante el script PowerShell:
+.\start-iot.ps1 -Interval 15
+```
+
+Usar **solo una** alternativa. Intervalo permitido: 1–86400 segundos, finito; valor predeterminado 60. La primera consulta es inmediata. El intervalo es la espera después de terminar cada ciclo, a la que se suma el tiempo del cliente HTTP y sus reintentos (timeout 3 s, hasta 3 intentos con esperas 0,2/0,4 s). Los fallos no terminan el bucle: se registran y se vuelve a consultar en el siguiente ciclo. Un bloqueo de sistema operativo permite un solo worker por base y se libera al salir o terminar el proceso. El bloqueo no impide la consulta manual, que comparte validaciones y deduplicación. Una transacción `BEGIN IMMEDIATE` serializa las recepciones, además del ID externo UNIQUE.
+
+El worker no se inicia automáticamente al importar Flask: hacerlo duplicaría procesos en WSGI. Para despliegue continuo, mantener web y worker como servicios independientes y supervisados. Detener `start.ps1` no detiene un worker que se inició en otra terminal. Configurar URL, token e intervalo en el entorno del proceso del worker. El intervalo no modifica el historial ni los umbrales.
+
+El proveedor ficticio mantiene un lote estable durante su ejecución: consultas sucesivas lo cuentan como duplicado. Reiniciarlo crea nuevas muestras con IDs diferentes. La automatización captura datos nuevos cuando el proveedor los ofrece; no inventa una nueva medición en cada consulta. Todos los valores y umbrales son supuestos académicos.
+
+### JSON del proveedor (GET /measurements)
+
+```json
+{
+  "simulated": true,
+  "measurements": [
+    {"external_id":"academico-01","bridge_code":"DEM-01","kind":"vibracion","sensor_code":"DEM-01-VIBRACION","value":7,"unit":"mm/s","measured_at":"2026-10-22T10:00:00-03:00","status":"valido","simulated":true},
+    {"external_id":"academico-02","bridge_code":"DEM-02","kind":"inclinacion","sensor_code":"DEM-02-INCLINACION","value":-3,"unit":"°","measured_at":"2026-10-22T10:00:00-03:00","status":"valido","simulated":true}
+  ]
+}
+```
+
+`bridge_code` es el **identificador único del puente** registrado en infraestructura, no el ID numérico interno. `kind` es `vibracion` o `inclinacion` y debe coincidir con el sensor; la relación sensor → componente → puente debe corresponder a `bridge_code`. Estos campos son obligatorios para el proveedor consultado, incluso antes de contabilizar un ID repetido. Se conservan además las validaciones de unidad, fecha, valor, estado y marca de simulación. Inconsistencias no guardan mediciones ni alertas; no impiden procesar registros válidos del lote.
+
+La API POST municipal anterior y la captura local siguen compatibles con el contrato anterior. Si se aportan `bridge_code` o `kind` en esa API, ambos se exigen y validan; no se ignora una identidad incoherente.
+
+**Evidencia:** DOM → Historial de operaciones. Cada consulta conserva recibidas, duplicadas, errores, identidad del registro rechazado (ID externo/sensor/puente/variable) y motivo. Fallos de conexión/JSON/persistencia se registran como «Error al consultar proveedor ficticio». Los fallos del worker también se escriben en su salida de errores; si SQLite no está disponible se informa allí y continúa el siguiente ciclo. No se guardan tokens de acceso en los informes.
+
+### Umbrales de vibración y mockups
+
+Vibración admite umbrales numéricos finitos **mayores o iguales que cero**; valores negativos muestran un error y no se guardan. Inclinación mantiene comparaciones direccionales con umbrales negativos o `abs_gt` con umbral no negativo.
+
+`docs/mockups.html` representa las cinco funcionalidades actuales, incluida programación, condiciones visuales, pendientes, ubicación de sensores, filtro por puente y seguimiento de alertas. Se genera desde las plantillas reales con datos temporales, sin usar la base local:
+
+```powershell
+.\.venv\Scripts\python.exe tools/build_mockups.py
+```
+
+Son bocetos estáticos navegables por secciones; los botones de persistencia están desactivados. Las vistas de inspección muestran al inspector y su programación, no un formulario DOM ficticio. Se conservan las fechas: término EDT 1.4.5/1.4.6 **24/11/2026**; presentación **26/11/2026**.

@@ -6,6 +6,7 @@ from uuid import uuid4
 import click
 from migrations import migrate
 from provider_client import fetch_measurements
+from polling import run_polling, interval_seconds, single_worker
 from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image, UnidentifiedImageError
@@ -182,7 +183,17 @@ def create_app(config=None):
 
         return bool(applicable)
 
+    def validate_identity(data, provider=False):
+        required(data,'sensor_code')
+        sensor=one('SELECT s.*,b.code AS bridge_code FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE s.code=?',(data['sensor_code'],))
+        if not sensor: raise ValueError('Sensor desconocido.')
+        if provider or 'bridge_code' in data or 'kind' in data:
+            required(data,'bridge_code','kind')
+            if data['bridge_code']!=sensor['bridge_code']: raise ValueError('El identificador del puente no coincide con el sensor registrado.')
+            if data['kind']!=sensor['kind']: raise ValueError('El tipo de medición no coincide con la variable del sensor registrado.')
+
     def receive(data,simulated=False):
+        validate_identity(data)
         required(data,'sensor_code','unit','measured_at','status')
         if data.get('external_id') is not None and (not isinstance(data['external_id'],str) or len(data['external_id'])>200): raise ValueError('external_id debe ser texto de hasta 200 caracteres.')
         s=one('SELECT s.*,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id WHERE s.code=?',(data['sensor_code'],))
@@ -321,6 +332,7 @@ def create_app(config=None):
                         except ValueError: raise ValueError('Indica un umbral numérico.')
                         if not math.isfinite(threshold): raise ValueError('El umbral debe ser finito.')
                     else: raise ValueError('Tipo de regla inválido.')
+                    if kind=='vibracion' and threshold<0: raise ValueError('El umbral de vibración no puede ser negativo.')
                     simulated=True  # Todas las nuevas reglas del piloto son supuestos académicos.
                     comparison=request.form.get('comparison','gt')
                     if comparison not in ['gt','lt','abs_gt']: raise ValueError('Comparación inválida.')
@@ -428,23 +440,52 @@ def create_app(config=None):
             for kind in KINDS: insert('sensors',component_id=cid,code=code+'-'+kind.upper(),kind=kind,unit=KINDS[kind])
         db().commit(); click.echo('Dos puentes ficticios creados. Sin mediciones ni reglas oficiales.')
 
-    def pull_provider():
+    def _pull_provider():
         items=fetch_measurements(app.config['PROVIDER_URL'],app.config['PROVIDER_TOKEN'])
         result=dict(received=0,duplicates=0,errors=[])
+        db().execute('BEGIN IMMEDIATE')  # Serializa recepción manual/automática antes de deduplicar.
         for index,item in enumerate(items):
             db().execute('SAVEPOINT provider_item')
             try:
                 if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor académico debe identificar simulated=true.')
                 required(item,'external_id')
+                validate_identity(item,provider=True)
                 if one('SELECT id FROM measurements WHERE external_id=?',(item['external_id'],)):
                     result['duplicates']+=1
                 else: receive(item,True); result['received']+=1
                 db().execute('RELEASE provider_item')
             except (ValueError,sqlite3.IntegrityError) as error:
                 db().execute('ROLLBACK TO provider_item');db().execute('RELEASE provider_item')
-                result['errors'].append(f'Registro {index+1}: {error}')
+                identity={key:item.get(key) for key in ['external_id','sensor_code','bridge_code','kind']} if isinstance(item,dict) else {'registro':'no es objeto'}
+                result['errors'].append(f'Registro {index+1} {identity}: {error}')
         audit('Consultar proveedor ficticio','measurements',None,str(result)); db().commit()
         return result
+
+    def pull_provider():
+        try: return _pull_provider()
+        except (ValueError,sqlite3.Error) as error:
+            db().rollback()
+            message=str(error) if isinstance(error,ValueError) else 'Error de persistencia IoT: '+type(error).__name__
+            try:
+                audit('Error al consultar proveedor ficticio','measurements',None,message);db().commit()
+            except sqlite3.Error:
+                db().rollback();app.logger.exception('No se pudo persistir el error IoT')
+            raise ValueError(message) from error
+
+    @app.cli.command('poll-provider')
+    @click.option('--interval',default=None,type=str,help='Segundos entre consultas (1–86400). Predeterminado: IOT_POLL_INTERVAL o 60.')
+    def poll_command(interval):
+        try:
+            seconds=interval_seconds(interval if interval is not None else os.environ.get('IOT_POLL_INTERVAL','60'))
+            def cycle():
+                # Cierra conexión/transacción en cada ciclo; no comparte g ni conexiones con la web.
+                with app.app_context():
+                    result=pull_provider()
+                    app.logger.info('Consulta IoT simulada: %s',result)
+            with single_worker(app.config['DATABASE']):
+                click.echo(f'Captura IoT automática simulada: intervalo {seconds:g}s. Ctrl+C para detener.')
+                run_polling(cycle,seconds,on_error=lambda error: app.logger.error('Ciclo IoT fallido; se reintentará: %s',error))
+        except ValueError as error: raise click.ClickException(str(error))
 
     @app.post('/provider/pull')
     @access('DOM')
