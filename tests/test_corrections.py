@@ -47,16 +47,15 @@ class CorrectionsTests(SystemTests):
         self.assertEqual(response.json['evaluation'],'Sin regla aplicable')
 
     def test_signed_and_absolute_inclination_boundaries(self):
-        for comparison,threshold,values,expected in [('abs_gt','2',[2,-2,1,-1,3,-3],2),('lt','-2',[-2,-3,3],1),('gt','2',[2,3,-3],1)]:
-            self.db.execute('UPDATE rules SET active=0');self.db.commit()
-            self.rule('inclinacion',comparison=comparison,threshold=threshold)
-            before=self.count('alerts')
-            for value in values:self.post('/measurements',self.measurement(sensor_code='S2',unit='°',value=str(value)))
-            self.assertEqual(self.count('alerts')-before,expected)
-        before=self.count('rules');self.rule('inclinacion',comparison='abs_gt',threshold='-1');self.assertEqual(self.count('rules'),before)
+        self.rule('inclinacion',threshold='2')
+        for value in [2,-2,1,-1,3,-3]:
+            self.post('/measurements',self.measurement(sensor_code='S2',unit='°',value=str(value)))
+        self.assertEqual(self.count('alerts'),4)  # EV2: both signs, inclusive limits.
+        before=self.count('rules');self.rule('inclinacion',threshold='-1');self.assertEqual(self.count('rules'),before)
 
     def test_provider_http_end_to_end_two_bridges_dedup_and_errors(self):
         self.db.execute("INSERT INTO sensors(component_id,code,kind,unit) VALUES(2,'S3','inclinacion','°')");self.db.commit()
+        self.db.execute("UPDATE sensors SET reference_value=0 WHERE code='S3'");self.db.commit()
         self.rule();self.rule('inclinacion',bridge_id='2',comparison='abs_gt',threshold='2')
         records=[self.measurement(external_id='provider-a',bridge_code='P1',kind='vibracion',simulated=True),self.measurement(external_id='provider-b',bridge_code='P2',kind='inclinacion',sensor_code='S3',unit='°',value='-3',simulated=True),self.measurement(external_id='provider-bad',bridge_code='P1',kind='vibracion',unit='wrong',simulated=True)]
         server=make_server(port=0,records=records);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
@@ -116,9 +115,10 @@ class CorrectionsTests(SystemTests):
         self.rule();self.post('/measurements',self.measurement());self.task()
         page=self.client.get('/alerts/1').get_data(as_text=True)
         self.assertIn('/measurements/1',page);self.assertIn('2026-',page)
-        self.assertIn('No constituyen diagnóstico estructural',page)
+        self.assertIn('Entorno de demostración',page)
+        self.assertNotIn('PRUEBA',page)
         page=self.client.get('/measurements?bridge_id=1').get_data(as_text=True)
-        for value in ['Puente de prueba','S1','vibracion','9.0','2026-01-01T13:00:00+00:00']:self.assertIn(value,page)
+        for value in ['Puente de prueba','S1','Aceleración vertical pico','9.0','2026-01-01T13:00:00+00:00']:self.assertIn(value,page)
         count=self.count('tasks')
         response=self.task(description='',follow_redirects=True)
         self.assertIn('obligatorio',response.get_data(as_text=True));self.assertEqual(self.count('tasks'),count)

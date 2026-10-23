@@ -6,5 +6,5 @@ document.querySelectorAll('form').forEach(form=>{
     bridge.addEventListener('change',update);update();
   }
   const sensor=form.querySelector('[name=sensor_code]'), unit=form.querySelector('[name=unit]');
-  if(sensor && unit){const update=()=>{unit.value=sensor.selectedOptions[0]?.dataset.unit||'mm/s';};sensor.addEventListener('change',update);update();}
+  if(sensor && unit){const update=()=>{unit.value=sensor.selectedOptions[0]?.dataset.unit||'m/s²';};sensor.addEventListener('change',update);update();}
 });

@@ -16,9 +16,10 @@ class SystemTests(unittest.TestCase):
         self.db.execute("INSERT INTO bridges VALUES(2,'P2','Segundo puente','Biobío','Media',1)")
         self.db.execute("INSERT INTO components VALUES(1,1,'Tablero')")
         self.db.execute("INSERT INTO components VALUES(2,2,'Pila')")
-        self.db.execute("INSERT INTO sensors VALUES(1,1,'S1','vibracion','mm/s')")
+        self.db.execute("INSERT INTO sensors VALUES(1,1,'S1','vibracion','m/s²')")
         self.db.execute("INSERT INTO sensors VALUES(2,1,'S2','inclinacion','°')")
         self.db.commit(); self.client=self.app.test_client(); self.login('dom')
+        self.db.execute("UPDATE sensors SET reference_value=0 WHERE kind='inclinacion'");self.db.commit()
     def tearDown(self): self.db.close(); self.tmp.cleanup()
     def login(self,name):
         self.client.get('/login')
@@ -29,11 +30,11 @@ class SystemTests(unittest.TestCase):
         return self.client.post(url,data=payload,**kwargs)
     def count(self,table): return self.db.execute('SELECT count(*) FROM '+table).fetchone()[0]
     def measurement(self,**extra):
-        d=dict(sensor_code='S1',value='9',unit='mm/s',measured_at='2026-01-01T10:00:00-03:00',status='valido');d.update(extra);return d
+        d=dict(sensor_code='S1',value='9',unit='m/s²',measured_at='2026-01-01T10:00:00-03:00',status='valido');d.update(extra);return d
     def rule(self,kind='vibracion',**extra):
-        d=dict(bridge_id='1',kind=kind,threshold='5',condition='Mala',label='Umbral ficticio',simulated='1');d.update(extra);return self.post('/rules',d)
+        d=dict(bridge_id='1',kind=kind,severity='Atención',threshold='5',condition='Alta',label='Umbral ficticio',simulated='1');d.update(extra);return self.post('/rules',d)
     def inspection(self,**extra):
-        d=dict(bridge_id='1',component_id='1',inspected_at='2026-01-01T10:00:00-03:00',condition='Mala',description='Hallazgo de prueba',simulated='1'); d.update(extra);return self.post('/inspections',d)
+        d=dict(bridge_id='1',component_id='1',inspected_at='2026-01-01T10:00:00-03:00',condition='Alta',description='Hallazgo de prueba',simulated='1'); d.update(extra);return self.post('/inspections',d)
     def task(self,**extra):
         d=dict(bridge_id='1',component_id='1',alert_id='1',description='Revisar tablero',assignee_id='3',planned_date='2026-11-26');d.update(extra);return self.post('/maintenance',d)
     def test_bridge_crud_and_duplicates(self):
@@ -73,7 +74,7 @@ class SystemTests(unittest.TestCase):
         page=self.client.get('/measurements?bridge_id=1&from=2026-01-01&to=2026-01-02')
         self.assertIn(b'S1',page.data);self.assertIn(b'no disponible',page.data)
     def test_alert_threshold_and_simulation(self):
-        self.rule();self.post('/measurements',self.measurement(value='5'));self.assertEqual(self.count('alerts'),0)
+        self.rule();self.post('/measurements',self.measurement(value='4.999'));self.assertEqual(self.count('alerts'),0)
         self.post('/measurements',self.measurement());self.assertEqual(self.count('alerts'),1)
         self.post('/measurements',self.measurement(status='invalido'));self.assertEqual(self.count('alerts'),1)
         a=self.db.execute('SELECT * FROM alerts').fetchone();self.assertEqual(a['bridge_id'],1);self.assertEqual(a['simulated'],1);self.assertIsNotNone(a['measurement_id'])

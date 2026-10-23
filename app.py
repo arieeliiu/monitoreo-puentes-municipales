@@ -1,4 +1,5 @@
-import os, secrets, sqlite3, math, hmac
+import os, secrets, sqlite3, math, hmac, json
+from decimal import Decimal
 from datetime import datetime, timezone, date
 from functools import wraps
 from pathlib import Path
@@ -11,8 +12,10 @@ from flask import Flask, g, session, request, redirect, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image, UnidentifiedImageError
 
-KINDS = {'vibracion': 'mm/s', 'inclinacion': '°'}
-CONDITIONS = ['Buena','Regular','Mala','Crítica']
+KINDS = {'vibracion': 'm/s²', 'inclinacion': '°'}
+CONDITIONS = ['Baja','Media','Alta','Crítica']
+SEVERITIES = ['Atención','Alerta','Crítico']
+LABELS = {'vibracion':'Aceleración vertical pico','inclinacion':'Inclinación','visual':'Condición visual'}
 def now(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
 def create_app(config=None):
@@ -88,7 +91,7 @@ def create_app(config=None):
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS)
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS)
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -115,7 +118,7 @@ def create_app(config=None):
         bridges=rows('SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!=\'Resuelta\') AS active FROM bridges b ORDER BY b.code')
         latest=rows('SELECT m.*, s.code,s.kind,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) ORDER BY s.code')
         active=rows('SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!=\'Resuelta\' ORDER BY a.id DESC LIMIT 10')
-        rules=one('SELECT count(*) AS n FROM rules WHERE active=1')['n']
+        rules=one("SELECT count(*) AS n FROM rules WHERE active=1 AND standard='EV2'")['n']
         pending=rows("SELECT t.*,b.name FROM tasks t JOIN bridges b ON b.id=t.bridge_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
         plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date")
         visual=rows('SELECT i.*,b.name,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
@@ -162,12 +165,17 @@ def create_app(config=None):
                     belongs(request.form['component_id'],bid)
                     kind=request.form['kind']
                     if kind not in KINDS: raise ValueError('Tipo de sensor inválido.')
+                    reference=None
+                    if kind=='inclinacion' and request.form.get('reference_value','').strip():
+                        try: reference=float(request.form['reference_value'])
+                        except ValueError: raise ValueError('La referencia debe ser numérica.')
+                        if not math.isfinite(reference): raise ValueError('La referencia debe ser finita.')
                     code=request.form['code'].strip().upper()
                     if request.form.get('id'):
                         s=get_id('sensors',request.form['id']); belongs(s['component_id'],bid)
                         if one('SELECT id FROM measurements WHERE sensor_id=?',(s['id'],)) and (s['kind']!=kind or s['component_id']!=int(request.form['component_id'])): raise ValueError('Un sensor con mediciones no puede cambiar de tipo ni componente.')
-                        db().execute('UPDATE sensors SET code=?,component_id=?,kind=?,unit=?,location=? WHERE id=?',(code,request.form['component_id'],kind,KINDS[kind],request.form['location'].strip(),s['id'])); eid=s['id']
-                    else: eid=insert('sensors',component_id=request.form['component_id'],code=code,kind=kind,unit=KINDS[kind],location=request.form['location'].strip())
+                        db().execute('UPDATE sensors SET code=?,component_id=?,kind=?,unit=?,location=?,reference_value=? WHERE id=?',(code,request.form['component_id'],kind,KINDS[kind],request.form['location'].strip(),reference,s['id'])); eid=s['id']
+                    else: eid=insert('sensors',component_id=request.form['component_id'],code=code,kind=kind,unit=KINDS[kind],location=request.form['location'].strip(),reference_value=reference)
                     audit('Guardar sensor','sensors',eid)
                 db().commit(); flash('Registro guardado.','success'); return redirect(url_for('bridge',bid=bid))
             except (ValueError,sqlite3.IntegrityError) as e:
@@ -175,12 +183,12 @@ def create_app(config=None):
         return render_template('bridge.html',b=b,components=rows('SELECT * FROM components WHERE bridge_id=?',(bid,)),sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
 
     def evaluate(kind,bridge_id,record_id,value,simulated):
-        applicable=rows('SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1',(bridge_id,kind))
-        for r in applicable:
-            if (kind=='visual' and value==r['condition']) or (kind!='visual' and ((r['comparison']=='gt' and value>r['threshold']) or (r['comparison']=='lt' and value<r['threshold']) or (r['comparison']=='abs_gt' and abs(value)>r['threshold']))):
-                insert('alerts',bridge_id=bridge_id,rule_id=r['id'],measurement_id=record_id if kind!='visual' else None,inspection_id=record_id if kind=='visual' else None,created_at=now(),simulated=int(bool(simulated or r['simulated'])))
-                audit('Generar alerta','alerts',one('SELECT last_insert_rowid() AS id')['id'])
-
+        applicable=rows("SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(bridge_id,kind))
+        matches=[r for r in applicable if (kind=='visual' and value==r['condition']) or (kind!='visual' and r['unit']==KINDS[kind] and value>=r['threshold'])]
+        if matches:
+            r=max(matches,key=lambda rule:(SEVERITIES.index(rule['severity']),rule['id']))
+            aid=insert('alerts',bridge_id=bridge_id,rule_id=r['id'],measurement_id=record_id if kind!='visual' else None,inspection_id=record_id if kind=='visual' else None,created_at=now(),simulated=int(bool(simulated or r['simulated'])),severity=r['severity'],standard='EV2')
+            audit('Generar alerta','alerts',aid,r['severity'])
         return bool(applicable)
 
     def validate_identity(data, provider=False):
@@ -198,7 +206,7 @@ def create_app(config=None):
         if data.get('external_id') is not None and (not isinstance(data['external_id'],str) or len(data['external_id'])>200): raise ValueError('external_id debe ser texto de hasta 200 caracteres.')
         s=one('SELECT s.*,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id WHERE s.code=?',(data['sensor_code'],))
         if not s: raise ValueError('Sensor desconocido.')
-        if data['unit']!=s['unit']: raise ValueError(f'Unidad incorrecta. Se espera {s["unit"]}.')
+        if data['unit']!=KINDS[s['kind']]: raise ValueError(f'Unidad incorrecta. Se espera {KINDS[s["kind"]]}.')
         status=data['status']
         if status not in ['valido','invalido','no_disponible']: raise ValueError('Estado de medición inválido.')
         value=data.get('value')
@@ -212,10 +220,14 @@ def create_app(config=None):
             if not math.isfinite(value): raise ValueError('El valor debe ser finito.')
             if status=='valido' and s['kind']=='vibracion' and value<0: raise ValueError('La vibración no puede ser negativa.')
         measured_at=timestamp(data['measured_at'])
-        mid=insert('measurements',sensor_id=s['id'],value=value,unit=s['unit'],measured_at=measured_at,status=status,simulated=int(simulated),external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
-        applicable=bool(one('SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1',(s['bridge_id'],s['kind'])))
-        if status=='valido': evaluate(s['kind'],s['bridge_id'],mid,value,simulated)
+        reference=s['reference_value'] if s['kind']=='inclinacion' else None
+        variation=float(abs(Decimal(str(value))-Decimal(str(reference)))) if value is not None and reference is not None else None
+        if variation is not None and not math.isfinite(variation): raise ValueError('La variación calculada debe ser finita.')
+        mid=insert('measurements',specification='EV2',reference_value=reference,variation=variation,sensor_id=s['id'],value=value,unit=KINDS[s['kind']],measured_at=measured_at,status=status,simulated=int(simulated),external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
+        applicable=bool(one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(s['bridge_id'],s['kind'])))
+        if status=='valido' and (s['kind']!='inclinacion' or reference is not None): evaluate(s['kind'],s['bridge_id'],mid,variation if s['kind']=='inclinacion' else value,simulated)
         evaluation=('Evaluada' if status=='valido' else 'No evaluada: dato '+status) if applicable else 'Sin regla aplicable'
+        if s['kind']=='inclinacion' and reference is None: evaluation='Falta referencia del sensor: medición no evaluable'
         db().execute('UPDATE measurements SET evaluation=? WHERE id=?',(evaluation,mid))
         if not applicable: audit('Sin regla aplicable','measurements',mid,s['kind'])
         audit('Recibir medición simulada' if simulated else 'Recibir medición','measurements',mid)
@@ -227,7 +239,7 @@ def create_app(config=None):
         if request.method=='POST':
             if g.user['role']!='DOM': abort(403)
             try:
-                mid=receive(request.form,True); db().commit(); flash(f'Medición de prueba {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
+                mid=receive(request.form,True); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
                 return redirect(url_for('measurements'))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El identificador externo ya se recibió.','error')
@@ -243,7 +255,7 @@ def create_app(config=None):
     @app.post('/api/v1/measurements')
     def iot():
         key=app.config.get('IOT_API_KEY')
-        if not key: return jsonify(error='Integración real pendiente: configura IOT_API_KEY.'),503
+        if not key: return jsonify(error='El acceso de recepción no está configurado.'),503
         if not hmac.compare_digest(request.headers.get('Authorization',''),'Bearer '+key): return jsonify(error='No autorizado'),401
         data=request.get_json(silent=True)
         if not isinstance(data,dict): return jsonify(error='Se requiere un objeto JSON.'),400
@@ -280,7 +292,7 @@ def create_app(config=None):
                         if image.format not in ['JPEG','PNG'] or image.width*image.height>20_000_000: raise ValueError('Usa fotografías JPEG o PNG de hasta 20 megapíxeles.')
                         image.load(); images.append(image.convert('RGB'))
                     except (UnidentifiedImageError,OSError,Image.DecompressionBombError): raise ValueError('El archivo no es una fotografía JPEG o PNG válida.')
-                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=timestamp(request.form['inspected_at']),inspector_id=g.user['id'],condition=request.form['condition'],description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
+                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=timestamp(request.form['inspected_at']),inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
                 if request.form.get('plan_id'):
                     plan=get_id('inspection_plans',request.form['plan_id'])
                     if g.user['role']!='Inspector' or plan['inspector_id']!=g.user['id']: abort(403)
@@ -333,13 +345,15 @@ def create_app(config=None):
                         if not math.isfinite(threshold): raise ValueError('El umbral debe ser finito.')
                     else: raise ValueError('Tipo de regla inválido.')
                     if kind=='vibracion' and threshold<0: raise ValueError('El umbral de vibración no puede ser negativo.')
-                    simulated=True  # Todas las nuevas reglas del piloto son supuestos académicos.
-                    comparison=request.form.get('comparison','gt')
-                    if comparison not in ['gt','lt','abs_gt']: raise ValueError('Comparación inválida.')
-                    if kind!='inclinacion' and comparison!='gt': raise ValueError('La comparación alternativa se aplica a inclinación.')
-                    if comparison=='abs_gt' and threshold<0: raise ValueError('El umbral de magnitud debe ser no negativo.')
-                    label=request.form['label'].strip()
-                    rid=insert('rules',bridge_id=request.form['bridge_id'],kind=kind,threshold=threshold,condition=condition,label=label,simulated=int(simulated),comparison=comparison,author_id=g.user['id'],created_at=now()); audit('Configurar regla','rules',rid)
+                    severity=request.form.get('severity')
+                    if severity not in SEVERITIES: raise ValueError('Selecciona Atención, Alerta o Crítico.')
+                    if kind!='visual' and threshold<0: raise ValueError('El umbral de vibración no puede ser negativo.' if kind=='vibracion' else 'El umbral de variación debe ser no negativo.')
+                    if kind!='visual':
+                        for other in rows("SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2' AND severity!=?",(request.form['bridge_id'],kind,severity)):
+                            if (SEVERITIES.index(other['severity'])<SEVERITIES.index(severity) and threshold<=other['threshold']) or (SEVERITIES.index(other['severity'])>SEVERITIES.index(severity) and threshold>=other['threshold']): raise ValueError('Los umbrales deben aumentar de Atención a Alerta y Crítico.')
+                    # Version rules instead of changing the rule attached to past alerts.
+                    db().execute("UPDATE rules SET active=0 WHERE bridge_id=? AND kind=? AND standard='EV2' AND active=1 AND "+('condition=?' if kind=='visual' else 'severity=?'),(request.form['bridge_id'],kind,condition if kind=='visual' else severity))
+                    rid=insert('rules',bridge_id=request.form['bridge_id'],kind=kind,threshold=threshold,condition=condition,label=request.form['label'].strip(),simulated=1,comparison='gte',severity=severity,standard='EV2',unit=KINDS.get(kind),author_id=g.user['id'],created_at=now()); audit('Configurar regla','rules',rid)
                 db().commit(); flash('Regla guardada. Se aplica a nuevos registros.','success'); return redirect(url_for('rules'))
             except (ValueError,sqlite3.IntegrityError) as e: db().rollback(); flash(str(e),'error')
         return render_template('rules.html',rules=rows('SELECT r.*,b.name FROM rules r JOIN bridges b ON b.id=r.bridge_id ORDER BY r.id DESC'),bridges=rows('SELECT * FROM bridges'))
@@ -434,11 +448,11 @@ def create_app(config=None):
             password=secrets.token_urlsafe(14)
             insert('users',username=username,password=generate_password_hash(password),role=role)
             click.echo(f'{username}: {password}')
-        for code,name,location in [('DEM-01','Puente Estero Norte','Ubicación ficticia · Biobío'),('DEM-02','Puente Ribera Sur','Ubicación ficticia · Biobío')]:
+        for code,name,location in [('DEM-01','Puente Estero Norte','Sector municipal · Biobío'),('DEM-02','Puente Ribera Sur','Sector municipal · Biobío')]:
             bid=insert('bridges',code=code,name=name,location=location,criticality='Alta',simulated=1)
-            cid=insert('components',bridge_id=bid,name='Tablero · prueba')
+            cid=insert('components',bridge_id=bid,name='Tablero')
             for kind in KINDS: insert('sensors',component_id=cid,code=code+'-'+kind.upper(),kind=kind,unit=KINDS[kind])
-        db().commit(); click.echo('Dos puentes ficticios creados. Sin mediciones ni reglas oficiales.')
+        configure_ev2_demo(); db().commit(); click.echo('Dos puentes de demostración configurados con EV2.')
 
     def _pull_provider():
         items=fetch_measurements(app.config['PROVIDER_URL'],app.config['PROVIDER_TOKEN'])
@@ -492,7 +506,7 @@ def create_app(config=None):
     def provider_pull():
         try:
             result=pull_provider()
-            flash(f"Proveedor simulado: {result['received']} recibidas, {result['duplicates']} duplicadas. "+' '.join(result['errors']),'warning' if result['errors'] else 'success')
+            flash(f"Recepción del proveedor: {result['received']} recibidas, {result['duplicates']} duplicadas. "+' '.join(result['errors']),'warning' if result['errors'] else 'success')
         except ValueError as error: flash(str(error),'error')
         return redirect(url_for('measurements'))
 
@@ -526,6 +540,37 @@ def create_app(config=None):
                 return redirect(url_for('inspection_plans'))
             except (ValueError,sqlite3.IntegrityError) as error: db().rollback();flash(str(error),'error')
         return render_template('inspection_plans.html',plans=rows('SELECT p.*,b.name,c.name AS component,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN components c ON c.id=p.component_id JOIN users u ON u.id=p.inspector_id ORDER BY planned_date'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT * FROM components'),inspectors=rows("SELECT * FROM users WHERE role='Inspector'"))
+
+
+    def configure_ev2_demo():
+        config=json.loads(Path(app.root_path,'config/ev2_pilot.json').read_text(encoding='utf-8'))
+        for kind in KINDS:
+            values=[float(config['thresholds'][kind][level]) for level in SEVERITIES]
+            if any(not math.isfinite(value) or value<0 for value in values) or not values[0]<values[1]<values[2]: raise ValueError('Configuración EV2: umbrales no negativos, finitos y crecientes.')
+        if not math.isfinite(float(config['inclination_reference'])): raise ValueError('La referencia de demostración debe ser finita.')
+        author=one("SELECT id FROM users WHERE role='DOM' ORDER BY id LIMIT 1")
+        if not author: raise ValueError('Crea primero un usuario DOM.')
+        for b in rows('SELECT * FROM bridges WHERE simulated=1'):
+            for name in ['Tablero','Viga','Estribo']:
+                if not one('SELECT id FROM components WHERE bridge_id=? AND name=?',(b['id'],name)):
+                    old=one('SELECT id FROM components WHERE bridge_id=? AND name=?',(b['id'],name+' · prueba'))
+                    if old: db().execute('UPDATE components SET name=? WHERE id=?',(name,old['id']))
+                    else: insert('components',bridge_id=b['id'],name=name)
+            # Seed only missing references on demonstration sensors. Real sensors are untouched.
+            db().execute("UPDATE sensors SET reference_value=? WHERE kind='inclinacion' AND reference_value IS NULL AND component_id IN (SELECT id FROM components WHERE bridge_id=?)",(config['inclination_reference'],b['id']))
+            for kind,levels in config['thresholds'].items():
+                for severity,threshold in levels.items():
+                    if not one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND severity=? AND standard='EV2'",(b['id'],kind,severity)):
+                        insert('rules',bridge_id=b['id'],kind=kind,threshold=threshold,label=LABELS[kind],simulated=1,comparison='gte',severity=severity,standard='EV2',unit=KINDS[kind],author_id=author['id'],created_at=now())
+            for condition,severity in config['visual'].items():
+                if not one("SELECT id FROM rules WHERE bridge_id=? AND kind='visual' AND condition=? AND standard='EV2'",(b['id'],condition)):
+                    insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,simulated=1,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
+        audit('Actualizar demostración EV2','bridges',None);db().commit()
+
+    @app.cli.command('configure-ev2-demo')
+    def demo_ev2_command():
+        try: configure_ev2_demo();click.echo('Demostración EV2 actualizada sin duplicar infraestructura ni reglas activas.')
+        except ValueError as error: raise click.ClickException(str(error))
 
     return app
 

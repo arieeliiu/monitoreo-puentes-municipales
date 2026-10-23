@@ -19,7 +19,7 @@ class IotUpdateTests(SystemTests):
         for value in ['0','2.5']:self.assertEqual(self.rule(threshold=value).status_code,302)
         self.assertEqual(self.count('rules'),2)
         # Signed directional inclination thresholds are still allowed.
-        self.assertEqual(self.rule('inclinacion',comparison='lt',threshold='-2').status_code,302)
+        self.assertEqual(self.rule('inclinacion',threshold='-2').status_code,200)
 
     def contract(self,external_id='x',**overrides):
         data=self.measurement(external_id=external_id,bridge_code='P1',kind='vibracion',simulated=True)
@@ -106,7 +106,7 @@ class IotUpdateTests(SystemTests):
                 if tag=='form':self.routes.append(attrs.get('action'))
         html=Path('docs/mockups.html').read_text(encoding='utf-8');doc=Document();doc.feed(html)
         self.assertEqual(doc.sections,['infraestructura','captura','alertas','panel','mantenimiento'])
-        for label in ['Programar inspección preventiva','Programación que se atiende','Actividades de mantenimiento pendientes','Próximas inspecciones programadas','Condiciones visuales','Ubicación específica','Magnitud absoluta','poll-provider']:
+        for label in ['Programar inspección preventiva','Programación que se atiende','Actividades de mantenimiento pendientes','Próximas inspecciones programadas','Condiciones visuales','Ubicación específica','Cambio absoluto','Consultar proveedor']:
             self.assertIn(label,html)
         self.assertTrue(all(route is None for route in doc.routes))
         self.assertNotIn('Umbrales oficiales pendientes',html)

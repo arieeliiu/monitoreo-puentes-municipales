@@ -1,46 +1,41 @@
-# Verificación de la versión corregida
+# Verificación final EV2
 
-Fecha: 23/10/2026. Instalación verificada: carpeta `Desktop/puentes`.
+Fecha: 23/10/2026. Referencia funcional: alcance EV2 actualizado del 22/10/2026, prevalente sobre especificaciones anteriores.
 
-## Resultado automatizado
+## Suite automatizada
 
-Comando: `.venv/Scripts/python.exe -m unittest discover -v`
+`python -m unittest discover -v`: **45 pruebas aprobadas, 0 fallos** en la instalación del escritorio. Se conservan 36 casos de regresión (actualizados solo donde EV2 cambia unidades, comparaciones o interfaz) y se añaden 9 casos EV2. No se cuentan duplicados por herencia.
 
-**36 pruebas aprobadas, 0 fallos; ejecución completa actual: 74,616 segundos.** Se conservan 18 casos de regresión (la prueba de reglas oficiales se adaptó al nuevo requisito académico y la de sensores aporta ubicación obligatoria) y se agregan 11 casos de la corrección anterior y 7 casos de umbrales, captura automática, identidad IoT y mockups. No se cuentan ejecuciones duplicadas por herencia.
+| Caso EV2 | Resultado verificado |
+|---|---|
+| test_numeric_levels_positive_negative_and_exact_limits | Ambos sensores, límites exactos e intermedios, comparación >=, signos positivos/negativos, una sola severidad máxima por medición. |
+| test_reference_offset_snapshot_missing_and_invalid | Referencia 10°, cambios en ambos sentidos, límites decimales exactos, snapshot inmutable después de cambiar referencia, ausencia explícita sin alertar y rechazo de referencia no finita. |
+| test_old_units_are_never_relabelled | Migración desde esquema anterior poblado: mm/s y valor originales conservados, configuración futura del sensor en m/s² con previous_unit, condición Mala sin equivalencia, fotos/alertas/FK preservadas e idempotencia. Nuevas capturas mm/s rechazadas. |
+| test_visual_categories_and_configured_alerts | Baja/Media/Alta/Crítica, reglas por coincidencia exacta, niveles generados y rechazo de categorías anteriores en inspecciones nuevas. |
+| test_rule_configuration_versions_and_highest_only | Umbrales editables por DOM, versiones conservadas, orden validado y alerta original vinculada a su regla; inspector sin permiso. |
+| test_demo_setup_is_idempotent_and_customizable | Tres componentes requeridos por puente, referencias configuradas no sobrescritas, niveles desactivados no reactivados y ningún sensor físico adicional inventado. |
+| test_professional_ui_and_severity_styles_all_roles | Cinco módulos y programación accesibles con los tres roles, una indicación discreta por pantalla, ausencia de HU/EDT/fechas/etiquetas repetidas y severidad diferenciada por texto/color. |
+| test_ev2_provider_flow_both_bridges | HTTP independiente real y cliente municipal: aceleración 0,5 m/s² en un puente e inclinación con referencia 10° y lectura 9,771° en el otro; alertas Atención/Alerta, snapshot 0,229° y deduplicación. |
+| test_fresh_demo_has_three_components_per_bridge | Instalación desde cero, seed-demo funcional, dos puentes con exactamente Tablero/Viga/Estribo, cuatro sensores configurables y referencias simuladas. |
 
-- Infraestructura: alta/edición, unicidad, validaciones, ubicación de sensor y variable visible.
-- Tres roles: controles de servidor, datos de mantenimiento asignados, programación DOM y resultado solo por inspector asignado.
-- Mediciones e inspecciones: historial, valores inválidos/no disponibles, fotos válidas/inválidas, CSRF, escape HTML y persistencia.
-- Reglas: numéricas y visuales, inclinaciones positivas/negativas, gt/lt/abs_gt, límites exactos, supuesto académico y aviso individual sin regla.
-- Panel: cinco funcionalidades navegables, datos disponibles/ausentes, pendientes, programación y últimos hallazgos con enlaces a fotos.
-- Mantenimiento: filtro por puente, responsable, ejecución, relación con alertas y cierre explícito DOM.
-- Programación: estado, cancelación, validación de puente/componente, resultado único y rechazo de inspector no asignado.
-- IoT: servidor HTTP independiente en puerto efímero, cliente real, lote para ambos puentes, mediciones/alertas persistidas, duplicados y registro inválido aislado. Se prueba desconexión y servidor HTTP 503 que responde correctamente al tercer intento.
-- Migración: idempotencia, conservación tabla por tabla y apertura de base con esquema anterior.
+La regresión conserva controles de permisos, CSRF, escape HTML, fotos opcionales/privadas y validación de archivos, persistencia, filtros, mantenimiento y trazabilidad sin cierre automático. También prueba el worker periódico (ciclos con reloj controlado), recuperación de desconexión y reintentos HTTP, singleton, identidad puente/variable, rechazo de registros inconsistentes y errores auditados. Mockups comprobados contra las vistas actuales.
 
-## Conservación de la instalación existente
+## Defectos corregidos durante la verificación
 
-Se creó respaldo SQLite antes de migrar, dentro de `instance/` (excluido de Git). Se compararon los valores de todas las columnas previas y filas de todas las tablas después de migrar: 3 usuarios, 2 puentes, 2 componentes, 4 sensores y 2 operaciones de auditoría conservados. No había mediciones, inspecciones, reglas, alertas ni tareas en esa base al migrar; no se atribuye conservación de datos que no existían. La suite sí prueba la migración con esas entidades pobladas. Se verificó igualdad de archivos fotográficos (0 en esta instalación), `integrity_check=ok` y `foreign_key_check` sin errores. Informe local: `instance/MIGRACION_VERIFICADA.json`.
+- Se añadió una lectura de inclinación con referencia/variación a los mockups para representar el flujo completo.
+- Se cerró explícitamente la conexión SQLite de la prueba de instalación nueva, para que Windows libere el archivo temporal.
+- No quedan fallos conocidos en la suite final.
 
-Servidor corregido iniciado con Waitress; GET `/login` respondió HTTP 200. El cotejo de pantallas y permisos se realiza con el cliente HTTP de Flask; no se afirma una nueva revisión visual en tablets físicas. `panel-verificado.png` corresponde al diseño de la versión inicial, no acredita las correcciones actuales.
+## Migración de la instalación existente
 
-## Cobertura oficial y límites
+Web detenida antes del respaldo y migración; no había worker activo. Respaldo e informe privados en `instance/backup-antes-EV2-*.sqlite` y `instance/EV2_MIGRACION_VERIFICADA.json`, excluidos de Git. Comparación por ID de todas las columnas anteriores: cuentas, puentes, sensores, mediciones, inspecciones, fotografías, reglas, alertas, notas, tareas, auditoría y programación conservados. Excepciones documentadas: unidad de configuración futura de sensores y normalización del nombre del componente demo, conservando ID y relaciones. Las mediciones no cambian de unidad ni valor.
 
-Se cotejó la transcripción `CRITERIOS_OFICIALES.md`: 57 CA de HU-01 a HU-07 con evidencia individual; CA-04.2 dentro del supuesto académico explícito. Los 8 CA de HU-08 se documentan únicamente para el entorno simulado; no hay especificaciones ni conectividad de hardware/proveedor real verificadas. HU-09 permanece pendiente (aceptación municipal, piloto operacional, capacitación y cierre).
+En la base local había 3 cuentas, 2 puentes, 2 componentes, 4 sensores y 2 operaciones de auditoría; no había mediciones/inspecciones/fotos/alertas. Por tanto, la preservación de esas entidades pobladas se prueba con bases temporales en la suite, no se atribuye a registros locales inexistentes. Se comprobaron hashes de los archivos disponibles, integrity_check=ok y foreign_key_check sin errores. Tras actualizar: Tablero/Viga/Estribo por puente, sensores existentes, referencias de demostración y reglas EV2 iniciales. Repetir la configuración no duplica infraestructura ni reglas.
 
-Término planificado de EDT 1.4.5 y 1.4.6: **24/11/2026**. Objetivo de presentación académica: **26/11/2026**. No se modifica la línea de base.
+Servidor EV2 reiniciado con Waitress y GET /login respondió HTTP 200. Los mockups se generan desde las plantillas reales con datos temporales; no se afirma prueba de tablet física ni nueva captura de pantalla. La imagen panel-verificado.png es de una versión anterior y no acredita los cambios EV2.
 
+## Alcance y pendientes
 
-## Captura automática, contrato extendido y mockups
+Requisitos EV2 de unidades, niveles, referencia, condiciones visuales, infraestructura demo, limpieza de interfaz, migración, documentación y pruebas corregidos. Matriz individual HU-01 a HU-08 conservada y complementada con la evidencia EV2. HU-08 se verifica solo con proveedor simulado, no con hardware/proveedor real. No se declara diagnóstico estructural ni validación externa. HU-09 (aceptación municipal, capacitación, piloto operacional y cierre) permanece pendiente y fuera de estas correcciones.
 
-- `test_vibration_nonnegative_finite_threshold`: rechazo sin insertar para negativos, no numéricos y no finitos; acepta cero/positivos y conserva inclinación direccional negativa.
-- `test_provider_rejects_inconsistent_and_missing_identity_with_evidence`: HTTP independiente con ambos puentes, identidades coherentes/incoherentes, campos ausentes, error persistente accesible en auditoría y duplicados sin nuevas filas.
-- `test_optional_api_identity_is_validated_without_breaking_legacy`: API receptora compatible, con validación de identidad cuando se suministra.
-- `test_provider_default_json_includes_two_bridges_and_types`: lote generado del proveedor con identificador de ambos puentes, ambas variables y marca de simulación.
-- `test_automatic_worker_recovers_and_deduplicates_real_http`: ejecuta el comando CLI con el bucle periódico real y servidor HTTP real; sustituye solo las esperas por un reloj controlado para verificar tres ciclos sin ralentizar la suite. Primer ciclo desconectado, posteriores recuperados, una medición y error auditado; consulta manual conservada y web operativa. El cliente HTTP y sus reintentos se verifican además en la regresión existente.
-- `test_worker_interval_environment_lock_and_bad_json`: intervalo inválido, configuración por entorno, singleton liberable y JSON inválido sin reintentos inútiles.
-- `test_mockups_cover_current_real_views`: cinco secciones, programación y selección por inspector, pendientes, condiciones visuales, ubicación de sensores y consultas IoT; sin formularios que escriban en la aplicación.
-
-Los mockups se regeneraron desde plantillas reales usando SQLite temporal (`tools/build_mockups.py`). No se realizó una nueva revisión visual en tablet física. El servidor web se reinició con la versión corregida y respondió HTTP 200. El worker de producción local se inicia explícitamente con `start-iot.ps1` o `poll-provider`, independiente de la web; no se declara un servicio permanente instalado. URL e intervalo están documentados en README.
-
-Esta actualización no cambia el esquema ni borra datos. Se creó respaldo local `backup-antes-iot-*.sqlite` excluido de Git. Se compararon todas las filas de la base respaldada con las posteriores a la actualización. Las pruebas usan sus propias bases temporales. Se mantienen los supuestos académicos y las fechas de línea de base.
+Término EDT 1.4.5/1.4.6: **24/11/2026**. Presentación académica: **26/11/2026**. Fechas conservadas solo en documentación, no en las pantallas operativas.

@@ -7,22 +7,26 @@ from app import create_app
 from migrations import migrate
 
 def build():
+    (ROOT/'docs').mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as temp:
         database=Path(temp)/'mockups.sqlite'
         db=sqlite3.connect(database);db.executescript((ROOT/'schema.sql').read_text(encoding='utf-8'));migrate(db)
         db.executemany('INSERT INTO users(id,username,password,role) VALUES(?,?,?,?)',[(1,'dom','sin acceso','DOM'),(2,'inspector','sin acceso','Inspector'),(3,'mantencion','sin acceso','Mantención')])
-        db.executemany('INSERT INTO bridges VALUES(?,?,?,?,?,1)',[(1,'DEM-01','Puente Estero Norte','Ubicación ficticia · Biobío','Alta'),(2,'DEM-02','Puente Ribera Sur','Ubicación ficticia · Biobío','Alta')])
-        db.executemany('INSERT INTO components VALUES(?,?,?)',[(1,1,'Tablero · prueba'),(2,2,'Tablero · prueba')])
+        db.executemany('INSERT INTO bridges VALUES(?,?,?,?,?,1)',[(1,'DEM-01','Puente Estero Norte','Sector municipal · Biobío','Alta'),(2,'DEM-02','Puente Ribera Sur','Sector municipal · Biobío','Alta')])
+        db.executemany('INSERT INTO components VALUES(?,?,?)',[(1,1,'Tablero'),(2,2,'Tablero')])
         for bid in (1,2):
-            for kind,unit in [('vibracion','mm/s'),('inclinacion','°')]:
-                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location) VALUES(?,?,?,?,?)',(bid,f'DEM-0{bid}-{kind.upper()}',kind,unit,'Apoyo central · ubicación ficticia'))
+            for kind,unit in [('vibracion','m/s²'),('inclinacion','°')]:
+                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'DEM-0{bid}-{kind.upper()}',kind,unit,'Apoyo central',0 if kind=='inclinacion' else None))
         stamp='2026-10-22T13:00:00+00:00'
-        db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,author_id,created_at,comparison) VALUES(1,'vibracion',5,'Supuesto de contraparte ficticia',1,1,?,'gt')",(stamp,))
-        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation) VALUES(1,7,'mm/s',?,'valido',1,'mockup-1',?,'Evaluada')",(stamp,stamp))
-        db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated) VALUES(1,1,1,?,1)",(stamp,))
-        db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,simulated) VALUES(1,1,?,2,'Regular','Hallazgo ficticio: revisar apoyo del tablero.',1)",(stamp,))
-        db.execute("INSERT INTO tasks(bridge_id,component_id,alert_id,description,assignee_id,planned_date,author_id,created_at) VALUES(1,1,1,'Revisión preventiva ficticia',3,'2026-11-20',1,?)",(stamp,))
-        db.execute("INSERT INTO inspection_plans(bridge_id,component_id,inspector_id,planned_date,description,author_id,created_at) VALUES(2,2,2,'2026-11-23','Inspección preventiva ficticia',1,?)",(stamp,))
+        db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,author_id,created_at,comparison,severity,standard,unit) VALUES(1,'vibracion',1.0,'Aceleración vertical pico',1,1,?,'gte','Alerta','EV2','m/s²')",(stamp,))
+        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification) VALUES(1,1.0,'m/s²',?,'valido',1,'mockup-1',?,'Evaluada','EV2')",(stamp,stamp))
+        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification,reference_value,variation) VALUES(2,0.229,'°',?,'valido',1,'mockup-2',?,'Evaluada','EV2',0,0.229)",(stamp,stamp))
+        db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,severity,standard) VALUES(1,1,1,?,1,'Alerta','EV2')",(stamp,))
+        db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,simulated,standard) VALUES(1,1,?,2,'Media','Revisar apoyo del tablero.',1,'EV2')",(stamp,))
+        db.execute("INSERT INTO tasks(bridge_id,component_id,alert_id,description,assignee_id,planned_date,author_id,created_at) VALUES(1,1,1,'Revisión preventiva',3,'2026-11-20',1,?)",(stamp,))
+        db.execute("INSERT INTO inspection_plans(bridge_id,component_id,inspector_id,planned_date,description,author_id,created_at) VALUES(2,2,2,'2026-11-23','Inspección preventiva',1,?)",(stamp,))
+        for bid in (1,2):
+            for name in ['Viga','Estribo']: db.execute('INSERT INTO components(bridge_id,name) VALUES(?,?)',(bid,name))
         db.commit();db.close()
         app=create_app({'TESTING':True,'DATABASE':str(database),'UPLOAD_FOLDER':str(Path(temp)/'photos'),'SECRET_KEY':'mockup-not-a-session-key'})
         client=app.test_client()
@@ -50,7 +54,7 @@ def build():
                 body.append(f'<article><h3>{label}</h3><small>Vista real: {route} · Rol {role} en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>{content}</article>')
             body.append('</section>')
         nav=''.join(f'<a href="#{anchor}">{title}</a>' for anchor,title,_ in sections)
-        html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mockups actuales · Puentes</title><link rel="stylesheet" href="../static/app.css"></head><body><aside><div class="brand">╫ PUENTES</div><nav>'+nav+'</nav></aside><main><h1>Mockups de las cinco funcionalidades</h1><p class="notice warning">Bocetos estáticos generados desde las plantillas reales. Todos los datos y umbrales son supuestos académicos. Botones desactivados; usa los enlaces de navegación. Las fotografías son opcionales.</p><p>Término EDT 1.4.5/1.4.6: 24/11/2026 · Presentación: 26/11/2026.</p>'+''.join(body)+'</main></body></html>'
+        html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mockups actuales · Puentes</title><link rel="stylesheet" href="../static/app.css"></head><body><aside><div class="brand">╫ PUENTES</div><nav>'+nav+'</nav></aside><main><h1>Mockups de las cinco funcionalidades</h1><p class="notice warning">Bocetos de navegación generados desde las pantallas actuales. Botones desactivados. Las fotografías son opcionales.</p>'+''.join(body)+'</main></body></html>'
         (ROOT/'docs/mockups.html').write_text(html.replace('><','>\n<'),encoding='utf-8')
 
 if __name__=='__main__':build()

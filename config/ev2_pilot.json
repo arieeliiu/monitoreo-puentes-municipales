@@ -1,0 +1,9 @@
+{
+  "description": "Parámetros asumidos para el piloto académico EV2; revisión externa antes de uso real.",
+  "thresholds": {
+    "vibracion": {"Atención": 0.5, "Alerta": 1.0, "Crítico": 2.5},
+    "inclinacion": {"Atención": 0.115, "Alerta": 0.229, "Crítico": 0.458}
+  },
+  "visual": {"Media": "Atención", "Alta": "Alerta", "Crítica": "Crítico"},
+  "inclination_reference": 0.0
+}

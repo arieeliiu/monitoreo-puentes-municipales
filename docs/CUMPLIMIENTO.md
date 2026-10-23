@@ -1,6 +1,6 @@
-# Matriz individual de criterios oficiales
+# Matriz individual de criterios oficiales y alcance EV2
 
-Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), localizada por el usuario en Descargas. Se cotejan implementaciones y pruebas, no solo pantallas. La evidencia es de pruebas automatizadas de servidor y HTTP; no equivale a aceptación municipal.
+Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), localizada por el usuario en Descargas. Se cotejan implementaciones y pruebas, no solo pantallas. Prevalece EV2 actualizado del 22/10/2026: aceleración vertical pico, cambio respecto de referencia, niveles inclusivos y categorías visuales vigentes. La evidencia es de pruebas automatizadas de servidor y HTTP; no equivale a aceptación municipal.
 
 **EDT 1.4.5 y 1.4.6: término planificado 24/11/2026. Presentación académica: 26/11/2026.**
 
@@ -81,26 +81,18 @@ Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), 
 | CA-09.8 | La aceptación final y la firma corresponden al Patrocinador (Municipalidad), según el procedimiento de cierre establecido en el Acta (EDT 1.6.5). | Pendiente: aceptación/operación/cierre posterior | No se declara ejecutado; fuera del alcance de estas correcciones. |
 | CA-09.9 | Se documenta el cierre de las condiciones del proyecto. | Pendiente: aceptación/operación/cierre posterior | No se declara ejecutado; fuera del alcance de estas correcciones. |
 
-## Requisitos adicionales
 
-- RF-1: `sensors.location` editable y variable `kind` claramente rotulada; prueba `test_sensor_location_and_variable`.
-- Programación preventiva: `inspection_plans`, DOM programa/cancela e inspector asignado registra el resultado. Pruebas `test_schedule_roles_result_and_dashboard`, `test_schedule_validations_and_cancel`, `test_unassigned_inspector_cannot_record_plan`.
-- Panel: pendientes de mantenimiento, programación y última inspección por puente con acceso a observaciones/fotos. Las mediciones y alertas existentes se conservan.
-- Migración: aditiva e idempotente, sin pérdida de filas. `test_migration_preserves_every_existing_table_row` verifica tabla por tabla y migración desde esquema anterior; se coteja además la base local al actualizar.
-- Inclinación: gt, lt y abs_gt; criterio simulado recomendado abs(valor) > umbral. Igualdad no alerta. `test_signed_and_absolute_inclination_boundaries`.
-- Fotos siguen siendo opcionales y privadas. Las tareas no cierran alertas automáticamente.
+## Evidencia EV2 que complementa las filas individuales
 
-No se declara validación estructural, proveedor físico ni aceptación HU-09. Código, simulaciones y trazabilidad verificables están disponibles en el repositorio.
-
-
-## Verificación adicional: captura automática, identidad y mockups
-
-| Área / CA relacionados | Corrección y evidencia nueva |
+| Requisito vigente / criterios relacionados | Evidencia funcional |
 |---|---|
-| HU-04 CA-04.1–04.4 | Vibración: umbral finito >= 0, error visible y rechazo sin insertar. `app.rules`; `test_vibration_nonnegative_finite_threshold`. Se mantienen supuestos académicos y comparaciones de inclinación. |
-| HU-02 CA-02.2, CA-02.8; HU-08 CA-08.2, CA-08.5, CA-08.6 | Contrato proveedor exige bridge_code/kind coherentes con sensor/componente/puente. `app.validate_identity`, `mock_provider.demo_records`; `test_provider_rejects_inconsistent_and_missing_identity_with_evidence`, `test_provider_default_json_includes_two_bridges_and_types`. |
-| HU-08 CA-08.3, CA-08.4, CA-08.7, CA-08.8 | Worker periódico configurable, manual conservado, reintentos y recuperación; evidencia de errores persistida. `app.poll_command`, `polling.run_polling`; `test_automatic_worker_recovers_and_deduplicates_real_http`, `test_worker_interval_environment_lock_and_bad_json`. Solo entorno simulado. |
-| Compatibilidad HU-02 | API anterior sigue operativa y valida identidad opcional. `test_optional_api_identity_is_validated_without_breaking_legacy`. |
-| EDT 1.2.1 / HU-05 / HU-06 | Mockups generados de las vistas reales, con inspector, programación y panel ampliado. `tools/build_mockups.py`; `test_mockups_cover_current_real_views`. |
+| Vibración = aceleración vertical pico en m/s²; CA-02.3, 02.4, 02.8 y HU-08 | `app.receive`, `mock_provider.demo_records`; `test_old_units_are_never_relabelled`, `test_ev2_provider_flow_both_bridges`. Históricos mm/s conservados, identificados y no reinterpretados. |
+| Atención/Alerta/Crítico, >= y mayor severidad; CA-04.1–04.7 | JSON configurable + `app.rules`/`evaluate`; `test_numeric_levels_positive_negative_and_exact_limits`, `test_rule_configuration_versions_and_highest_only`. Una alerta por lectura; conserva regla de su versión. |
+| Referencia configurable, cambio absoluto y ausencia explícita; CA-02.5, CA-04.3, HU-01 | `sensors.reference_value`, snapshots en measurements; `test_reference_offset_snapshot_missing_and_invalid`. Ambos sentidos y límites exactos con referencias no nulas. |
+| Baja/Media/Alta/Crítica nuevas; HU-03 y CA-04.1/04.4 | `app.inspections`/`evaluate`; `test_visual_categories_and_configured_alerts`, `test_old_units_are_never_relabelled`. Sin equivalencia de categorías históricas. Fotos opcionales conservadas. |
+| Tres componentes por puente, sensores configurables; RF-1 y HU-01 | `configure-ev2-demo`; `test_demo_setup_is_idempotent_and_customizable`, `test_fresh_demo_has_three_components_per_bridge`. No se inventan sensores físicos adicionales. |
+| Interfaz operativa limpia, sin pérdida de datos; HU-05 | `test_professional_ui_and_severity_styles_all_roles`; niveles diferenciados en panel/historial. Ausencias y fallos se conservan. |
+| Integración HTTP y worker para ambos puentes; HU-08 | `test_ev2_provider_flow_both_bridges` y suite de captura periódica/identidad. Solo proveedor simulado. |
+| Preservación/migración | `ev2_migration.migrate_ev2`; `test_old_units_are_never_relabelled`, `test_migration_preserves_every_existing_table_row`. Fotos, IDs y relaciones preservados. |
 
-Esta evidencia complementa las filas individuales anteriores; no cambia la línea de base ni declara integración real o aceptación HU-09.
+Los valores son parámetros asumidos académicamente conforme a EV2; no se solicita validación externa para esta evaluación. Las alertas no son diagnósticos. Las definiciones oficiales de HU/CA se conservan en CRITERIOS_OFICIALES.md; sus detalles cuantitativos anteriores deben leerse con las correcciones EV2 de esta tabla. HU-09 sigue pendiente, sin declarar aceptación municipal.

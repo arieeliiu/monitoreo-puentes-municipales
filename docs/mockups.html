@@ -19,18 +19,16 @@
 </aside>
 <main>
 <h1>Mockups de las cinco funcionalidades</h1>
-<p class="notice warning">Bocetos estáticos generados desde las plantillas reales. Todos los datos y umbrales son supuestos académicos. Botones desactivados; usa los enlaces de navegación. Las fotografías son opcionales.</p>
-<p>Término EDT 1.4.5/1.4.6: 24/11/2026 · Presentación: 26/11/2026.</p>
+<p class="notice warning">Bocetos de navegación generados desde las pantallas actuales. Botones desactivados. Las fotografías son opcionales.</p>
 <section id="infraestructura">
 <h2>1 · Infraestructura</h2>
 <article>
 <h3>Inventario</h3>
 <small>Vista real: /bridges · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
-<div class="eyebrow">HU-01 / Inventario</div>
 <h1>Infraestructura</h1>
 <p>Puentes, componentes y sensores asociados.</p>
 </div>
@@ -41,18 +39,16 @@
 <h2>
 <a href="#infraestructura">Puente Estero Norte →</a>
 </h2>
-<p>Ubicación ficticia · Biobío</p>
+<p>Sector municipal · Biobío</p>
 <span class="badge">Alta</span>
-<span class="badge test">PRUEBA</span>
 </article>
 <article class="panel">
 <div class="eyebrow">DEM-02</div>
 <h2>
 <a href="#infraestructura">Puente Ribera Sur →</a>
 </h2>
-<p>Ubicación ficticia · Biobío</p>
+<p>Sector municipal · Biobío</p>
 <span class="badge">Alta</span>
-<span class="badge test">PRUEBA</span>
 </article>
 </div>
 <section class="panel">
@@ -77,15 +73,14 @@
 <article>
 <h3>Ficha, edición, componentes y sensores</h3>
 <small>Vista real: /bridges/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
 <div class="eyebrow">Infraestructura / DEM-01</div>
 <h1>Puente Estero Norte</h1>
-<p>Ubicación ficticia · Biobío · Criticidad Alta</p>
+<p>Sector municipal · Biobío · Criticidad Alta</p>
 <span class="badge">Ficha del puente</span>
-<span class="badge test">PRUEBA</span>
 </div>
 </header>
 <div class="quicklinks">
@@ -101,7 +96,7 @@
 </label>
 <label>Nombre<input name="name" type="text" value="Puente Estero Norte" required >
 </label>
-<label>Ubicación<input name="location" type="text" value="Ubicación ficticia · Biobío" required >
+<label>Ubicación<input name="location" type="text" value="Sector municipal · Biobío" required >
 </label>
 <label>Criticidad<select name="criticality">
 <option >Baja</option>
@@ -115,12 +110,34 @@
 <div class="bridge-grid">
 <section class="panel">
 <h2>Componentes estructurales</h2>
-<div class="row-link">Tablero · prueba<details>
+<div class="row-link">Estribo<details>
+<summary>Editar</summary>
+<form>
+<input type="hidden" name="entity" value="component">
+<input type="hidden" name="id" value="4">
+<label>Nombre<input name="name" type="text" value="Estribo" required >
+</label>
+<button disabled>Guardar componente</button>
+</form>
+</details>
+</div>
+<div class="row-link">Tablero<details>
 <summary>Editar</summary>
 <form>
 <input type="hidden" name="entity" value="component">
 <input type="hidden" name="id" value="1">
-<label>Nombre<input name="name" type="text" value="Tablero · prueba" required >
+<label>Nombre<input name="name" type="text" value="Tablero" required >
+</label>
+<button disabled>Guardar componente</button>
+</form>
+</details>
+</div>
+<div class="row-link">Viga<details>
+<summary>Editar</summary>
+<form>
+<input type="hidden" name="entity" value="component">
+<input type="hidden" name="id" value="3">
+<label>Nombre<input name="name" type="text" value="Viga" required >
 </label>
 <button disabled>Guardar componente</button>
 </form>
@@ -137,7 +154,7 @@
 <h2>Sensores asociados</h2>
 <div class="row-link">
 <strong>DEM-01-VIBRACION</strong>
-<small>Variable: Vibración · mm/s · Tablero · prueba · Ubicación específica: Apoyo central · ubicación ficticia</small>
+<small>Variable: Aceleración vertical pico · m/s² · Tablero · Ubicación específica: Apoyo central</small>
 <details>
 <summary>Editar</summary>
 <form>
@@ -145,15 +162,19 @@
 <input type="hidden" name="id" value="1">
 <label>Código<input name="code" type="text" value="DEM-01-VIBRACION" required >
 </label>
-<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central · ubicación ficticia" required >
+<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central" required >
+</label>
+<label>Referencia de inclinación (°)<input name="reference_value" type="number" value=""  step=any>
 </label>
 <label>Componente<select name="component_id">
-<option value="1" selected>Tablero · prueba</option>
+<option value="4" >Estribo</option>
+<option value="1" selected>Tablero</option>
+<option value="3" >Viga</option>
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="vibracion" selected>vibracion</option>
-<option value="inclinacion" >inclinacion</option>
+<option value="Aceleración vertical pico" selected>Aceleración vertical pico</option>
+<option value="Inclinación" >Inclinación</option>
 </select>
 </label>
 <button disabled>Guardar sensor</button>
@@ -162,7 +183,8 @@
 </div>
 <div class="row-link">
 <strong>DEM-01-INCLINACION</strong>
-<small>Variable: Inclinación · ° · Tablero · prueba · Ubicación específica: Apoyo central · ubicación ficticia</small>
+<small>Variable: Inclinación · ° · Tablero · Ubicación específica: Apoyo central</small>
+<small>Referencia: 0.0 °</small>
 <details>
 <summary>Editar</summary>
 <form>
@@ -170,15 +192,19 @@
 <input type="hidden" name="id" value="2">
 <label>Código<input name="code" type="text" value="DEM-01-INCLINACION" required >
 </label>
-<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central · ubicación ficticia" required >
+<label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Apoyo central" required >
+</label>
+<label>Referencia de inclinación (°)<input name="reference_value" type="number" value="0.0"  step=any>
 </label>
 <label>Componente<select name="component_id">
-<option value="1" selected>Tablero · prueba</option>
+<option value="4" >Estribo</option>
+<option value="1" selected>Tablero</option>
+<option value="3" >Viga</option>
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="vibracion" >vibracion</option>
-<option value="inclinacion" selected>inclinacion</option>
+<option value="Aceleración vertical pico" >Aceleración vertical pico</option>
+<option value="Inclinación" selected>Inclinación</option>
 </select>
 </label>
 <button disabled>Guardar sensor</button>
@@ -191,14 +217,18 @@
 </label>
 <label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="" required >
 </label>
+<label>Referencia de inclinación (°)<input name="reference_value" type="number" value=""  step=any>
+</label>
 <label>Componente<select name="component_id" data-components required>
 <option value="">Selecciona un componente</option>
-<option value="1" data-bridge="1">Tablero · prueba</option>
+<option value="4" data-bridge="1">Estribo</option>
+<option value="1" data-bridge="1">Tablero</option>
+<option value="3" data-bridge="1">Viga</option>
 </select>
 </label>
 <label>Variable medida<select name="kind">
-<option value="vibracion">Vibracion (mm/s)</option>
-<option value="inclinacion">Inclinacion (°)</option>
+<option value="Aceleración vertical pico">Aceleración vertical pico (m/s²)</option>
+<option value="Inclinación">Inclinación (°)</option>
 </select>
 </label>
 <button disabled>Asociar sensor</button>
@@ -212,12 +242,11 @@
 <article>
 <h3>Historial, consulta manual y captura automática IoT</h3>
 <small>Vista real: /measurements · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
-<div class="eyebrow">HU-02 / Sensores</div>
-<h1>Mediciones</h1>
+<h1>Lecturas de sensores</h1>
 <p>Valores recibidos e historial. Fechas almacenadas en UTC.</p>
 </div>
 </header>
@@ -256,12 +285,23 @@
 </thead>
 <tbody>
 <tr>
-<td>Puente Estero Norte<small>DEM-01-VIBRACION · vibracion</small>
+<td>Puente Estero Norte<small>DEM-01-INCLINACION · Inclinación</small>
 </td>
-<td>7.0 mm/s</td>
+<td>0.229 °<small>Lectura: 0.229 °</small>
+<small>Referencia: 0.0 ° · Cambio absoluto: 0.229 °</small>
+</td>
 <td>
 <span class="badge">valido</span>
-<span class="badge test">PRUEBA</span>
+<small>Evaluada</small>
+</td>
+<td>2026-10-22T13:00:00+00:00</td>
+</tr>
+<tr>
+<td>Puente Estero Norte<small>DEM-01-VIBRACION · Aceleración vertical pico</small>
+</td>
+<td>1.0 m/s²</td>
+<td>
+<span class="badge">valido</span>
 <small>Evaluada</small>
 </td>
 <td>2026-10-22T13:00:00+00:00</td>
@@ -270,27 +310,26 @@
 </table>
 </section>
 <section class="panel">
-<h2>Consultar API del proveedor ficticio</h2>
-<p>Consulta manual o captura automática mediante el worker poll-provider (intervalo configurable). Proveedor IoT → cliente municipal → validación y alertas. Los errores quedan en Historial de operaciones.</p>
+<h2>Recibir lecturas del proveedor</h2>
+<p>Las lecturas se reciben automáticamente cuando la captura está activa. También puedes consultar ahora. Revisa las incidencias en el historial de operaciones.</p>
 <form>
-<button disabled>Consultar proveedor simulado</button>
+<button disabled>Consultar proveedor</button>
 </form>
 </section>
 <details class="panel">
-<summary>Entorno local · Registrar medición simulada</summary>
-<p class="notice warning">Datos de prueba. Este formulario demuestra el mismo flujo de almacenamiento y alertas de la API. No verifica una conexión IoT real.</p>
+<summary>Registrar lectura manual</summary>
 <form>
 <label>Sensor<select name="sensor_code" required>
-<option value="DEM-01-VIBRACION" data-unit="mm/s">Puente Estero Norte · DEM-01-VIBRACION (mm/s)</option>
+<option value="DEM-01-VIBRACION" data-unit="m/s²">Puente Estero Norte · DEM-01-VIBRACION (m/s²)</option>
 <option value="DEM-01-INCLINACION" data-unit="°">Puente Estero Norte · DEM-01-INCLINACION (°)</option>
-<option value="DEM-02-VIBRACION" data-unit="mm/s">Puente Ribera Sur · DEM-02-VIBRACION (mm/s)</option>
+<option value="DEM-02-VIBRACION" data-unit="m/s²">Puente Ribera Sur · DEM-02-VIBRACION (m/s²)</option>
 <option value="DEM-02-INCLINACION" data-unit="°">Puente Ribera Sur · DEM-02-INCLINACION (°)</option>
 </select>
 </label>
 <label>Valor<input name="value" type="number" value=""  step=any>
 </label>
 <label>Unidad<select name="unit">
-<option>mm/s</option>
+<option>m/s²</option>
 <option>°</option>
 </select>
 </label>
@@ -304,18 +343,17 @@
 </label>
 <label>ID externo único (opcional)<input name="external_id" type="text" value=""  >
 </label>
-<button disabled>Guardar medición de prueba</button>
+<button disabled>Guardar medición</button>
 </form>
 </details>
 </article>
 <article>
 <h3>Registro visual con fotografías opcionales</h3>
 <small>Vista real: /inspections · Rol Inspector en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
-<div class="eyebrow">HU-03 / Registro en terreno</div>
 <h1>Inspecciones visuales</h1>
 <p>Hallazgos y evidencia fotográfica por componente.</p>
 </div>
@@ -325,7 +363,7 @@
 <form>
 <label>Programación que se atiende (opcional)<select name="plan_id">
 <option value="">Inspección no programada</option>
-<option value="1">#1 · Puente 2 / Componente 2 · 2026-11-23 · Inspección preventiva ficticia</option>
+<option value="1">#1 · Puente 2 / Componente 2 · 2026-11-23 · Inspección preventiva</option>
 </select>
 </label>
 <label>Puente<select name="bridge_id" required data-bridge>
@@ -336,16 +374,20 @@
 </label>
 <label>Componente<select name="component_id" data-components required>
 <option value="">Selecciona un componente</option>
-<option value="1" data-bridge="1">Tablero · prueba · Puente Estero Norte</option>
-<option value="2" data-bridge="2">Tablero · prueba · Puente Ribera Sur</option>
+<option value="1" data-bridge="1">Tablero · Puente Estero Norte</option>
+<option value="2" data-bridge="2">Tablero · Puente Ribera Sur</option>
+<option value="3" data-bridge="1">Viga · Puente Estero Norte</option>
+<option value="4" data-bridge="1">Estribo · Puente Estero Norte</option>
+<option value="5" data-bridge="2">Viga · Puente Ribera Sur</option>
+<option value="6" data-bridge="2">Estribo · Puente Ribera Sur</option>
 </select>
 </label>
 <label>Fecha y hora con zona horaria<input name="inspected_at" type="text" value="" required >
 </label>
 <label>Condición visual<select name="condition">
-<option>Buena</option>
-<option>Regular</option>
-<option>Mala</option>
+<option>Baja</option>
+<option>Media</option>
+<option>Alta</option>
 <option>Crítica</option>
 </select>
 </label>
@@ -355,8 +397,7 @@
 <label>Fotografías (opcionales)<input type="file" name="photos" accept="image/jpeg,image/png" multiple>
 <small>Hasta 5 imágenes JPEG/PNG. Petición máxima: 20 MB.</small>
 </label>
-<label class="check">
-<input type="checkbox" name="simulated" value="1"> Registro ficticio de prueba</label>
+<input type="hidden" name="simulated" value="1">
 <p>Inspector: <strong>inspector</strong>
 </p>
 <button disabled>Guardar inspección</button>
@@ -365,31 +406,29 @@
 <section class="panel">
 <h2>Historial de inspecciones</h2>
 <a class="row-link" href="#captura">
-<strong>Puente Estero Norte · Tablero · prueba</strong>
-<span class="badge">Regular</span>
-<span class="badge test">PRUEBA</span>
+<strong>Puente Estero Norte · Tablero</strong>
+<span class="badge">Media</span>
 <small>2026-10-22T13:00:00+00:00 · inspector</small>
-<span>Hallazgo ficticio: revisar apoyo del tablero.</span>
+<span>Revisar apoyo del tablero.</span>
 </a>
 </section>
 </article>
 <article>
 <h3>Resultado, observaciones y fotografías</h3>
 <small>Vista real: /inspections/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
 <div class="eyebrow">Inspección #1 / Evidencia visual</div>
 <h1>Puente Estero Norte</h1>
-<p>Tablero · prueba · 2026-10-22T13:00:00+00:00</p>
-<span class="badge">Regular</span>
-<span class="badge test">PRUEBA</span>
+<p>Tablero · 2026-10-22T13:00:00+00:00</p>
+<span class="badge">Media</span>
 </div>
 </header>
 <section class="panel">
 <h2>Hallazgo</h2>
-<p class="preserve">Hallazgo ficticio: revisar apoyo del tablero.</p>
+<p class="preserve">Revisar apoyo del tablero.</p>
 <p>Registrado por inspector.</p>
 <div class="gallery">
 <p class="muted">Esta inspección no tiene fotografías adjuntas.</p>
@@ -402,18 +441,16 @@
 <article>
 <h3>Umbrales académicos y comparaciones</h3>
 <small>Vista real: /rules · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
-<div class="eyebrow">HU-04 / Configuración DOM</div>
 <h1>Reglas de alerta</h1>
-<p>Comparación de nuevos registros con criterios configurados.</p>
+<p>Configura los niveles para las nuevas lecturas y condiciones visuales.</p>
 </div>
 </header>
-<div class="notice warning">Piloto académico: umbrales supuestos por una contraparte técnica ficticia; no son referencias universales de seguridad estructural. Para inclinación se recomienda magnitud absoluta (|valor| > umbral). El límite exacto no genera alerta.</div>
 <section class="panel">
-<h2>Configurar regla</h2>
+<h2>Configurar nivel</h2>
 <form>
 <label>Puente<select name="bridge_id" required data-bridge>
 <option value="">Selecciona un puente</option>
@@ -421,41 +458,40 @@
 <option value="2">DEM-02 · Puente Ribera Sur</option>
 </select>
 </label>
-<label>Nombre de la regla<input name="label" type="text" value="" required >
+<label>Descripción de la regla<input name="label" type="text" value="" required >
 </label>
-<label>Origen<select name="kind">
-<option value="vibracion">Vibración (mm/s)</option>
+<label>Variable<select name="kind">
+<option value="vibracion">Aceleración vertical pico (m/s²)</option>
 <option value="inclinacion">Inclinación (°)</option>
 <option value="visual">Condición visual</option>
 </select>
 </label>
-<label>Umbral: genera alerta si valor &gt; umbral<input name="threshold" type="number" value=""  step=any>
+<label>Nivel de alerta<select name="severity">
+<option>Atención</option>
+<option>Alerta</option>
+<option>Crítico</option>
+</select>
 </label>
-<label>Condición visual exacta<select name="condition">
-<option>Buena</option>
-<option>Regular</option>
-<option>Mala</option>
+<label>Límite inclusivo (mayor o igual)<input name="threshold" type="number" value=""  step=any>
+</label>
+<label>Condición visual<select name="condition">
+<option>Baja</option>
+<option>Media</option>
+<option>Alta</option>
 <option>Crítica</option>
 </select>
 </label>
-<label class="check">
-<input type="hidden" name="simulated" value="1"> Supuesto académico ficticio</label>
-<label>Comparación (inclinación)<select name="comparison">
-<option value="gt">Valor > umbral</option>
-<option value="lt">Valor &lt; umbral</option>
-<option value="abs_gt">Magnitud absoluta > umbral</option>
-</select>
-</label>
-<button disabled>Guardar regla</button>
+<p>En inclinación se evalúa el cambio absoluto respecto de la referencia del sensor. Guardar un nivel existente crea una nueva versión y conserva el historial.</p>
+<button disabled>Guardar configuración</button>
 </form>
 </section>
 <section class="panel">
-<h2>Reglas configuradas</h2>
+<h2>Configuraciones vigentes e históricas</h2>
 <div class="row-link">
-<strong>Puente Estero Norte · Supuesto de contraparte ficticia</strong>
-<span>vibracion &gt; 5.0 mm/s</span>
+<strong>Puente Estero Norte · Aceleración vertical pico</strong>
+<span class="badge">Alerta</span>
+<span>Aceleración vertical pico ≥ 1.0 m/s²</span>
 <span class="badge">Activa</span>
-<span class="badge test">PRUEBA</span>
 <form>
 <button disabled class="quiet" name="disable" value="1">Desactivar regla</button>
 </form>
@@ -465,16 +501,15 @@
 <article>
 <h3>Origen, inspección relacionada, tareas y cierre explícito</h3>
 <small>Vista real: /alerts/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
-<p class="notice warning">Las alertas indican situaciones para revisión. No constituyen diagnóstico estructural ni una decisión automática sobre la seguridad del puente.</p>
 <header>
 <div>
 <div class="eyebrow">Seguimiento / Alerta #1</div>
 <h1>Puente Estero Norte</h1>
-<p>Supuesto de contraparte ficticia · 2026-10-22T13:00:00+00:00</p>
+<p>Aceleración vertical pico · 2026-10-22T13:00:00+00:00</p>
+<span class="badge severity-alert">Alerta</span>
 <span class="badge">Activa</span>
-<span class="badge test">PRUEBA</span>
 </div>
 </header>
 <section class="panel">
@@ -492,7 +527,7 @@
 </label>
 <label>Relacionar inspección<select name="inspection_id">
 <option value="">Sin relación nueva</option>
-<option value="1">#1 · Regular · 2026-10-22T13:00:00+00:00</option>
+<option value="1">#1 · Media · 2026-10-22T13:00:00+00:00</option>
 </select>
 </label>
 <label>Estado<select name="status">
@@ -507,7 +542,7 @@
 <section class="panel">
 <h2>Mantenimiento relacionado</h2>
 <div class="timeline">
-<strong>#1 · Revisión preventiva ficticia</strong>
+<strong>#1 · Revisión preventiva</strong>
 <p>mantencion · 2026-11-20</p>
 <span class="badge">Pendiente</span>
 </div>
@@ -522,9 +557,8 @@
 <article>
 <h3>Sensores, alertas, pendientes, programación y últimas inspecciones</h3>
 <small>Vista real: / · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
-<p class="notice warning">Las alertas indican situaciones para revisión. No constituyen diagnóstico estructural ni una decisión automática sobre la seguridad del puente.</p>
 <header>
 <div>
 <div class="eyebrow">Red municipal / Vista general</div>
@@ -539,7 +573,6 @@
 <div class="card-top">
 <span class="eyebrow">DEM-01</span>
 <span class="badge">Criticidad Alta</span>
-<span class="badge test">PRUEBA</span>
 </div>
 <div class="bridge-drawing" aria-hidden="true">
 <svg viewBox="0 0 500 100">
@@ -549,21 +582,25 @@
 <h2>
 <a href="#infraestructura">Puente Estero Norte ↗</a>
 </h2>
-<p>Ubicación ficticia · Biobío</p>
+<p>Sector municipal · Biobío</p>
 <div class="status-line">
 <strong class="danger">1 alerta(s) abierta(s)</strong>
 <span>Revisar disponibilidad de datos</span>
 </div>
 <div class="readings">
 <div>
-<small>Inclinacion · DEM-01-INCLINACION</small>
-<strong class="missing">Sin datos</strong>
+<small>Inclinación · DEM-01-INCLINACION</small>
+<strong>0.229 <em>°</em>
+</strong>
+<small>Lectura: 0.229 °</small>
+<small>Referencia: 0.0 ° · Cambio absoluto: 0.229 °</small>
+<small>2026-10-22T13:00:00+00:00</small>
 </div>
 <div>
-<small>Vibracion · DEM-01-VIBRACION</small>
-<strong>7.0 <em>mm/s</em>
+<small>Aceleración vertical pico · DEM-01-VIBRACION</small>
+<strong>1.0 <em>m/s²</em>
 </strong>
-<small>2026-10-22T13:00:00+00:00 · PRUEBA</small>
+<small>2026-10-22T13:00:00+00:00</small>
 </div>
 </div>
 <a href="#captura">Historial de mediciones →</a> <a href="#captura">Inspecciones →</a>
@@ -572,7 +609,6 @@
 <div class="card-top">
 <span class="eyebrow">DEM-02</span>
 <span class="badge">Criticidad Alta</span>
-<span class="badge test">PRUEBA</span>
 </div>
 <div class="bridge-drawing" aria-hidden="true">
 <svg viewBox="0 0 500 100">
@@ -582,18 +618,18 @@
 <h2>
 <a href="#infraestructura">Puente Ribera Sur ↗</a>
 </h2>
-<p>Ubicación ficticia · Biobío</p>
+<p>Sector municipal · Biobío</p>
 <div class="status-line">
 <strong>Sin alertas abiertas</strong>
 <span>Revisar disponibilidad de datos</span>
 </div>
 <div class="readings">
 <div>
-<small>Inclinacion · DEM-02-INCLINACION</small>
+<small>Inclinación · DEM-02-INCLINACION</small>
 <strong class="missing">Sin datos</strong>
 </div>
 <div>
-<small>Vibracion · DEM-02-VIBRACION</small>
+<small>Aceleración vertical pico · DEM-02-VIBRACION</small>
 <strong class="missing">Sin datos</strong>
 </div>
 </div>
@@ -606,30 +642,30 @@
 <a href="#alertas">Ver historial →</a>
 </div>
 <a class="row-link" href="#alertas">
-<strong>Puente Estero Norte · Supuesto de contraparte ficticia</strong>
+<strong>Puente Estero Norte · Aceleración vertical pico</strong>
+<span class="badge severity-alert">Alerta</span>
 <span class="badge">Activa</span>
-<span class="badge test">PRUEBA</span>
 <small>2026-10-22T13:00:00+00:00</small>
 </a>
 </section>
 <div class="bridge-grid">
 <section class="panel">
 <h2>Actividades de mantenimiento pendientes</h2>
-<a class="row-link" href="#mantenimiento">Puente Estero Norte · Revisión preventiva ficticia<small>2026-11-20 · Pendiente</small>
+<a class="row-link" href="#mantenimiento">Puente Estero Norte · Revisión preventiva<small>2026-11-20 · Pendiente</small>
 </a>
 </section>
 <section class="panel">
 <h2>Próximas inspecciones programadas</h2>
 <a href="#mantenimiento">Ver programación →</a>
-<p>Puente Ribera Sur · 2026-11-23 · inspector<small>Inspección preventiva ficticia</small>
+<p>Puente Ribera Sur · 2026-11-23 · inspector<small>Inspección preventiva</small>
 </p>
 </section>
 </div>
 <section class="panel">
 <h2>Condiciones visuales · últimas inspecciones</h2>
 <p>Registros de inspectores; distintos de las mediciones de sensores.</p>
-<a class="row-link" href="#captura">Puente Estero Norte · Tablero · prueba · Regular<small>2026-10-22T13:00:00+00:00</small>
-<span>Hallazgo ficticio: revisar apoyo del tablero.</span>
+<a class="row-link" href="#captura">Puente Estero Norte · Tablero · Media<small>2026-10-22T13:00:00+00:00</small>
+<span>Revisar apoyo del tablero.</span>
 <strong> Ver fotografías y observaciones →</strong>
 </a>
 </section>
@@ -640,11 +676,10 @@
 <article>
 <h3>Asignación, estados y filtro por puente</h3>
 <small>Vista real: /maintenance · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
-<div class="eyebrow">HU-06 / Atención en terreno</div>
 <h1>Mantenimiento</h1>
 <p>Planificación y seguimiento de actividades.</p>
 </div>
@@ -669,8 +704,12 @@
 </label>
 <label>Componente<select name="component_id" data-components >
 <option value="">Todo el puente</option>
-<option value="1" data-bridge="1">Tablero · prueba · Puente Estero Norte</option>
-<option value="2" data-bridge="2">Tablero · prueba · Puente Ribera Sur</option>
+<option value="1" data-bridge="1">Tablero · Puente Estero Norte</option>
+<option value="2" data-bridge="2">Tablero · Puente Ribera Sur</option>
+<option value="3" data-bridge="1">Viga · Puente Estero Norte</option>
+<option value="4" data-bridge="1">Estribo · Puente Estero Norte</option>
+<option value="5" data-bridge="2">Viga · Puente Ribera Sur</option>
+<option value="6" data-bridge="2">Estribo · Puente Ribera Sur</option>
 </select>
 </label>
 <label>Alerta relacionada<select name="alert_id">
@@ -694,8 +733,8 @@
 <article class="panel">
 <div class="eyebrow">Actividad #1 · 2026-11-20</div>
 <h2>Puente Estero Norte</h2>
-<p>Tablero · prueba</p>
-<p class="preserve">Revisión preventiva ficticia</p>
+<p>Tablero</p>
+<p class="preserve">Revisión preventiva</p>
 <span class="badge">Pendiente</span>
 <p>Responsable: mantencion</p>
 <a href="#alertas">Seguimiento de alerta #1 →</a>
@@ -703,7 +742,7 @@
 <summary>Actualizar actividad</summary>
 <form>
 <input type="hidden" name="id" value="1">
-<label>Descripción<input name="description" type="text" value="Revisión preventiva ficticia" required >
+<label>Descripción<input name="description" type="text" value="Revisión preventiva" required >
 </label>
 <label>Fecha planificada<input name="planned_date" type="date" value="2026-11-20" required >
 </label>
@@ -726,7 +765,7 @@
 <article>
 <h3>DOM programa; inspector asignado registra resultado</h3>
 <small>Vista real: /inspection-plans · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Objetivo · 26 NOV 2026</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
 <div>
@@ -745,8 +784,12 @@
 </label>
 <label>Componente<select name="component_id" data-components required>
 <option value="">Selecciona un componente</option>
-<option value="1" data-bridge="1">Tablero · prueba</option>
-<option value="2" data-bridge="2">Tablero · prueba</option>
+<option value="1" data-bridge="1">Tablero</option>
+<option value="2" data-bridge="2">Tablero</option>
+<option value="3" data-bridge="1">Viga</option>
+<option value="4" data-bridge="1">Estribo</option>
+<option value="5" data-bridge="2">Viga</option>
+<option value="6" data-bridge="2">Estribo</option>
 </select>
 </label>
 <label>Inspector responsable<select name="inspector_id" required>
@@ -763,8 +806,8 @@
 </section>
 <section class="panel">
 <article class="row-link">
-<h2>Puente Ribera Sur · Tablero · prueba</h2>
-<p>2026-11-23 · inspector · Inspección preventiva ficticia</p>
+<h2>Puente Ribera Sur · Tablero</h2>
+<p>2026-11-23 · inspector · Inspección preventiva</p>
 <span class="badge">Programada</span>
 <form>
 <button disabled name="cancel" value="1" class="quiet">Cancelar programación</button>

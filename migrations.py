@@ -17,3 +17,5 @@ def migrate(connection):
         inspection_id INTEGER UNIQUE REFERENCES inspections(id), author_id INTEGER NOT NULL REFERENCES users(id),
         created_at TEXT NOT NULL)''')
     connection.commit()
+    from ev2_migration import migrate_ev2
+    migrate_ev2(connection)

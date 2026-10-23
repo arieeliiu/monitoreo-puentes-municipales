@@ -1,40 +1,37 @@
-# Arquitectura corregida
+# Arquitectura vigente — EV2 del 22/10/2026
 
-Se mantienen Flask, Jinja, SQLite y el almacenamiento privado de fotografías.
+Se mantienen Flask/Jinja, SQLite, archivos fotográficos privados, proveedor HTTP independiente y worker periódico. Los cambios se concentran en el modelo de evaluación y presentación.
 
 ```mermaid
 flowchart LR
-    Sensor --> Plataforma[Plataforma IoT ficticia]
-    Plataforma --> Proveedor[API proveedor independiente: mock_provider.py]
-    Proveedor --> Cliente[provider_client: GET con timeout y reintentos]
-    Cliente --> Recepcion[receive: validar e identificar duplicados]
-    Recepcion --> Reglas[Reglas gt / lt / abs_gt / condición visual]
-    Recepcion --> BD[(SQLite)]
-    Reglas --> BD
-    DOM --> Plan[Programación de inspecciones]
-    Plan --> Resultado[Inspección realizada por inspector asignado]
-    Resultado --> Fotos[Fotografías privadas opcionales]
-    Resultado --> BD
-    BD --> Panel[Panel: sensores, visual, alertas, pendientes y programación]
+    Proveedor[API IoT simulada independiente] --> Cliente[Cliente HTTP con reintentos]
+    Cliente --> Recepcion[Identidad, unidad, valor, estado y fecha]
+    Recepcion --> Referencia[Lectura y referencia guardadas por medición]
+    Referencia --> Variacion[Inclinación: abs lectura menos referencia]
+    Variacion --> Niveles[Comparación inclusiva y mayor severidad]
+    Recepcion --> Niveles
+    Niveles --> BD[(SQLite)]
+    Inspector --> Visual[Baja / Media / Alta / Crítica]
+    Visual --> Niveles
+    BD --> Panel[Panel de monitoreo]
 ```
 
-`mock_provider.py` sirve HTTP en otro proceso/puerto; el sistema municipal consulta `/measurements` mediante URL configurable y Bearer opcional. El proveedor simulado genera un lote estable para ambos puentes. La prueba usa servidores HTTP reales en puertos efímeros y el cliente municipal real. No se declara conectividad con hardware o proveedor real.
+`KINDS` identifica unidades canónicas (m/s² para aceleración vertical pico y ° para inclinación). El proveedor entrega lectura bruta; la referencia se obtiene de la base, administrada por DOM, no de un campo no confiable del proveedor. `measurements` guarda referencia y variación de cada lectura EV2. Se resta con Decimal antes de convertir el resultado finito a almacenamiento REAL para conservar límites decimales exactos.
 
-La consulta manual DOM, `pull-provider` y el worker automático `poll-provider` comparten lógica. Retries solo para errores transitorios de transporte/429/5xx. Una transacción BEGIN IMMEDIATE serializa la recepción y cada elemento usa savepoint; un registro inválido no deja medición ni alertas parciales. Se comprueba ID externo único antes de insertar y se conserva la restricción UNIQUE en SQLite. Se mantiene la API POST receptora como alternativa compatible.
+`config/ev2_pilot.json` configura los supuestos iniciales. `configure-ev2-demo` agrega componentes y configuraciones que no existen, sin sensores adicionales ni modificación de referencias definidas. `app.rules` valida finitud, no negatividad y orden de niveles y versiona reglas al guardar. `evaluate` filtra reglas activas EV2, compara >= y selecciona una sola severidad máxima, vinculando alerta/regla/medición. Visuales se comparan por condición exacta y también conservan la regla generadora. Una alerta no es diagnóstico estructural y las tareas no cambian su estado automáticamente.
 
-`migrations.migrate` agrega columnas y tabla sin reconstruir ni eliminar datos. Se ejecuta al abrir la conexión y también mediante `migrate-db`; `init-db` inicializa instalaciones nuevas. `schema.sql` conserva el esquema base para probar migración desde la versión anterior. La tabla de programación referencia puente/componente/inspector y el resultado real único. Solo el inspector asignado registra ese resultado; el puente/componente deben coincidir y el plan estar programado. Todas las operaciones relevantes se auditan.
+## Migraciones e históricos
 
-Las reglas antiguas conservan `gt`. Para el piloto se documenta `abs_gt` en inclinación: abs(valor) > umbral académico. `lt` permite umbrales negativos. Igualdad no dispara alerta. Una medición sin regla activa del mismo puente y variable informa «Sin regla aplicable». Datos históricos conservan un estado de evaluación explícitamente histórico. Las reglas académicas del formulario siempre llevan marca ficticia.
+`schema.sql` conserva el bootstrap original; `migrations.py` agrega campos previos y llama a `ev2_migration.py`. EV2 agrega reference_value/previous_unit a sensores, reference_value/variation/specification a mediciones, standard/severity/unit a reglas, standard/severity a alertas y standard a inspecciones.
 
-Panel de sensores y panel visual separados, pendientes de mantenimiento filtrados por rol, programación pendiente y última inspección por puente. Filtros por puente no evaden permisos. Las relaciones alerta-inspección son explícitas: origen o nota; alerta-tarea mediante FK. Cierre de alerta sigue siendo exclusivamente DOM con justificación.
+La ampliación del CHECK de inspecciones utiliza una nueva tabla con columnas originales, copia por nombre de columnas, conserva IDs, sustituye la tabla y comprueba foreign_key_check dentro de una transacción. La desactivación temporal de FK se limita a la migración y se restaura al finalizar. No se eliminan registros ni archivos, ni se cambia el valor/unidad de mediciones anteriores. Su specification queda historica; no se calcula retroactivamente la variación. Las categorías visuales anteriores se conservan sin equivalencia automática. Las reglas históricas no evalúan registros EV2; alertas pasadas conservan relaciones y no reciben una severidad inventada.
 
-Término EDT 1.4.5/1.4.6: **24/11/2026**. Presentación académica: **26/11/2026**.
+El cambio de unidad de configuración de sensores de vibración solo afecta a capturas nuevas; previous_unit conserva la configuración anterior. No es una conversión física. La actualización se aplica con web y worker detenidos y respaldo completo previo.
 
+## Captura y seguridad
 
-## Worker periódico y consistencia de identidad
+Manual y automática comparten validaciones y deduplicación. BEGIN IMMEDIATE serializa la recepción; savepoints evitan filas/alertas parciales por elemento. El worker es un proceso independiente con bloqueo de SO, configuración de intervalo, recuperación tras errores y conexiones cerradas por ciclo. Auditoría registra identidad/motivo de rechazos; fallos que impidan auditar se registran por logging.
 
-`polling.py` ejecuta un bucle de consultas con espera interrumpible (`Event.wait`), intervalo validado y recuperación de fallos por ciclo. `poll-provider` abre/cierra un contexto Flask por ciclo: nunca comparte conexiones SQLite con la web. Un bloqueo de SO por base evita lanzar dos workers; una transacción de recepción evita carreras de deduplicación manual/automática. No se añaden hilos al cargar la aplicación WSGI. El worker se inicia explícitamente con CLI/`start-iot.ps1` y continúa hasta detenerlo; se recomienda supervisar este proceso por separado de la web.
+Se mantienen autenticación, permisos, CSRF, CSP, carga fotográfica validada, relaciones de programación y mantenimiento y trazabilidad. La UI usa los mismos registros y una única indicación de demostración. Los mockups se construyen desde estas plantillas y datos temporales.
 
-El proveedor JSON incluye `bridge_code` y `kind`. `validate_identity` contrasta esos campos con la ruta sensor → componente → puente y variable de la base. El proveedor exige ambos; el POST anterior permite omitirlos para compatibilidad, pero los valida si se suministran. El resultado de cada rechazo conserva identificadores y motivo en auditoría. Las consultas fallidas registran una operación de error; errores de almacenamiento que impidan auditar se notifican por logging y el worker continúa. No se persisten credenciales del proveedor.
-
-Las reglas de vibración rechazan umbrales negativos, no numéricos o no finitos antes de insertar; los umbrales direccionales negativos de inclinación permanecen válidos. Los mockups se generan desde las plantillas reales mediante `tools/build_mockups.py`, con SQLite temporal y roles adecuados; no cambian datos del piloto.
+Fechas documentales: 24/11/2026 término de EDT 1.4.5/1.4.6; 26/11/2026 presentación. El alcance cuantitativo EV2 prevalece sobre documentación histórica. No se declara proveedor real, validación externa ni aceptación HU-09.
