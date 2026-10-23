@@ -48,12 +48,12 @@ class SystemTests(unittest.TestCase):
         self.post('/bridges/1',dict(entity='component',name='Estribo'))
         self.post('/bridges/1',dict(entity='component',name='Estribo'));self.assertEqual(self.count('components'),3)
         self.post('/bridges/1',dict(entity='component',id='3',name='Estribo norte'))
-        self.post('/bridges/1',dict(entity='sensor',code='S3',component_id='3',kind='inclinacion'))
+        self.post('/bridges/1',dict(entity='sensor',location='Apoyo de prueba',code='S3',component_id='3',kind='inclinacion'))
         self.assertEqual(self.count('sensors'),3)
-        self.post('/bridges/1',dict(entity='sensor',code='S4',component_id='2',kind='vibracion'))
+        self.post('/bridges/1',dict(entity='sensor',location='Apoyo de prueba',code='S4',component_id='2',kind='vibracion'))
         self.assertEqual(self.count('sensors'),3)
         self.post('/measurements',self.measurement())
-        self.post('/bridges/1',dict(entity='sensor',id='1',code='S1',component_id='1',kind='inclinacion'))
+        self.post('/bridges/1',dict(entity='sensor',location='Apoyo de prueba',id='1',code='S1',component_id='1',kind='inclinacion'))
         self.assertEqual(self.db.execute('SELECT kind FROM sensors WHERE id=1').fetchone()[0],'vibracion')
     def test_role_permissions(self):
         self.login('inspector')
@@ -82,9 +82,9 @@ class SystemTests(unittest.TestCase):
         self.rule('inclinacion',threshold='2');self.rule('visual')
         self.post('/measurements',self.measurement(sensor_code='S2',value='3',unit='°'))
         self.inspection();self.assertEqual(self.count('alerts'),2)
-    def test_official_rule_requires_reference(self):
-        self.rule(simulated='0');self.assertEqual(self.count('rules'),0)
-        self.rule(simulated='0',validation_reference='Informe de prueba');self.assertEqual(self.count('rules'),1)
+    def test_academic_rule_without_real_reference(self):
+        self.rule(simulated='0');self.assertEqual(self.count('rules'),1)
+        self.assertEqual(self.db.execute('SELECT simulated FROM rules').fetchone()[0],1)
     def test_photo_upload_and_authorization(self):
         self.login('inspector'); buf=io.BytesIO();Image.new('RGB',(24,24),'blue').save(buf,'PNG');buf.seek(0)
         response=self.inspection(photos=(buf,'puente.png'))

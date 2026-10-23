@@ -1,6 +1,6 @@
 # Monitoreo de puentes municipales
 
-Aplicación funcional Flask + SQLite para un piloto de dos puentes de la Región del Biobío. Fecha objetivo de la línea de base: **26 de noviembre de 2026**.
+Aplicación funcional Flask + SQLite para un piloto de dos puentes de la Región del Biobío. Presentación académica: **26/11/2026**. Término planificado de EDT 1.4.5 y 1.4.6: **24/11/2026**.
 
 ## Instalar en Windows
 
@@ -53,7 +53,7 @@ Las contraseñas se piden sin eco y requieren 12 caracteres como mínimo. No hay
 
 ## Integración IoT y simulador
 
-Arquitectura: Sensor → plataforma IoT externa → POST API municipal. El adaptador receptor está implementado; **no hay proveedor ni conexión real verificada**. El proveedor futuro debe enviar JSON al contrato siguiente. El sistema no instala sensores ni predice fallas.
+Arquitectura principal: Sensor → plataforma IoT del proveedor → API del proveedor → cliente municipal (consulta manual o CLI). Existe un proveedor ficticio independiente y un cliente pull implementados; **no hay proveedor ni conexión real verificada**. El proveedor futuro deberá exponer su API y acordar la adaptación al contrato descrito; la API receptora se conserva como alternativa. El sistema no instala sensores ni predice fallas.
 
 ```powershell
 $env:IOT_API_KEY = 'reemplazar-por-un-secreto-largo-y-aleatorio'
@@ -70,7 +70,7 @@ El número del ejemplo es exclusivamente ficticio. El simulador marca siempre `s
 {"external_id":"proveedor-uuid-unico","sensor_code":"DEM-01-VIBRACION","value":7,"unit":"mm/s","measured_at":"2026-10-22T10:00:00-03:00","status":"valido","simulated":true}
 ```
 
-Unidades canónicas: vibración `mm/s`, inclinación `°`. No se convierten unidades silenciosamente. `status`: `valido`, `invalido`, `no_disponible`; los dos últimos no generan alertas, pueden guardar valor nulo. Payload malformado se rechaza. Un sensor válido con vibración negativa se rechaza; inclinación admite valores con signo. Umbral numérico: comparación estricta `valor > umbral`; visual: coincidencia exacta con la condición seleccionada. Reglas nuevas no reevalúan registros históricos. Desactivar una regla conserva las alertas existentes. Toda alerta hereda marca de prueba si la regla o el registro es ficticio.
+Unidades canónicas: vibración `mm/s`, inclinación `°`. No se convierten unidades silenciosamente. `status`: `valido`, `invalido`, `no_disponible`; los dos últimos no generan alertas, pueden guardar valor nulo. Payload malformado se rechaza. Un sensor válido con vibración negativa se rechaza; inclinación admite valores con signo. Umbral numérico configurable: `valor > umbral`, `valor < umbral` o `abs(valor) > umbral` (las dos últimas para inclinación); visual: coincidencia exacta con la condición seleccionada. Reglas nuevas no reevalúan registros históricos. Desactivar una regla conserva las alertas existentes. Toda alerta hereda marca de prueba si la regla o el registro es ficticio.
 
 ## Datos, seguridad y operación
 
@@ -80,7 +80,7 @@ Unidades canónicas: vibración `mm/s`, inclinación `°`. No se convierten unid
 - Cambiar tipo o componente de un sensor con mediciones se bloquea para preservar la trazabilidad. Cambios relevantes se registran con autor y fecha en auditoría.
 - Historial de mediciones: máximo 500 resultados por consulta; filtrar fechas y sensor. Auditoría: últimas 500 operaciones en pantalla; la base conserva todas.
 - Para red institucional, usar HTTPS y servidor WSGI: `waitress-serve --listen=127.0.0.1:5000 --call app:create_app`, detrás de proxy TLS. Configurar `COOKIE_SECURE=1`, `SECRET_KEY` e `IOT_API_KEY` mediante el entorno. El servidor Flask de `start.ps1` se destina a demostración local.
-- Pendiente de terceros: nombres y ubicaciones reales, criterios CA textuales oficiales, umbrales validados, proveedor IoT y credenciales, política de frescura/retención/respaldo y aceptación municipal. La referencia de validación de reglas es declarada por DOM, no certificada por el sistema.
+- Fuera del alcance simulado: nombres y ubicaciones reales, aceptación formal municipal, umbrales para uso real, proveedor IoT real y credenciales, política de frescura/retención/respaldo y aceptación municipal. No se solicitan informes, firmas ni contactos reales para las reglas académicas.
 
 ## Pruebas
 
@@ -97,3 +97,45 @@ Nombre solicitado: `monitoreo-puentes-municipales`, visibilidad pública. Public
 ```powershell
 gh repo create monitoreo-puentes-municipales --public --source . --remote origin --push
 ```
+
+
+## Correcciones del piloto académico
+
+Fechas de línea de base: **término planificado de EDT 1.4.5 y 1.4.6: 24/11/2026**. **Presentación académica: 26/11/2026**. Son hitos diferentes.
+
+### Actualizar sin perder datos
+
+Detener el servidor y respaldar `instance/puentes.sqlite` y `instance/photos/`. Luego:
+
+```powershell
+.\.venv\Scripts\python.exe -m flask --app app migrate-db
+```
+
+La migración es aditiva e idempotente: conserva IDs, usuarios, hashes, mediciones, reglas, inspecciones, fotos, tareas y auditoría. Agrega `sensors.location`, `rules.comparison`, `measurements.evaluation` e `inspection_plans`. Sensores históricos muestran «Pendiente de precisar» hasta editar su ubicación; no se inventan posiciones. La variable medida sigue identificada por `kind` (Vibración/Inclinación) y su unidad. Reglas históricas mantienen comparación `gt`. Registros antiguos indican que su evaluación no fue registrada históricamente.
+
+### Proveedor IoT ficticio independiente y cliente municipal
+
+En una terminal ejecutar:
+
+```powershell
+.\.venv\Scripts\python.exe mock_provider.py --port 5100
+```
+
+En otra, iniciar la aplicación. DOM → Mediciones → **Consultar proveedor simulado**, o ejecutar:
+
+```powershell
+$env:PROVIDER_URL='http://127.0.0.1:5100/measurements'
+.\.venv\Scripts\python.exe -m flask --app app pull-provider
+```
+
+La obtención es manual, sin scheduler automático. Puede ejecutarse el comando desde un programador externo si se necesita periodicidad. `PROVIDER_TOKEN` es opcional para un futuro proveedor. La respuesta es `{"simulated":true,"measurements":[...]}` con los registros del contrato descrito arriba. El proveedor ficticio entrega cuatro mediciones (dos variables por cada puente DEM-01 y DEM-02), valores arbitrarios **7 mm/s y −3°**, no referencias seguras. El lote mantiene IDs durante su ejecución; consultar de nuevo cuenta duplicados sin volver a insertarlos. Reiniciar proveedor crea otro lote. Timeout 3 segundos por intento, máximo 3 intentos con espera exponencial 0,2 / 0,4 segundos ante desconexiones, HTTP 429 y 5xx. Otros 4xx o JSON inválido se informan sin reintento. Cada registro inválido se informa y no impide guardar otros válidos. Cada recepción válida comparte la lógica de validación, evaluación y auditoría; siempre se conserva `simulated=true`. La API receptora anterior se mantiene por compatibilidad, pero ya no representa el flujo principal del piloto.
+
+### Reglas e inclinaciones negativas
+
+Para el piloto ficticio elegir **Magnitud absoluta > umbral**, con un umbral académico no negativo elegido por DOM (por ejemplo **2° exclusivamente para demostración**): +3° y −3° alertan; +2° y −2° no alertan. También se admiten reglas direccionales `gt` y `lt` (por ejemplo, valor < −2°). Vibración conserva `gt`; condición visual conserva coincidencia exacta. Las reglas del formulario son supuestos de una contraparte ficticia y no requieren validación real. La ausencia de regla aplicable queda visible por medición y en la respuesta API, incluso cuando existen reglas de otra variable o puente.
+
+### Inspecciones preventivas y panel
+
+DOM → Inspecciones programadas: puente, componente, inspector, fecha y descripción. Estados Programada, Cancelada, Realizada. DOM puede cancelar mientras esté programada. El inspector asignado selecciona la programación al registrar una inspección del mismo puente y componente; se vincula el resultado y sus fotos opcionales y se cambia a Realizada en la misma transacción. No se permite reutilizar la programación ni registrar su resultado como otro inspector o DOM. Se mantienen inspecciones no programadas.
+
+El panel separa sensores de condiciones visuales y muestra actividades no completadas (solo asignadas para Mantención), próximas inspecciones programadas, última inspección visual de cada puente y enlaces a fotografías/observaciones. Mantenimiento permite filtro por puente conservando la restricción del personal asignado. La ficha de alerta informa por separado falta de inspección vinculada (origen visual o nota con inspección) y falta de tarea relacionada. Tener inspecciones en el mismo puente no las vincula implícitamente. Las tareas nunca cierran la alerta automáticamente.

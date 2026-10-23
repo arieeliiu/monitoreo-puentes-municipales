@@ -1,11 +1,31 @@
-# Verificación
+# Verificación de la versión corregida
 
-Suite: `python -m unittest discover -v`. Resultado registrado durante el desarrollo: **18 pruebas aprobadas**. Se ejecuta contra SQLite temporal y cliente HTTP de Flask, incluyendo la recepción API y el contenido HTML de las pantallas. Esto no equivale a integración con dispositivos o aceptación de un especialista.
+Fecha: 23/10/2026. Instalación verificada: carpeta `Desktop/puentes`.
 
-Ver los nombres y las verificaciones completas en `tests/test_app.py`. La suite verifica controles de permisos de servidor, inyección HTML escapada, CSRF, fotos inválidas sin persistencia, idempotencia de ID externo, asociaciones entre puentes, reglas ficticias, estados no disponibles y cierre explícito de alertas después de completar tareas.
+## Resultado automatizado
 
-Prueba de aceptación sugerida: seguir el recorrido del README con las tres cuentas. Revisar el panel sin datos antes de las capturas; crear una regla ficticia; capturar un dato que la supere; subir una foto en una inspección; vincular inspección, alerta y actividad; completar con mantención y cerrar como DOM con justificación. Verificar la auditoría. Repetir desde tablet.
+Comando: `.venv/Scripts/python.exe -m unittest discover -v`
 
-Limitaciones pendientes: API/proveedor real, validación estructural de umbrales, contenido oficial detallado de CA, verificación en tablets físicas y despliegue municipal con HTTPS y política de respaldo. La interfaz es adaptable mediante CSS y todas las páginas se renderizan en la suite.
+**29 pruebas aprobadas, 0 fallos; ejecución completa: 60,874 segundos.** Se conservan 18 casos de regresión (la prueba de reglas oficiales se adaptó al nuevo requisito académico y la de sensores aporta ubicación obligatoria) y se agregan 11 casos de correcciones. No se cuentan ejecuciones duplicadas por herencia.
 
-Revisión visual realizada: inicio de sesión DOM y panel con los dos puentes de prueba, aviso sin reglas y estados sin datos. Evidencia: panel-verificado.png. Verificación en navegador local, sin dispositivos físicos.
+- Infraestructura: alta/edición, unicidad, validaciones, ubicación de sensor y variable visible.
+- Tres roles: controles de servidor, datos de mantenimiento asignados, programación DOM y resultado solo por inspector asignado.
+- Mediciones e inspecciones: historial, valores inválidos/no disponibles, fotos válidas/inválidas, CSRF, escape HTML y persistencia.
+- Reglas: numéricas y visuales, inclinaciones positivas/negativas, gt/lt/abs_gt, límites exactos, supuesto académico y aviso individual sin regla.
+- Panel: cinco funcionalidades navegables, datos disponibles/ausentes, pendientes, programación y últimos hallazgos con enlaces a fotos.
+- Mantenimiento: filtro por puente, responsable, ejecución, relación con alertas y cierre explícito DOM.
+- Programación: estado, cancelación, validación de puente/componente, resultado único y rechazo de inspector no asignado.
+- IoT: servidor HTTP independiente en puerto efímero, cliente real, lote para ambos puentes, mediciones/alertas persistidas, duplicados y registro inválido aislado. Se prueba desconexión y servidor HTTP 503 que responde correctamente al tercer intento.
+- Migración: idempotencia, conservación tabla por tabla y apertura de base con esquema anterior.
+
+## Conservación de la instalación existente
+
+Se creó respaldo SQLite antes de migrar, dentro de `instance/` (excluido de Git). Se compararon los valores de todas las columnas previas y filas de todas las tablas después de migrar: 3 usuarios, 2 puentes, 2 componentes, 4 sensores y 2 operaciones de auditoría conservados. No había mediciones, inspecciones, reglas, alertas ni tareas en esa base al migrar; no se atribuye conservación de datos que no existían. La suite sí prueba la migración con esas entidades pobladas. Se verificó igualdad de archivos fotográficos (0 en esta instalación), `integrity_check=ok` y `foreign_key_check` sin errores. Informe local: `instance/MIGRACION_VERIFICADA.json`.
+
+Servidor corregido iniciado con Waitress; GET `/login` respondió HTTP 200. El cotejo de pantallas y permisos se realiza con el cliente HTTP de Flask; no se afirma una nueva revisión visual en tablets físicas. `panel-verificado.png` corresponde al diseño de la versión inicial, no acredita las correcciones actuales.
+
+## Cobertura oficial y límites
+
+Se cotejó la transcripción `CRITERIOS_OFICIALES.md`: 57 CA de HU-01 a HU-07 con evidencia individual; CA-04.2 dentro del supuesto académico explícito. Los 8 CA de HU-08 se documentan únicamente para el entorno simulado; no hay especificaciones ni conectividad de hardware/proveedor real verificadas. HU-09 permanece pendiente (aceptación municipal, piloto operacional, capacitación y cierre).
+
+Término planificado de EDT 1.4.5 y 1.4.6: **24/11/2026**. Objetivo de presentación académica: **26/11/2026**. No se modifica la línea de base.
