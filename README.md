@@ -147,3 +147,7 @@ Los mockups se generan con plantillas reales y base temporal; no escriben en el 
 SQLite, fotos, credenciales, backups y claves están en `instance/`, excluido de Git. Mantener respaldo conjunto y HTTPS para uso institucional. Hash de contraseñas, roles de servidor, CSRF, CSP, imágenes privadas verificadas/recodificadas y auditoría se conservan. Fotografías JPEG/PNG: hasta 5, 20 megapíxeles y petición máxima 20 MB. Para red institucional usar Waitress detrás de TLS con `COOKIE_SECURE=1` y secretos por entorno.
 
 Línea de base conservada en documentación: término EDT 1.4.5/1.4.6 **24/11/2026**; presentación **26/11/2026**. HU-09 (aceptación municipal, piloto real, capacitación y cierre) sigue pendiente; proveedor real y validación externa no verificados.
+
+## Compartir la aplicación real por internet
+
+Publicación gratuita temporal mediante Cloudflare Quick Tunnel en Windows: desde esta carpeta ejecutar `.\publicar-demo.ps1`; detener con `.\detener-demo.ps1`. Instrucciones, requisitos y pruebas en [PUBLICACION.md](docs/PUBLICACION.md). El script imprime la URL HTTPS asignada y conserva el corte del 26/10, SQLite y cuentas locales. El computador debe permanecer encendido y conectado; la URL cambia al reiniciar el túnel. Credenciales privadas en `instance/ACCESO_LOCAL.txt`, excluido de Git.
