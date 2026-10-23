@@ -1,4 +1,17 @@
-# Verificación final EV2
+# Verificación del corte y modo completo
+
+## Corrección de alcance al corte 26/10/2026
+
+La etapa predeterminada es `cutoff_2026_10_26`; el modo `full` se conserva explícitamente. La suite previa mantiene sus expectativas completas y configura `full` en las bases y procesos de prueba.
+
+Resultados finales: **66 pruebas aprobadas: 63 Python (189,890 s) y 3 JavaScript; 0 fallos**.
+
+Los 12 casos nuevos de `tests/test_project_stage.py` verifican configuración por defecto/entorno y rechazo de etapa inválida; login/logout de los tres roles; cuatro entradas exactas en menú; inicio sin elementos futuros; GET/POST de rutas futuras con/sin CSRF y ninguna escritura; formularios HTML de puentes y sensores; inspecciones con fotos y categorías EV2; recepción manual/API sin consultas SQL a reglas y con evaluación pendiente; `plan_id` manipulado sin escrituras/fotos; proveedor y worker como procesos reales con intervalo 1 s, desconexión, recuperación, ambos puentes y deduplicación sin alertas; mockups del corte; alternancia de etapas sobre una base poblada y archivos fotográficos inmutables, recuperando evaluación, rutas y programación en `full`.
+
+Los comandos de la suite son `python -m unittest discover -v` y `node --test tests/frontend.test.cjs`. Los procesos temporales IoT se cierran al terminar. Los mockups se generan con `python tools/build_mockups.py` (corte) y `python tools/build_mockups.py --stage full` (documentación completa separada). No se cambia el diseño general, las especificaciones técnicas, el esquema de datos ni las fechas o porcentajes de gestión.
+
+La instalación local se reinicia en corte sobre su misma base, con copia SQLite privada previa y verificación de que las filas y hashes de fotografías no cambian al iniciar/consultar el modo. Los respaldos y datos quedan excluidos de Git. La evidencia anterior que sigue corresponde a la versión completa conservada. Se verificó en navegador el inicio local con las cuatro opciones y la ficha sin acceso a alertas. Se corrigió el cierre del árbol de procesos temporales en Windows para liberar el log heredado por el intérprete hijo del entorno virtual; la suite final completa no presenta errores de limpieza. La base local conserva 2 puentes, 6 componentes, 4 sensores y 18 reglas; no tenía mediciones, fotos ni alertas. La conservación de esas entidades pobladas y sus archivos se comprueba en las bases temporales de prueba, sin atribuir registros inexistentes a la instalación local.
+
 
 Fecha: 23/10/2026. Referencia funcional: alcance EV2 actualizado del 22/10/2026, prevalente sobre especificaciones anteriores.
 

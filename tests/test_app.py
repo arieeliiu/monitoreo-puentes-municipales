@@ -8,7 +8,7 @@ class SystemTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
         self.path=Path(self.tmp.name)
-        self.app=create_app({'TESTING':True,'DATABASE':str(self.path/'test.sqlite'),'UPLOAD_FOLDER':str(self.path/'photos'),'SECRET_KEY':'test','IOT_API_KEY':'test-key'})
+        self.app=create_app({'TESTING':True,'DATABASE':str(self.path/'test.sqlite'),'UPLOAD_FOLDER':str(self.path/'photos'),'SECRET_KEY':'test','IOT_API_KEY':'test-key','PROJECT_STAGE':'full'})
         self.db=sqlite3.connect(self.app.config['DATABASE']); self.db.row_factory=sqlite3.Row
         self.db.executescript(Path('schema.sql').read_text(encoding='utf-8'))
         for name,role in [('dom','DOM'),('inspector','Inspector'),('worker','Mantención'),('other','Mantención')]: self.db.execute('INSERT INTO users(username,password,role) VALUES (?,?,?)',(name,generate_password_hash('password-test'),role))

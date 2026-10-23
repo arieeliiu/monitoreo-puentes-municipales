@@ -114,7 +114,7 @@ class Ev2Tests(SystemTests):
 
     def test_fresh_demo_has_three_components_per_bridge(self):
         from app import create_app
-        fresh=create_app({'TESTING':True,'DATABASE':str(self.path/'fresh.sqlite'),'UPLOAD_FOLDER':str(self.path/'fresh-photos'),'SECRET_KEY':'fresh-test'})
+        fresh=create_app({'TESTING':True,'DATABASE':str(self.path/'fresh.sqlite'),'UPLOAD_FOLDER':str(self.path/'fresh-photos'),'SECRET_KEY':'fresh-test','PROJECT_STAGE':'full'})
         runner=fresh.test_cli_runner()
         self.assertEqual(runner.invoke(args=['init-db']).exit_code,0)
         result=runner.invoke(args=['seed-demo']);self.assertEqual(result.exit_code,0,result.output)

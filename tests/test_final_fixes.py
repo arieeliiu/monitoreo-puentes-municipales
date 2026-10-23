@@ -1,5 +1,6 @@
 """Regresión desde formularios renderizados y procesos IoT reales."""
 import socket
+import os
 import subprocess
 import sys
 import time
@@ -160,13 +161,16 @@ class FinalFixTests(SystemTests):
         self.assertTrue(all(r[0] == '' for r in self.db.execute('SELECT location FROM sensors')))
 
     def test_real_provider_and_periodic_worker_restart_recovery(self):
+        self.run_real_provider_and_worker()
+
+    def run_real_provider_and_worker(self, expected_alerts=True):
         self.setup_pilot()
         with socket.socket() as sock:
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
         url = f'http://127.0.0.1:{port}/measurements'
         self.app.config['PROVIDER_URL'] = url
-        config = {key: self.app.config[key] for key in ['DATABASE', 'UPLOAD_FOLDER', 'SECRET_KEY', 'PROVIDER_URL']}
+        config = {key: self.app.config[key] for key in ['DATABASE', 'UPLOAD_FOLDER', 'SECRET_KEY', 'PROVIDER_URL', 'PROJECT_STAGE']}
         code = ('from app import create_app\n'
                 f'app=create_app({config!r})\n'
                 "with app.app_context(): app.cli.main(args=['poll-provider','--interval','1'])\n")
@@ -176,6 +180,17 @@ class FinalFixTests(SystemTests):
             process = subprocess.Popen([sys.executable, *args], cwd=Path(__file__).resolve().parents[1], stdout=log, stderr=log)
             processes.append(process)
             return process
+
+        def stop_process(process):
+            if process.poll() is None:
+                if os.name == 'nt':
+                    # Windows venv launches a child interpreter: terminate the whole
+                    # tree started by this test, including inherited log handles.
+                    subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+                else:
+                    process.terminate()
+            process.wait(timeout=10)
 
         def wait_for(predicate, label):
             deadline = time.monotonic() + 20
@@ -197,24 +212,25 @@ class FinalFixTests(SystemTests):
                 wait_for(lambda: self.count('measurements') == 4, 'captura automática de ambos puentes')
                 wait_for(lambda: self.db.execute("SELECT count(*) FROM audit WHERE action='Consultar proveedor ficticio'").fetchone()[0] >= 2, 'segunda consulta automática')
                 self.assertEqual(self.count('measurements'), 4)
-                self.assertEqual(self.count('alerts'), 4)
-                provider.terminate(); provider.wait(timeout=10)
+                self.assertEqual(self.count('alerts'), 4 if expected_alerts else 0)
+                stop_process(provider)
                 previous = errors()
                 wait_for(lambda: errors() > previous, 'error tras desconectar proveedor')
                 self.assertEqual(self.client.get('/').status_code, 200)
                 provider = launch(['mock_provider.py', '--port', str(port)])
                 wait_for(lambda: self.count('measurements') == 8, 'recuperación automática sin reiniciar worker')
-                self.assertEqual(self.count('alerts'), 8)
-                self.assertEqual([tuple(r) for r in self.db.execute('SELECT bridge_id,count(*),min(severity),max(severity) FROM alerts GROUP BY bridge_id')], [(1,4,'Alerta','Alerta'),(2,4,'Alerta','Alerta')])
+                self.assertEqual(self.count('alerts'), 8 if expected_alerts else 0)
+                self.assertEqual([tuple(r) for r in self.db.execute('SELECT bridge_id,count(*),min(severity),max(severity) FROM alerts GROUP BY bridge_id')], [(1,4,'Alerta','Alerta'),(2,4,'Alerta','Alerta')] if expected_alerts else [])
                 self.assertEqual(self.post('/provider/pull').status_code, 302)
                 self.assertEqual(self.count('measurements'), 8)
-                self.assertEqual(self.count('alerts'), 8)
+                self.assertEqual(self.count('alerts'), 8 if expected_alerts else 0)
+                if not expected_alerts:
+                    from app import PENDING_EVALUATION
+                    self.assertEqual({r[0] for r in self.db.execute('SELECT evaluation FROM measurements')}, {PENDING_EVALUATION})
                 self.assertIsNone(worker.poll())
             finally:
                 for process in processes:
-                    if process.poll() is None:
-                        process.terminate()
-                    process.wait(timeout=10)
+                    stop_process(process)
 
 
 def load_tests(loader, standard_tests, pattern):

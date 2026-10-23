@@ -1,5 +1,20 @@
 # Matriz individual de criterios oficiales y alcance EV2
 
+## Alcance visible del corte 26/10/2026
+
+Esta matriz conserva la evidencia de implementación del modo `full`. La presentación predeterminada corresponde exclusivamente al alcance solicitado para el corte, sin cambiar las fechas ni los porcentajes de la documentación de gestión.
+
+| Área | Corte `cutoff_2026_10_26` | Modo `full` |
+|---|---|---|
+| HU-01 infraestructura | Disponible con permisos y ubicaciones existentes | Disponible |
+| HU-02 mediciones e integración simulada | Manual, API, proveedor, worker, validaciones e historial; evaluación por reglas pendiente | Disponible con evaluación EV2 |
+| HU-03 inspecciones y fotos | Disponible; envío de `plan_id` rechazado | Disponible con programación |
+| HU-04 reglas y alertas | Rutas bloqueadas; motor omitido; históricos conservados | Implementación conservada y activa |
+| Panel completo, mantenimiento y programación | Ocultos y bloqueados en servidor | Implementaciones conservadas |
+
+Evidencia nueva: `tests/test_project_stage.py` comprueba navegación por rol, bloqueo GET/POST sin escrituras, ausencia de consulta de reglas, formularios, fotos, API/worker reales sin alertas, programación manipulada y alternancia sobre datos/fotos poblados. La regresión previa configura `full` explícitamente. Las filas que siguen mantienen su significado como evidencia del modo completo, no como funciones demostradas en el corte.
+
+
 Fuente literal: [transcripción oficial proporcionada](CRITERIOS_OFICIALES.md), localizada por el usuario en Descargas. Se cotejan implementaciones y pruebas, no solo pantallas. Prevalece EV2 actualizado del 22/10/2026: aceleración vertical pico, cambio respecto de referencia, niveles inclusivos y categorías visuales vigentes. La evidencia es de pruebas automatizadas de servidor y HTTP; no equivale a aceptación municipal.
 
 **EDT 1.4.5 y 1.4.6: término planificado 24/11/2026. Presentación académica: 26/11/2026.**

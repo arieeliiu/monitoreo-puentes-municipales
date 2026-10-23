@@ -10,21 +10,60 @@
 <aside>
 <div class="brand">╫ PUENTES</div>
 <nav>
-<a href="#infraestructura">1 · Infraestructura</a>
-<a href="#captura">2 · Mediciones e inspecciones visuales</a>
-<a href="#alertas">3 · Reglas y seguimiento de alertas</a>
-<a href="#panel">4 · Panel de monitoreo</a>
-<a href="#mantenimiento">5 · Mantenimiento y programación de inspecciones</a>
+<a href="#inicio">1 · Inicio</a>
+<a href="#infraestructura">2 · Infraestructura</a>
+<a href="#mediciones">3 · Mediciones</a>
+<a href="#inspecciones">4 · Inspecciones visuales</a>
 </nav>
 </aside>
 <main>
-<h1>Mockups de las cinco funcionalidades</h1>
+<h1>Mockups · Corte 26/10/2026</h1>
 <p class="notice warning">Bocetos de navegación generados desde las pantallas actuales. Botones desactivados. Las fotografías son opcionales.</p>
+<section id="inicio">
+<h2>1 · Inicio</h2>
+<article>
+<h3>Resumen de infraestructura</h3>
+<small>Vista real: / · Rol DOM en este boceto.</small>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+</div>
+<header>
+<div>
+<h1>Sistema de monitoreo de puentes municipales</h1>
+<p>Infraestructura registrada, mediciones e inspecciones visuales.</p>
+</div>
+</header>
+<section class="panel">
+<h2>Infraestructura registrada</h2>
+<p>2 puentes · 6 componentes · 4 sensores · 2 mediciones almacenadas.</p>
+<div class="quicklinks">
+<a href="#infraestructura">Infraestructura →</a>
+<a href="#mediciones">Mediciones →</a>
+<a href="#inspecciones">Inspecciones visuales →</a>
+</div>
+</section>
+<div class="bridge-grid">
+<article class="panel">
+<div class="eyebrow">DEM-01</div>
+<h2>
+<a href="#infraestructura">Puente Estero Norte →</a>
+</h2>
+<p>Sector municipal · Biobío</p>
+</article>
+<article class="panel">
+<div class="eyebrow">DEM-02</div>
+<h2>
+<a href="#infraestructura">Puente Ribera Sur →</a>
+</h2>
+<p>Sector municipal · Biobío</p>
+</article>
+</div>
+</article>
+</section>
 <section id="infraestructura">
-<h2>1 · Infraestructura</h2>
+<h2>2 · Infraestructura</h2>
 <article>
 <h3>Inventario</h3>
-<small>Vista real: /bridges · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
+<small>Vista real: /bridges · Rol DOM en este boceto.</small>
 <div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
@@ -72,7 +111,7 @@
 </article>
 <article>
 <h3>Ficha, edición, componentes y sensores</h3>
-<small>Vista real: /bridges/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
+<small>Vista real: /bridges/1 · Rol DOM en este boceto.</small>
 <div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
@@ -84,9 +123,8 @@
 </div>
 </header>
 <div class="quicklinks">
-<a href="#captura">Mediciones →</a>
-<a href="#captura">Inspecciones y fotos →</a>
-<a href="#alertas">Alertas →</a>
+<a href="#mediciones">Mediciones →</a>
+<a href="#inspecciones">Inspecciones y fotos →</a>
 </div>
 <details class="panel">
 <summary>Editar datos del puente</summary>
@@ -237,11 +275,11 @@
 </div>
 </article>
 </section>
-<section id="captura">
-<h2>2 · Mediciones e inspecciones visuales</h2>
+<section id="mediciones">
+<h2>3 · Mediciones</h2>
 <article>
-<h3>Historial, consulta manual y captura automática IoT</h3>
-<small>Vista real: /measurements · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
+<h3>Historial, recepción automática IoT y consulta manual</h3>
+<small>Vista real: /measurements · Rol DOM en este boceto.</small>
 <div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
@@ -270,7 +308,7 @@
 <label>Hasta<input name="to" type="date" value=""  >
 </label>
 <button disabled>Filtrar historial</button>
-<a href="#captura">Limpiar filtros</a>
+<a href="#mediciones">Limpiar filtros</a>
 </form>
 <section class="panel table-wrap">
 <p class="muted">Hasta 500 registros por consulta. Acota el rango para consultar registros anteriores.</p>
@@ -292,7 +330,7 @@
 </td>
 <td>
 <span class="badge">valido</span>
-<small>Evaluada</small>
+<small>Medición registrada. Evaluación por reglas pendiente de implementación</small>
 </td>
 <td>2026-10-22T13:00:00+00:00</td>
 </tr>
@@ -302,7 +340,7 @@
 <td>1.0 m/s²</td>
 <td>
 <span class="badge">valido</span>
-<small>Evaluada</small>
+<small>Medición registrada. Evaluación por reglas pendiente de implementación</small>
 </td>
 <td>2026-10-22T13:00:00+00:00</td>
 </tr>
@@ -347,9 +385,12 @@
 </form>
 </details>
 </article>
+</section>
+<section id="inspecciones">
+<h2>4 · Inspecciones visuales</h2>
 <article>
 <h3>Registro visual con fotografías opcionales</h3>
-<small>Vista real: /inspections · Rol Inspector en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
+<small>Vista real: /inspections · Rol Inspector en este boceto.</small>
 <div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
@@ -361,11 +402,6 @@
 <details class="panel" open>
 <summary>Registrar inspección</summary>
 <form>
-<label>Programación que se atiende (opcional)<select name="plan_id">
-<option value="">Inspección no programada</option>
-<option value="1">#1 · Puente 2 / Componente 2 · 2026-11-23 · Inspección preventiva</option>
-</select>
-</label>
 <label>Puente<select name="bridge_id" required data-bridge>
 <option value="">Selecciona un puente</option>
 <option value="1">DEM-01 · Puente Estero Norte</option>
@@ -405,7 +441,7 @@
 </details>
 <section class="panel">
 <h2>Historial de inspecciones</h2>
-<a class="row-link" href="#captura">
+<a class="row-link" href="#inspecciones">
 <strong>Puente Estero Norte · Tablero</strong>
 <span class="badge">Media</span>
 <small>2026-10-22T13:00:00+00:00 · inspector</small>
@@ -414,8 +450,8 @@
 </section>
 </article>
 <article>
-<h3>Resultado, observaciones y fotografías</h3>
-<small>Vista real: /inspections/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
+<h3>Hallazgos y fotografías</h3>
+<small>Vista real: /inspections/1 · Rol DOM en este boceto.</small>
 <div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
 </div>
 <header>
@@ -433,386 +469,6 @@
 <div class="gallery">
 <p class="muted">Esta inspección no tiene fotografías adjuntas.</p>
 </div>
-</section>
-</article>
-</section>
-<section id="alertas">
-<h2>3 · Reglas y seguimiento de alertas</h2>
-<article>
-<h3>Umbrales académicos y comparaciones</h3>
-<small>Vista real: /rules · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
-</div>
-<header>
-<div>
-<h1>Reglas de alerta</h1>
-<p>Configura los niveles para las nuevas lecturas y condiciones visuales.</p>
-</div>
-</header>
-<section class="panel">
-<h2>Configurar nivel</h2>
-<form>
-<label>Puente<select name="bridge_id" required data-bridge>
-<option value="">Selecciona un puente</option>
-<option value="1">DEM-01 · Puente Estero Norte</option>
-<option value="2">DEM-02 · Puente Ribera Sur</option>
-</select>
-</label>
-<label>Descripción de la regla<input name="label" type="text" value="" required >
-</label>
-<label>Variable<select name="kind">
-<option value="vibracion">Aceleración vertical pico (m/s²)</option>
-<option value="inclinacion">Inclinación (°)</option>
-<option value="visual">Condición visual</option>
-</select>
-</label>
-<label>Nivel de alerta<select name="severity">
-<option>Atención</option>
-<option>Alerta</option>
-<option>Crítico</option>
-</select>
-</label>
-<label>Límite inclusivo (mayor o igual)<input name="threshold" type="number" value=""  step=any>
-</label>
-<label>Condición visual<select name="condition">
-<option>Baja</option>
-<option>Media</option>
-<option>Alta</option>
-<option>Crítica</option>
-</select>
-</label>
-<p>En inclinación se evalúa el cambio absoluto respecto de la referencia del sensor. Guardar un nivel existente crea una nueva versión y conserva el historial.</p>
-<button disabled>Guardar configuración</button>
-</form>
-</section>
-<section class="panel">
-<h2>Configuraciones vigentes e históricas</h2>
-<div class="row-link">
-<strong>Puente Estero Norte · Aceleración vertical pico</strong>
-<span class="badge">Alerta</span>
-<span>Aceleración vertical pico ≥ 1.0 m/s²</span>
-<span class="badge">Activa</span>
-<form>
-<button disabled class="quiet" name="disable" value="1">Desactivar regla</button>
-</form>
-</div>
-</section>
-</article>
-<article>
-<h3>Origen, inspección relacionada, tareas y cierre explícito</h3>
-<small>Vista real: /alerts/1 · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
-</div>
-<header>
-<div>
-<div class="eyebrow">Seguimiento / Alerta #1</div>
-<h1>Puente Estero Norte</h1>
-<p>Aceleración vertical pico · 2026-10-22T13:00:00+00:00</p>
-<span class="badge severity-alert">Alerta</span>
-<span class="badge">Activa</span>
-</div>
-</header>
-<section class="panel">
-<h2>Registro de origen</h2>
-<a href="#captura">Medición #1 · Consultar historial →</a>
-</section>
-<div class="bridge-grid">
-<section class="panel">
-<h2>Seguimiento documentado</h2>
-<p class="notice warning">Sin inspección relacionada con esta alerta.</p>
-<p>Sin notas de seguimiento.</p>
-<form>
-<label>Nota / justificación<textarea name="note" required>
-</textarea>
-</label>
-<label>Relacionar inspección<select name="inspection_id">
-<option value="">Sin relación nueva</option>
-<option value="1">#1 · Media · 2026-10-22T13:00:00+00:00</option>
-</select>
-</label>
-<label>Estado<select name="status">
-<option selected>Activa</option>
-<option >En atención</option>
-<option >Resuelta</option>
-</select>
-</label>
-<button disabled>Guardar seguimiento</button>
-</form>
-</section>
-<section class="panel">
-<h2>Mantenimiento relacionado</h2>
-<div class="timeline">
-<strong>#1 · Revisión preventiva</strong>
-<p>mantencion · 2026-11-20</p>
-<span class="badge">Pendiente</span>
-</div>
-<a href="#mantenimiento">Planificar actividad →</a>
-<p class="muted">Crear o completar una actividad no cierra automáticamente la alerta.</p>
-</section>
-</div>
-</article>
-</section>
-<section id="panel">
-<h2>4 · Panel de monitoreo</h2>
-<article>
-<h3>Sensores, alertas, pendientes, programación y últimas inspecciones</h3>
-<small>Vista real: / · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
-</div>
-<header>
-<div>
-<div class="eyebrow">Red municipal / Vista general</div>
-<h1>Panel de monitoreo</h1>
-<p>El estado de la información, puente por puente.</p>
-</div>
-<a class="button secondary" href="#captura">Registrar inspección ↗</a>
-</header>
-
-<div class="bridge-grid">
-<article class="bridge-card">
-<div class="card-top">
-<span class="eyebrow">DEM-01</span>
-<span class="badge">Criticidad Alta</span>
-</div>
-<div class="bridge-drawing" aria-hidden="true">
-<svg viewBox="0 0 500 100">
-<path d="M0 85 Q90 65 160 85 T320 85 T500 85 M15 50 H485 M40 45 Q125 -28 210 45 M250 45 Q335 -28 420 45 M40 45 V70 M210 45 V70 M250 45 V70 M420 45 V70 M80 20 V45 M120 10 V45 M160 20 V45 M290 20 V45 M330 10 V45 M370 20 V45"/>
-</svg>
-</div>
-<h2>
-<a href="#infraestructura">Puente Estero Norte ↗</a>
-</h2>
-<p>Sector municipal · Biobío</p>
-<div class="status-line">
-<strong class="danger">1 alerta(s) abierta(s)</strong>
-<span>Revisar disponibilidad de datos</span>
-</div>
-<div class="readings">
-<div>
-<small>Inclinación · DEM-01-INCLINACION</small>
-<strong>0.229 <em>°</em>
-</strong>
-<small>Lectura: 0.229 °</small>
-<small>Referencia: 0.0 ° · Cambio absoluto: 0.229 °</small>
-<small>2026-10-22T13:00:00+00:00</small>
-</div>
-<div>
-<small>Aceleración vertical pico · DEM-01-VIBRACION</small>
-<strong>1.0 <em>m/s²</em>
-</strong>
-<small>2026-10-22T13:00:00+00:00</small>
-</div>
-</div>
-<a href="#captura">Historial de mediciones →</a> <a href="#captura">Inspecciones →</a>
-</article>
-<article class="bridge-card">
-<div class="card-top">
-<span class="eyebrow">DEM-02</span>
-<span class="badge">Criticidad Alta</span>
-</div>
-<div class="bridge-drawing" aria-hidden="true">
-<svg viewBox="0 0 500 100">
-<path d="M0 85 Q90 65 160 85 T320 85 T500 85 M15 50 H485 M40 45 Q125 -28 210 45 M250 45 Q335 -28 420 45 M40 45 V70 M210 45 V70 M250 45 V70 M420 45 V70 M80 20 V45 M120 10 V45 M160 20 V45 M290 20 V45 M330 10 V45 M370 20 V45"/>
-</svg>
-</div>
-<h2>
-<a href="#infraestructura">Puente Ribera Sur ↗</a>
-</h2>
-<p>Sector municipal · Biobío</p>
-<div class="status-line">
-<strong>Sin alertas abiertas</strong>
-<span>Revisar disponibilidad de datos</span>
-</div>
-<div class="readings">
-<div>
-<small>Inclinación · DEM-02-INCLINACION</small>
-<strong class="missing">Sin datos</strong>
-</div>
-<div>
-<small>Aceleración vertical pico · DEM-02-VIBRACION</small>
-<strong class="missing">Sin datos</strong>
-</div>
-</div>
-<a href="#captura">Historial de mediciones →</a> <a href="#captura">Inspecciones →</a>
-</article>
-</div>
-<section class="panel">
-<div class="section-heading">
-<h2>Alertas activas y en atención</h2>
-<a href="#alertas">Ver historial →</a>
-</div>
-<a class="row-link" href="#alertas">
-<strong>Puente Estero Norte · Aceleración vertical pico</strong>
-<span class="badge severity-alert">Alerta</span>
-<span class="badge">Activa</span>
-<small>2026-10-22T13:00:00+00:00</small>
-</a>
-</section>
-<div class="bridge-grid">
-<section class="panel">
-<h2>Actividades de mantenimiento pendientes</h2>
-<a class="row-link" href="#mantenimiento">Puente Estero Norte · Revisión preventiva<small>2026-11-20 · Pendiente</small>
-</a>
-</section>
-<section class="panel">
-<h2>Próximas inspecciones programadas</h2>
-<a href="#mantenimiento">Ver programación →</a>
-<p>Puente Ribera Sur · 2026-11-23 · inspector<small>Inspección preventiva</small>
-</p>
-</section>
-</div>
-<section class="panel">
-<h2>Condiciones visuales · últimas inspecciones</h2>
-<p>Registros de inspectores; distintos de las mediciones de sensores.</p>
-<a class="row-link" href="#captura">Puente Estero Norte · Tablero · Media<small>2026-10-22T13:00:00+00:00</small>
-<span>Revisar apoyo del tablero.</span>
-<strong> Ver fotografías y observaciones →</strong>
-</a>
-</section>
-</article>
-</section>
-<section id="mantenimiento">
-<h2>5 · Mantenimiento y programación de inspecciones</h2>
-<article>
-<h3>Asignación, estados y filtro por puente</h3>
-<small>Vista real: /maintenance · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
-</div>
-<header>
-<div>
-<h1>Mantenimiento</h1>
-<p>Planificación y seguimiento de actividades.</p>
-</div>
-</header>
-<form>
-<label>Filtrar por puente<select name="bridge_id">
-<option value="">Todos los puentes</option>
-<option value="1" >Puente Estero Norte</option>
-<option value="2" >Puente Ribera Sur</option>
-</select>
-</label>
-<button disabled>Filtrar actividades</button>
-</form>
-<details class="panel">
-<summary>Planificar actividad</summary>
-<form>
-<label>Puente<select name="bridge_id" required data-bridge>
-<option value="">Selecciona un puente</option>
-<option value="1">DEM-01 · Puente Estero Norte</option>
-<option value="2">DEM-02 · Puente Ribera Sur</option>
-</select>
-</label>
-<label>Componente<select name="component_id" data-components >
-<option value="">Todo el puente</option>
-<option value="1" data-bridge="1">Tablero · Puente Estero Norte</option>
-<option value="2" data-bridge="2">Tablero · Puente Ribera Sur</option>
-<option value="3" data-bridge="1">Viga · Puente Estero Norte</option>
-<option value="4" data-bridge="1">Estribo · Puente Estero Norte</option>
-<option value="5" data-bridge="2">Viga · Puente Ribera Sur</option>
-<option value="6" data-bridge="2">Estribo · Puente Ribera Sur</option>
-</select>
-</label>
-<label>Alerta relacionada<select name="alert_id">
-<option value="">Sin alerta asociada</option>
-<option value="1">#1 · Puente Estero Norte · Activa</option>
-</select>
-</label>
-<label>Responsable<select name="assignee_id" required>
-<option value="3">mantencion</option>
-</select>
-</label>
-<label>Fecha planificada<input name="planned_date" type="date" value="" required >
-</label>
-<label class="wide">Descripción<textarea name="description" required>
-</textarea>
-</label>
-<button disabled>Crear actividad</button>
-</form>
-</details>
-<div class="bridge-grid">
-<article class="panel">
-<div class="eyebrow">Actividad #1 · 2026-11-20</div>
-<h2>Puente Estero Norte</h2>
-<p>Tablero</p>
-<p class="preserve">Revisión preventiva</p>
-<span class="badge">Pendiente</span>
-<p>Responsable: mantencion</p>
-<a href="#alertas">Seguimiento de alerta #1 →</a>
-<details>
-<summary>Actualizar actividad</summary>
-<form>
-<input type="hidden" name="id" value="1">
-<label>Descripción<input name="description" type="text" value="Revisión preventiva" required >
-</label>
-<label>Fecha planificada<input name="planned_date" type="date" value="2026-11-20" required >
-</label>
-<label>Responsable<select name="assignee_id">
-<option value="3" selected>mantencion</option>
-</select>
-</label>
-<label>Estado<select name="status">
-<option selected>Pendiente</option>
-<option >En ejecución</option>
-<option >Completada</option>
-</select>
-</label>
-<button disabled>Guardar actividad</button>
-</form>
-</details>
-</article>
-</div>
-</article>
-<article>
-<h3>DOM programa; inspector asignado registra resultado</h3>
-<small>Vista real: /inspection-plans · Rol DOM en este boceto. El inspector registra el resultado desde Inspecciones visuales, seleccionando su programación.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
-</div>
-<header>
-<div>
-<h1>Inspecciones programadas</h1>
-<p>DOM programa; el inspector asignado registra el resultado.</p>
-</div>
-</header>
-<section class="panel">
-<h2>Programar inspección preventiva</h2>
-<form>
-<label>Puente<select name="bridge_id" required data-bridge>
-<option value="">Selecciona un puente</option>
-<option value="1">DEM-01 · Puente Estero Norte</option>
-<option value="2">DEM-02 · Puente Ribera Sur</option>
-</select>
-</label>
-<label>Componente<select name="component_id" data-components required>
-<option value="">Selecciona un componente</option>
-<option value="1" data-bridge="1">Tablero</option>
-<option value="2" data-bridge="2">Tablero</option>
-<option value="3" data-bridge="1">Viga</option>
-<option value="4" data-bridge="1">Estribo</option>
-<option value="5" data-bridge="2">Viga</option>
-<option value="6" data-bridge="2">Estribo</option>
-</select>
-</label>
-<label>Inspector responsable<select name="inspector_id" required>
-<option value="2">inspector</option>
-</select>
-</label>
-<label>Fecha programada<input name="planned_date" type="date" value="" required >
-</label>
-<label>Descripción<textarea name="description" required>
-</textarea>
-</label>
-<button disabled>Programar inspección</button>
-</form>
-</section>
-<section class="panel">
-<article class="row-link">
-<h2>Puente Ribera Sur · Tablero</h2>
-<p>2026-11-23 · inspector · Inspección preventiva</p>
-<span class="badge">Programada</span>
-<form>
-<button disabled name="cancel" value="1" class="quiet">Cancelar programación</button>
-</form>
-</article>
 </section>
 </article>
 </section>

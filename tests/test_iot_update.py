@@ -104,7 +104,7 @@ class IotUpdateTests(SystemTests):
                 attrs=dict(attrs)
                 if tag=='section' and 'id' in attrs:self.sections.append(attrs['id'])
                 if tag=='form':self.routes.append(attrs.get('action'))
-        html=Path('docs/mockups.html').read_text(encoding='utf-8');doc=Document();doc.feed(html)
+        html=Path('docs/mockups-full.html').read_text(encoding='utf-8');doc=Document();doc.feed(html)
         self.assertEqual(doc.sections,['infraestructura','captura','alertas','panel','mantenimiento'])
         for label in ['Programar inspección preventiva','Programación que se atiende','Actividades de mantenimiento pendientes','Próximas inspecciones programadas','Condiciones visuales','Ubicación específica','Cambio absoluto','Consultar proveedor']:
             self.assertIn(label,html)

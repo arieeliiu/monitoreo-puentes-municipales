@@ -1,5 +1,36 @@
 # Monitoreo de puentes municipales
 
+## Versión que se presenta al 26/10/2026
+
+El inicio predeterminado usa `PROJECT_STAGE=cutoff_2026_10_26`. Muestra exactamente cuatro opciones: **Inicio, Infraestructura, Mediciones e Inspecciones visuales**. El inicio resume puentes, componentes, sensores y mediciones, con accesos a esas funciones. Se conservan los tres roles, inicio/cierre de sesión y permisos.
+
+En este modo las rutas `/rules`, `/alerts`, `/alerts/<id>`, `/maintenance` y `/inspection-plans` devuelven **404** para GET y POST, antes de acceder a SQLite o procesar CSRF. No aparecen sus enlaces ni el selector de programación de inspecciones. Un `plan_id` no vacío enviado a Inspecciones se rechaza sin crear registros/fotos ni completar programaciones. El historial de operaciones sigue disponible internamente para DOM en `/audit`.
+
+Las mediciones manuales, la API, la consulta del proveedor y el worker mantienen validaciones, unidades EV2, referencia/variación, deduplicación y auditoría. Las nuevas mediciones guardan **«Medición registrada. Evaluación por reglas pendiente de implementación»**. Se conserva su estado de recepción válido/inválido/no disponible. No consultan reglas operativas ni crean alertas; las inspecciones tampoco activan el motor. Las evaluaciones de registros anteriores se conservan como evidencia histórica.
+
+### Alternar con el modo completo
+
+```powershell
+# Predeterminado: presentación del corte (servidor y worker)
+$env:PROJECT_STAGE='cutoff_2026_10_26'
+.\start.ps1
+# En otra terminal, con la misma variable de etapa:
+$env:PROJECT_STAGE='cutoff_2026_10_26'
+.\start-iot.ps1 -Interval 60
+
+# Para recuperar los módulos completos, detener servidor/worker y reiniciar ambos:
+$env:PROJECT_STAGE='full'
+.\start.ps1
+# En la terminal del worker:
+$env:PROJECT_STAGE='full'
+.\start-iot.ps1 -Interval 60
+```
+
+`full` recupera el panel, reglas, alertas, mantenimiento, programación y evaluación original EV2. El modo se lee al crear cada proceso; usar la misma etapa en web y worker y reiniciarlos al alternar. No se crea otra base ni se ejecuta una migración para cambiar de modo. No se borran o modifican reglas, alertas, fotos, umbrales ni históricos al alternar. Registros capturados con evaluación pendiente no se reevaluan automáticamente al volver a `full`. Un nombre de etapa inválido impide iniciar para evitar activar funciones por error.
+
+Las secciones técnicas y módulos posteriores de este README describen las capacidades conservadas del **modo completo**; no implican que estén disponibles en la presentación del corte. [Mockups del corte](docs/mockups.html), [mockups completos](docs/mockups-full.html).
+
+
 Aplicación Flask + SQLite con cinco módulos y tres roles: DOM, inspector municipal y mantención. Esta versión aplica el **Enunciado del Alcance EV2 actualizado del 22/10/2026**, que prevalece sobre especificaciones anteriores.
 
 ## Instalación nueva (PowerShell, Python 3.12+)
@@ -108,6 +139,7 @@ Interfaz: solo una indicación discreta «Entorno de demostración» por pantall
 # Regresión JavaScript: Node.js 18+ (solo para pruebas; no requerido por la aplicación)
 node --test tests/frontend.test.cjs
 .\.venv\Scripts\python.exe tools/build_mockups.py
+.\.venv\Scripts\python.exe tools/build_mockups.py --stage full
 ```
 
 Los mockups se generan con plantillas reales y base temporal; no escriben en el piloto. Ver [arquitectura](docs/ARQUITECTURA.md), [matriz individual](docs/CUMPLIMIENTO.md), [verificación](docs/VERIFICACION.md) y [diseño](docs/DISENO.md).

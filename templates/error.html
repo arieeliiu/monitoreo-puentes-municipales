@@ -1,1 +1,1 @@
-{% extends 'base.html' %}{% block content %}<section class="panel"><h1>{{ error.code }}</h1><p>{{ error.description }}</p><a href="/">Volver al panel →</a></section>{% endblock %}
+{% extends 'base.html' %}{% block content %}<section class="panel"><h1>{{ error.code }}</h1><p>{{ error.description }}</p><a href="/">{{ 'Volver al inicio' if cutoff else 'Volver al panel' }} →</a></section>{% endblock %}

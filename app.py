@@ -16,6 +16,9 @@ from PIL import Image, UnidentifiedImageError
 KINDS = {'vibracion': 'm/s²', 'inclinacion': '°'}
 CONDITIONS = ['Baja','Media','Alta','Crítica']
 SEVERITIES = ['Atención','Alerta','Crítico']
+CUTOFF_STAGE = 'cutoff_2026_10_26'
+PROJECT_STAGES = (CUTOFF_STAGE, 'full')
+PENDING_EVALUATION = 'Medición registrada. Evaluación por reglas pendiente de implementación'
 LABELS = {'vibracion':'Aceleración vertical pico','inclinacion':'Inclinación','visual':'Condición visual'}
 def now(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
@@ -25,7 +28,10 @@ def create_app(config=None):
     key_file = Path(app.instance_path) / 'session.key'
     if not key_file.exists(): key_file.write_text(secrets.token_hex(32))
     app.config.update(SECRET_KEY=os.environ.get('SECRET_KEY') or key_file.read_text(), DATABASE=str(Path(app.instance_path)/'puentes.sqlite'), UPLOAD_FOLDER=str(Path(app.instance_path)/'photos'), MAX_CONTENT_LENGTH=20*1024*1024, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax', SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE')=='1', IOT_API_KEY=os.environ.get('IOT_API_KEY'), DEMO_ENABLED=False, PROVIDER_URL=os.environ.get('PROVIDER_URL','http://127.0.0.1:5100/measurements'), PROVIDER_TOKEN=os.environ.get('PROVIDER_TOKEN',''))
+    app.config['PROJECT_STAGE']=os.environ.get('PROJECT_STAGE',CUTOFF_STAGE)
     if config: app.config.update(config)
+    if app.config['PROJECT_STAGE'] not in PROJECT_STAGES:
+        raise ValueError('PROJECT_STAGE debe ser cutoff_2026_10_26 o full.')
     Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
 
     def db():
@@ -74,6 +80,15 @@ def create_app(config=None):
             return inner
         return decorator
 
+    def cutoff_mode():
+        return app.config['PROJECT_STAGE']==CUTOFF_STAGE
+
+    @app.before_request
+    def stage_access():
+        # Antes de sesión, CSRF o acceso a SQLite: no hay efectos en rutas futuras.
+        if cutoff_mode() and request.path.split('/')[1] in {'rules','alerts','maintenance','inspection-plans'}:
+            abort(404)
+
     @app.teardown_appcontext
     def close(error):
         connection=g.pop('db',None)
@@ -92,7 +107,7 @@ def create_app(config=None):
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS)
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode())
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -116,6 +131,9 @@ def create_app(config=None):
     @app.get('/')
     @access()
     def dashboard():
+        if cutoff_mode():
+            summary={table:one(f'SELECT count(*) AS n FROM {table}')["n"] for table in ('bridges','components','sensors','measurements')}
+            return render_template('dashboard.html',summary=summary,bridges=rows('SELECT * FROM bridges ORDER BY code'))
         bridges=rows('SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!=\'Resuelta\') AS active FROM bridges b ORDER BY b.code')
         latest=rows('SELECT m.*, s.code,s.kind,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) ORDER BY s.code')
         active=rows('SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!=\'Resuelta\' ORDER BY a.id DESC LIMIT 10')
@@ -184,6 +202,7 @@ def create_app(config=None):
         return render_template('bridge.html',b=b,components=rows('SELECT * FROM components WHERE bridge_id=?',(bid,)),sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
 
     def evaluate(kind,bridge_id,record_id,value,simulated):
+        if cutoff_mode(): return False
         applicable=rows("SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(bridge_id,kind))
         matches=[r for r in applicable if (kind=='visual' and value==r['condition']) or (kind!='visual' and r['unit']==KINDS[kind] and value>=r['threshold'])]
         if matches:
@@ -225,12 +244,15 @@ def create_app(config=None):
         variation=float(abs(Decimal(str(value))-Decimal(str(reference)))) if value is not None and reference is not None else None
         if variation is not None and not math.isfinite(variation): raise ValueError('La variación calculada debe ser finita.')
         mid=insert('measurements',specification='EV2',reference_value=reference,variation=variation,sensor_id=s['id'],value=value,unit=KINDS[s['kind']],measured_at=measured_at,status=status,simulated=int(simulated),external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
-        applicable=bool(one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(s['bridge_id'],s['kind'])))
-        if status=='valido' and (s['kind']!='inclinacion' or reference is not None): evaluate(s['kind'],s['bridge_id'],mid,variation if s['kind']=='inclinacion' else value,simulated)
-        evaluation=('Evaluada' if status=='valido' else 'No evaluada: dato '+status) if applicable else 'Sin regla aplicable'
-        if s['kind']=='inclinacion' and reference is None: evaluation='Falta referencia del sensor: medición no evaluable'
+        if cutoff_mode():
+            evaluation=PENDING_EVALUATION
+        else:
+            applicable=bool(one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(s['bridge_id'],s['kind'])))
+            if status=='valido' and (s['kind']!='inclinacion' or reference is not None): evaluate(s['kind'],s['bridge_id'],mid,variation if s['kind']=='inclinacion' else value,simulated)
+            evaluation=('Evaluada' if status=='valido' else 'No evaluada: dato '+status) if applicable else 'Sin regla aplicable'
+            if s['kind']=='inclinacion' and reference is None: evaluation='Falta referencia del sensor: medición no evaluable'
+            if not applicable: audit('Sin regla aplicable','measurements',mid,s['kind'])
         db().execute('UPDATE measurements SET evaluation=? WHERE id=?',(evaluation,mid))
-        if not applicable: audit('Sin regla aplicable','measurements',mid,s['kind'])
         audit('Recibir medición simulada' if simulated else 'Recibir medición','measurements',mid)
         return mid
 
@@ -281,6 +303,8 @@ def create_app(config=None):
             if g.user['role'] not in ['DOM','Inspector']: abort(403)
             saved=[]
             try:
+                if cutoff_mode() and request.form.get('plan_id'):
+                    raise ValueError('La programación de inspecciones no está disponible en esta etapa.')
                 required(request.form,'bridge_id','component_id','inspected_at','condition','description')
                 belongs(request.form['component_id'],request.form['bridge_id'])
                 if request.form['condition'] not in CONDITIONS: raise ValueError('Condición inválida.')
@@ -294,7 +318,7 @@ def create_app(config=None):
                         image.load(); images.append(image.convert('RGB'))
                     except (UnidentifiedImageError,OSError,Image.DecompressionBombError): raise ValueError('El archivo no es una fotografía JPEG o PNG válida.')
                 iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=timestamp(request.form['inspected_at']),inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
-                if request.form.get('plan_id'):
+                if not cutoff_mode() and request.form.get('plan_id'):
                     plan=get_id('inspection_plans',request.form['plan_id'])
                     if g.user['role']!='Inspector' or plan['inspector_id']!=g.user['id']: abort(403)
                     if plan['status']!='Programada' or plan['bridge_id']!=int(request.form['bridge_id']) or plan['component_id']!=int(request.form['component_id']): raise ValueError('La programación no corresponde al puente/componente o ya fue atendida.')
@@ -304,7 +328,7 @@ def create_app(config=None):
                     filename=uuid4().hex+'.jpg'; path=Path(app.config['UPLOAD_FOLDER'])/filename
                     saved.append(path); image.save(path,'JPEG',quality=88)
                     insert('photos',inspection_id=iid,filename=filename)
-                evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
+                if not cutoff_mode(): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
                 audit('Registrar inspección','inspections',iid); db().commit()
                 return redirect(url_for('inspection',iid=iid))
             except (ValueError,sqlite3.IntegrityError) as e:
@@ -314,7 +338,7 @@ def create_app(config=None):
         query='SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id'
         args=()
         if request.args.get('bridge_id'): query+=' WHERE i.bridge_id=?'; args=(request.args['bridge_id'],)
-        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
+        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=[] if cutoff_mode() else rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
     @app.get('/inspections/<int:iid>')
     @access()
     def inspection(iid):

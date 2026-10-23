@@ -1,5 +1,12 @@
 # Diseño funcional final
 
+## Pantallas de presentación del corte 26/10/2026
+
+La interfaz predeterminada conserva los estilos existentes y ofrece Inicio (resumen de infraestructura), Infraestructura (fichas y formularios), Mediciones (historial/recepción) e Inspecciones visuales (hallazgos/fotos). Los tres roles ven esas cuatro opciones; las acciones respetan sus permisos. No hay indicadores de alertas, tareas o programación en Inicio ni accesos a esas funciones en fichas. El Inspector registra inspecciones sin selector de programación.
+
+`docs/mockups.html` refleja esas cuatro opciones y los flujos disponibles. `docs/mockups-full.html` conserva los cinco módulos del modo `full`, descritos en los apartados siguientes. Ambos se generan desde plantillas reales con datos temporales; no cambian la base del usuario.
+
+
 Interfaz municipal: navegación lateral, azul río/estructura, tipografía clara, formularios con validación y una indicación discreta «Entorno de demostración». Sin HU/EDT ni fechas académicas en pantallas. Los datos y supuestos se explican en README, no mediante etiquetas repetidas por registro.
 
 1. Infraestructura → ficha → Tablero/Viga/Estribo → sensores. DOM configura ubicación, variable y referencia de inclinación; códigos únicos y relaciones validadas.
