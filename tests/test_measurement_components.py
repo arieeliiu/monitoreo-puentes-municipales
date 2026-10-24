@@ -75,4 +75,21 @@ class MeasurementComponentTests(unittest.TestCase):
             self.assertNotIn('data-measurement-bridge',self.client.get('/measurements').text)
         for route in ('/rules','/alerts','/maintenance','/inspection-plans'):self.assertEqual(self.client.get(route).status_code,404)
 
+    def test_dom_actions_before_history_closed_form_and_role_restrictions(self):
+        html=self.client.get('/measurements').text
+        self.assertLess(html.index('Registrar medición manual'),html.index('Consultar proveedor'))
+        self.assertLess(html.index('Consultar proveedor'),html.index('history-filters'))
+        self.assertLess(html.index('history-filters'),html.index('<tbody>'))
+        self.assertEqual(html.count('action="/provider/pull"'),1)
+        self.assertEqual(html.count('name="sensor_code"'),1)
+        self.assertIn('id="manual-measurement" hidden',html)
+        self.assertIn('aria-expanded="false"',html)
+        for role in ('inspector','worker'):
+            self.login(role);html=self.client.get('/measurements').text
+            self.assertNotIn('Registrar medición manual',html)
+            self.assertNotIn('Consultar proveedor',html)
+            self.assertIn('history-filters',html)
+            self.assertIn('<tbody>',html)
+            self.assertEqual(self.post('/provider/pull').status_code,403)
+
 def load_tests(loader,standard_tests,pattern):return loader.loadTestsFromTestCase(MeasurementComponentTests)

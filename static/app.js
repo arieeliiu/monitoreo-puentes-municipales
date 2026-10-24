@@ -37,6 +37,12 @@ document.querySelectorAll('form').forEach(form=>{
 // Abrir el calendario desde cualquier punto del campo, sin bloquear la escritura.
 document.addEventListener('click',event=>{
   const field=event.target;
+  if(field.matches?.('[data-manual-toggle]')){
+    const panel=document.getElementById(field.getAttribute('aria-controls'));
+    panel.hidden=!panel.hidden;
+    field.setAttribute('aria-expanded',String(!panel.hidden));
+    return;
+  }
   if(!field.matches?.('input[type="date"]') || field.disabled || field.readOnly || typeof field.showPicker!=='function')return;
   try{field.showPicker();}catch{
     // Si el navegador no permite abrirlo, conservar su control nativo sin cambios.

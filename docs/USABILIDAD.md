@@ -28,3 +28,10 @@ El registro manual usa Puente → Componente estructural → Sensor y envía el 
 Las regresiones están en `tests/test_measurement_components.py`, `tests/frontend.test.cjs` y un caso PostgreSQL con el rol/esquema aislado existentes en `tests/test_cloud.py`. Cubren componentes de ambos puentes, códigos de sensor ajenos a los prefijos del piloto, selecciones incompatibles, filtros persistidos, consulta sin puente, estados vacíos, registro manual y permisos.
 
 Resultado de esta ampliación: 84 pruebas Python (nueve PostgreSQL aisladas) y diez JavaScript aprobadas. En navegador local se comprobó la cadena DEM-02 → Tablero → inclinación, la unidad automática y el guardado en la base aislada, así como el filtro por componente y el historial vacío.
+
+
+## Acciones superiores de DOM en Mediciones
+
+Registrar medición manual y Consultar proveedor se muestran inmediatamente bajo el encabezado, antes de filtros e historial. El botón principal abre/cierra el único formulario existente, inicialmente oculto, con aria-expanded y aria-controls. El botón secundario conserva el POST a /provider/pull y CSRF. Inspector y Mantención conservan únicamente filtros, historial y detalles. No cambian recepción, proveedor, periodicidad, permisos, etapa ni datos. En navegador local se verificaron apertura/cierre, lectura válida guardada, vibración negativa rechazada y consulta simulada con cuatro lecturas recibidas.
+
+Verificación de la reorganización: 85 pruebas Python y diez JavaScript aprobadas, incluidas nueve PostgreSQL aisladas y la regresión de orden/visibilidad/CSRF/permisos existentes.
