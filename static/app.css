@@ -3,3 +3,5 @@
 .severity-attention{background:#fff2c9;color:#735100}.severity-alert{background:#ffe0bc;color:#853d00}.severity-critical{background:#9f2626;color:#fff}
 
 .history-filters{padding:12px 18px}.history-filters summary{width:fit-content;cursor:pointer;color:var(--accent,#24616b)}.history-filters summary small{display:inline;font-weight:normal}.history-filters[open] summary{margin-bottom:16px}
+
+.form-grid>label{align-self:start}

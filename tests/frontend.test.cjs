@@ -27,7 +27,7 @@ function run(nodes) {
        match[2] === 'data-history-sensors' ? n.historySensors :
        match[2] === 'name' ? n.name === match[3] : false)) || null;
   }};
-  runInNewContext(script, {document: {querySelectorAll: () => [form]}});
+  runInNewContext(script, {document: {querySelectorAll: () => [form], addEventListener() {}}});
 }
 
 test('sensor form without bridge selector keeps every component available', () => {
