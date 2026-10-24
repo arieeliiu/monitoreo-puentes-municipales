@@ -189,6 +189,17 @@ class PostgresTests(SystemTests):
         from tests.test_usability import UsabilityTests
         UsabilityTests.test_split_form_dates_photos_permissions_and_cutoff(self)
 
+    def test_postgres_component_history_and_manual(self):
+        from tests.test_measurement_components import MeasurementComponentTests
+        self.pilot=lambda:MeasurementComponentTests.pilot(self)
+        self.data=lambda **kw:MeasurementComponentTests.data(self,**kw)
+        MeasurementComponentTests.test_combined_history_filters_and_empty_component(self)
+        # Consulta y alta/rechazo comparten el mismo adaptador; no toca producción.
+        before=self.count('measurements')
+        self.post('/measurements',self.data(component_id='2'))
+        self.assertEqual(self.count('measurements'),before)
+        self.post('/measurements',self.data());self.assertEqual(self.count('measurements'),before+1)
+
 
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

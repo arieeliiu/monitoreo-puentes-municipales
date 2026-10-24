@@ -17,3 +17,14 @@ En navegador local aislado se verificaron login, panel cerrado/apertura/cierre, 
 Los datos, contraseñas, sensores, unidades, umbrales y secretos existentes se conservan. Continúa `cutoff_2026_10_26` con Inicio, Infraestructura, Mediciones e Inspecciones visuales; las rutas futuras permanecen bloqueadas. No se han modificado documentos académicos.
 
 Resultado: 80 pruebas Python (ocho PostgreSQL aisladas) y ocho JavaScript aprobadas. La carga real de PNG de 5.9 MB con fecha/hora separadas pasó en el bucket privado de pruebas, incluida recodificación, descarga firmada y rechazo de Mantención.
+
+
+## Componente estructural en Mediciones
+
+El panel de filtros añade `component_id` entre puente y sensor. Todos los componentes proceden de `components`; cada opción conserva su `bridge_id`. Los sensores conservan `component_id` y el puente obtenido por JOIN. JavaScript reconstruye opciones, reinicia selecciones incompatibles y permite consultar toda la infraestructura sin puente. Un componente sin lecturas conserva el estado vacío existente. La consulta SQL combina las restricciones de puente/componente/sensor y el historial muestra el nombre del componente junto al sensor.
+
+El registro manual usa Puente → Componente estructural → Sensor y envía el `sensor_code` original. El servidor verifica la pertenencia de componente al puente y sensor al componente antes de recibir la lectura. Los POST anteriores sin selectores de contexto conservan el contrato de sensor_code; cuando se envía cualquiera de esos selectores ambos son obligatorios y deben coincidir. API y proveedor IoT conservan sus contratos y validaciones. No hay cambios de esquema, datos, sensores, umbrales, unidades ni asociaciones; Inspecciones visuales conserva su selector.
+
+Las regresiones están en `tests/test_measurement_components.py`, `tests/frontend.test.cjs` y un caso PostgreSQL con el rol/esquema aislado existentes en `tests/test_cloud.py`. Cubren componentes de ambos puentes, códigos de sensor ajenos a los prefijos del piloto, selecciones incompatibles, filtros persistidos, consulta sin puente, estados vacíos, registro manual y permisos.
+
+Resultado de esta ampliación: 84 pruebas Python (nueve PostgreSQL aisladas) y diez JavaScript aprobadas. En navegador local se comprobó la cadena DEM-02 → Tablero → inclinación, la unidad automática y el guardado en la base aislada, así como el filtro por componente y el historial vacío.

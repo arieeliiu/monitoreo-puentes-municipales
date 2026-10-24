@@ -285,19 +285,25 @@ def create_app(config=None):
             if g.user['role']!='DOM': abort(403)
             try:
                 data=request.form.to_dict()
+                if 'bridge_id' in data or 'component_id' in data:
+                    required(data,'bridge_id','component_id','sensor_code')
+                    component=belongs(data['component_id'],data['bridge_id'])
+                    sensor=one('SELECT component_id FROM sensors WHERE code=?',(data['sensor_code'],))
+                    if not sensor or sensor['component_id']!=component['id']:
+                        raise ValueError('El sensor no pertenece al componente estructural seleccionado.')
                 data['measured_at']=form_timestamp(data,'measured',timestamp)
                 mid=receive(data,True); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
                 return redirect(url_for('measurements'))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El identificador externo ya se recibió.','error')
         filters=[]; args=[]
-        for field,column in [('bridge_id','c.bridge_id'),('sensor_id','s.id')]:
+        for field,column in [('bridge_id','c.bridge_id'),('component_id','c.id'),('sensor_id','s.id')]:
             if request.args.get(field): filters.append(column+'=?'); args.append(request.args[field])
         for field,op in [('from','>='),('to','<=')]:
             if request.args.get(field): filters.append(f'substr(m.measured_at,1,10){op}?'); args.append(request.args[field])
         where=' WHERE '+' AND '.join(filters) if filters else ''
-        data=rows('SELECT m.*,s.code,s.kind,b.name FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT 500',args)
-        return render_template('measurements.html',measurements=data,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'))
+        data=rows('SELECT m.*,s.code,s.kind,b.name,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT 500',args)
+        return render_template('measurements.html',measurements=data,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.code AS bridge_code FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY c.bridge_id,c.id'))
 
     @app.post('/api/v1/measurements')
     def iot():
