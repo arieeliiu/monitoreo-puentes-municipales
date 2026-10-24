@@ -121,3 +121,16 @@ Los valores son parámetros asumidos académicamente conforme a EV2; no se solic
 | HU-08: automatización y recuperación | `test_real_provider_and_periodic_worker_restart_recovery`: proveedor y worker en procesos separados, intervalo real de 1 s, ambos puentes, deduplicación, desconexión/reinicio, alertas EV2 y consulta manual. |
 
 Resultado conjunto: 51 pruebas Python y 3 JavaScript aprobadas. HU-09 y la integración con hardware real conservan el estado previamente documentado.
+
+
+## Evidencia de persistencia y publicación en nube
+
+| Alcance técnico | Evidencia |
+|---|---|
+| Persistencia sin disco efímero | `database.py`, `photo_storage.py`, `sql/postgres.sql`: PostgreSQL privado, rol limitado, RLS, TLS verificado y buckets privados. SQLite conservado para local. |
+| Conservación de datos | Importador transaccional con respaldo y comparación por fila; contraseñas/IDs preservados. Prueba PostgreSQL con fotos y rechazo de destino diferente. |
+| Fotografías y permisos | Cargas directas firmadas, validación del servidor y descarga de 60 s después de autorizar; pruebas DOM/Inspector/Mantención y carga real de 5.9 MB en entorno de prueba. |
+| HU-08 en publicación | Cron de Supabase cada minuto, endpoint protegido, simulación de ambos puentes y deduplicación compartida con consulta manual. Corte conserva evaluación pendiente. |
+| Regresión | 74 pruebas Python y siete JavaScript aprobadas, incluidas seis PostgreSQL aisladas. Acceso público HTTPS comprobado con las tres cuentas. |
+
+Esta ampliación de alojamiento no cambia los criterios oficiales, parámetros EV2 ni el estado de HU-09. Operación y límites: [SUPABASE_VERCEL.md](SUPABASE_VERCEL.md).

@@ -1,3 +1,5 @@
+La publicación vigente e independiente del ordenador está en [Vercel con Supabase](SUPABASE_VERCEL.md). El túnel siguiente es una alternativa local temporal; su base SQLite no se sincroniza con la nube.
+
 # Publicación temporal con Cloudflare Quick Tunnel
 
 Desde la carpeta del proyecto en PowerShell:

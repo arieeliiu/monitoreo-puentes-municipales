@@ -1,10 +1,16 @@
 # Monitoreo de puentes municipales
 
+## Aplicación publicada
+
+Acceso: **https://monitoreo-puentes-municipales.vercel.app**. Funciona en Vercel con PostgreSQL y fotografías privadas en Supabase, sin mantener encendido el equipo local. Conserva las tres cuentas existentes y el corte del 26/10/2026. Las contraseñas y claves de servidor están excluidas de Git.
+
+La captura simulada se ejecuta cada minuto mediante Supabase Cron; la consulta manual sigue disponible para DOM. [Configuración, migración, pruebas y operación](docs/SUPABASE_VERCEL.md). La instalación SQLite siguiente continúa disponible para uso local; no sincroniza automáticamente con la base publicada.
+
 ## Versión que se presenta al 26/10/2026
 
 El inicio predeterminado usa `PROJECT_STAGE=cutoff_2026_10_26`. Muestra exactamente cuatro opciones: **Inicio, Infraestructura, Mediciones e Inspecciones visuales**. El inicio resume puentes, componentes, sensores y mediciones, con accesos a esas funciones. Se conservan los tres roles, inicio/cierre de sesión y permisos.
 
-En este modo las rutas `/rules`, `/alerts`, `/alerts/<id>`, `/maintenance` y `/inspection-plans` devuelven **404** para GET y POST, antes de acceder a SQLite o procesar CSRF. No aparecen sus enlaces ni el selector de programación de inspecciones. Un `plan_id` no vacío enviado a Inspecciones se rechaza sin crear registros/fotos ni completar programaciones. El historial de operaciones sigue disponible internamente para DOM en `/audit`.
+En este modo las rutas `/rules`, `/alerts`, `/alerts/<id>`, `/maintenance` y `/inspection-plans` devuelven **404** para GET y POST, antes de acceder a la base de datos o procesar CSRF. No aparecen sus enlaces ni el selector de programación de inspecciones. Un `plan_id` no vacío enviado a Inspecciones se rechaza sin crear registros/fotos ni completar programaciones. El historial de operaciones sigue disponible internamente para DOM en `/audit`.
 
 Las mediciones manuales, la API, la consulta del proveedor y el worker mantienen validaciones, unidades EV2, referencia/variación, deduplicación y auditoría. Las nuevas mediciones guardan **«Medición registrada. Evaluación por reglas pendiente de implementación»**. Se conserva su estado de recepción válido/inválido/no disponible. No consultan reglas operativas ni crean alertas; las inspecciones tampoco activan el motor. Las evaluaciones de registros anteriores se conservan como evidencia histórica.
 
@@ -31,7 +37,7 @@ $env:PROJECT_STAGE='full'
 Las secciones técnicas y módulos posteriores de este README describen las capacidades conservadas del **modo completo**; no implican que estén disponibles en la presentación del corte. [Mockups del corte](docs/mockups.html), [mockups completos](docs/mockups-full.html).
 
 
-Aplicación Flask + SQLite con cinco módulos y tres roles: DOM, inspector municipal y mantención. Esta versión aplica el **Enunciado del Alcance EV2 actualizado del 22/10/2026**, que prevalece sobre especificaciones anteriores.
+Aplicación Flask/Jinja con SQLite local o PostgreSQL y Storage de Supabase en Vercel, con cinco módulos y tres roles: DOM, inspector municipal y mantención. Esta versión aplica el **Enunciado del Alcance EV2 actualizado del 22/10/2026**, que prevalece sobre especificaciones anteriores.
 
 ## Instalación nueva (PowerShell, Python 3.12+)
 

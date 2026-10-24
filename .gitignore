@@ -3,3 +3,8 @@ __pycache__/
 instance/
 .env
 *.pyc
+
+.vercel/
+.vercel
+.env*
+public/static/

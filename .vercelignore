@@ -1,0 +1,8 @@
+.git
+.venv
+instance
+.env*
+__pycache__
+tests
+docs
+*.ps1

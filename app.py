@@ -1,15 +1,20 @@
-import os, secrets, sqlite3, math, hmac, json
+import os, secrets, sqlite3, math, hmac, json, io
 from decimal import Decimal
 from datetime import datetime, timezone, date
 from functools import wraps
+from werkzeug.datastructures import FileStorage
 from pathlib import Path
 from uuid import uuid4
 import click
 from migrations import migrate
+from database import connect
+from photo_storage import PhotoStorage, PhotoStorageError
+from cloud_provider import cloud_records
+from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from provider_client import fetch_measurements
 from polling import run_polling, interval_seconds, single_worker
-from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory
+from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image, UnidentifiedImageError
 
@@ -24,22 +29,28 @@ def now(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
 def create_app(config=None):
     app = Flask(__name__, instance_relative_config=True)
-    Path(app.instance_path).mkdir(parents=True, exist_ok=True)
-    key_file = Path(app.instance_path) / 'session.key'
-    if not key_file.exists(): key_file.write_text(secrets.token_hex(32))
-    app.config.update(SECRET_KEY=os.environ.get('SECRET_KEY') or key_file.read_text(), DATABASE=str(Path(app.instance_path)/'puentes.sqlite'), UPLOAD_FOLDER=str(Path(app.instance_path)/'photos'), MAX_CONTENT_LENGTH=20*1024*1024, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax', SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE')=='1', IOT_API_KEY=os.environ.get('IOT_API_KEY'), DEMO_ENABLED=False, PROVIDER_URL=os.environ.get('PROVIDER_URL','http://127.0.0.1:5100/measurements'), PROVIDER_TOKEN=os.environ.get('PROVIDER_TOKEN',''))
+    supplied=config or {}
+    secret=supplied.get('SECRET_KEY') or os.environ.get('SECRET_KEY')
+    cloud=bool(supplied.get('DATABASE_URL') or os.environ.get('DATABASE_URL') or os.environ.get('VERCEL'))
+    if cloud and not secret: raise ValueError('Configura SECRET_KEY estable para el despliegue en la nube.')
+    if not secret:
+        Path(app.instance_path).mkdir(parents=True, exist_ok=True)
+        key_file=Path(app.instance_path)/'session.key'
+        if not key_file.exists(): key_file.write_text(secrets.token_hex(32))
+        secret=key_file.read_text()
+    app.config.update(SECRET_KEY=secret, DATABASE=str(Path(app.instance_path)/'puentes.sqlite'), UPLOAD_FOLDER=str(Path(app.instance_path)/'photos'), MAX_CONTENT_LENGTH=20*1024*1024, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax', SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE')=='1', IOT_API_KEY=os.environ.get('IOT_API_KEY'), DEMO_ENABLED=False, PROVIDER_URL=os.environ.get('PROVIDER_URL','http://127.0.0.1:5100/measurements'), PROVIDER_TOKEN=os.environ.get('PROVIDER_TOKEN',''))
+    app.config.update(DATABASE_URL=os.environ.get('DATABASE_URL',''),DATABASE_SCHEMA=os.environ.get('DATABASE_SCHEMA','puentes'),PHOTO_STORAGE=os.environ.get('PHOTO_STORAGE','local'),SUPABASE_URL=os.environ.get('SUPABASE_URL',''),SUPABASE_SECRET_KEY=os.environ.get('SUPABASE_SECRET_KEY',''),SUPABASE_STORAGE_BUCKET=os.environ.get('SUPABASE_STORAGE_BUCKET','puentes-fotos'),CLOUD_PROVIDER=os.environ.get('CLOUD_PROVIDER')=='1',CRON_SECRET=os.environ.get('CRON_SECRET',''))
     app.config['PROJECT_STAGE']=os.environ.get('PROJECT_STAGE',CUTOFF_STAGE)
     if config: app.config.update(config)
     if app.config['PROJECT_STAGE'] not in PROJECT_STAGES:
         raise ValueError('PROJECT_STAGE debe ser cutoff_2026_10_26 o full.')
-    Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
+    if os.environ.get('VERCEL') and (not app.config.get('DATABASE_URL') or app.config['PHOTO_STORAGE']!='supabase'): raise ValueError('Vercel requiere PostgreSQL y Storage privado; no se permite almacenamiento local efímero.')
+    if app.config['PHOTO_STORAGE']=='local': Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
+    photo_store=PhotoStorage(app.config)
 
     def db():
         if 'db' not in g:
-            g.db=sqlite3.connect(app.config['DATABASE'])
-            g.db.row_factory=sqlite3.Row
-            g.db.execute('PRAGMA foreign_keys=ON')
-            migrate(g.db)
+            g.db=connect(app.config)
         return g.db
     def rows(sql,args=()): return db().execute(sql,args).fetchall()
     def one(sql,args=()): return db().execute(sql,args).fetchone()
@@ -97,17 +108,18 @@ def create_app(config=None):
     def prepare():
         g.user=one('SELECT * FROM users WHERE id=?',(session['user_id'],)) if session.get('user_id') else None
         if 'csrf' not in session: session['csrf']=secrets.token_hex(32)
-        if request.method=='POST' and request.endpoint!='iot':
+        if request.method=='POST' and request.endpoint not in ('iot','cron_pull'):
             if not hmac.compare_digest(str(session['csrf']),str(request.form.get('csrf',''))): abort(400, 'La sesión del formulario venció. Recarga la página.')
     @app.after_request
     def security(response):
         response.headers['X-Content-Type-Options']='nosniff'
         response.headers['X-Frame-Options']='DENY'
-        response.headers['Content-Security-Policy']="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        storage_origin=photo_store.base if photo_store.remote else ''
+        response.headers['Content-Security-Policy']=f"default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data: {storage_origin}; connect-src 'self' {storage_origin}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode())
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), cloud_photos=photo_store.remote)
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -301,7 +313,7 @@ def create_app(config=None):
     def inspections():
         if request.method=='POST':
             if g.user['role'] not in ['DOM','Inspector']: abort(403)
-            saved=[]
+            saved=[];staged=[]
             try:
                 if cutoff_mode() and request.form.get('plan_id'):
                     raise ValueError('La programación de inspecciones no está disponible en esta etapa.')
@@ -309,6 +321,16 @@ def create_app(config=None):
                 belongs(request.form['component_id'],request.form['bridge_id'])
                 if request.form['condition'] not in CONDITIONS: raise ValueError('Condición inválida.')
                 files=[f for f in request.files.getlist('photos') if f.filename]
+                if request.form.get('staged_uploads'):
+                    if not photo_store.remote or files: raise ValueError('Solicitud de fotografías inválida.')
+                    names=json.loads(request.form['staged_uploads'])
+                    pending=session.get('pending_photos',[])
+                    if not isinstance(names,list) or len(names)>5 or any(not isinstance(n,str) or n not in pending for n in names) or len(set(names))!=len(names): raise ValueError('Fotografías sin autorización o sesión vencida.')
+                    staged=names;total=0
+                    for name in names:
+                        data=photo_store.staged(name);total+=len(data)
+                        if total>app.config['MAX_CONTENT_LENGTH']: raise ValueError('Las fotografías superan el límite total de 20 MB.')
+                        files.append(FileStorage(stream=io.BytesIO(data),filename=name))
                 if len(files)>5: raise ValueError('Adjunta hasta 5 fotografías por inspección.')
                 images=[]
                 for f in files:
@@ -325,16 +347,24 @@ def create_app(config=None):
                     db().execute("UPDATE inspection_plans SET status='Realizada',inspection_id=? WHERE id=?",(iid,plan['id']))
                     audit('Realizar inspección programada','inspection_plans',plan['id'])
                 for image in images:
-                    filename=uuid4().hex+'.jpg'; path=Path(app.config['UPLOAD_FOLDER'])/filename
-                    saved.append(path); image.save(path,'JPEG',quality=88)
+                    filename=uuid4().hex+'.jpg'
+                    image_bytes=io.BytesIO(); image.save(image_bytes,'JPEG',quality=88)
+                    photo_store.put(filename,image_bytes.getvalue()); saved.append(filename)
                     insert('photos',inspection_id=iid,filename=filename)
                 if not cutoff_mode(): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
                 audit('Registrar inspección','inspections',iid); db().commit()
                 return redirect(url_for('inspection',iid=iid))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback()
-                for path in saved: path.unlink(missing_ok=True)
+                for filename in saved:
+                    try: photo_store.delete(filename)
+                    except PhotoStorageError: app.logger.error('Limpieza de fotografía pendiente: %s',filename)
                 flash(str(e) if isinstance(e,ValueError) else 'No fue posible guardar: revisa los registros asociados.','error')
+            finally:
+                if staged:
+                    session['pending_photos']=[n for n in session.get('pending_photos',[]) if n not in staged]
+                    try:photo_store.delete_staged(staged)
+                    except PhotoStorageError:app.logger.error('Limpieza temporal de fotografías pendiente.')
         query='SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id'
         args=()
         if request.args.get('bridge_id'): query+=' WHERE i.bridge_id=?'; args=(request.args['bridge_id'],)
@@ -345,11 +375,27 @@ def create_app(config=None):
         i=one('SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id WHERE i.id=?',(iid,))
         if not i: abort(404)
         return render_template('inspection.html',i=i,photos=rows('SELECT * FROM photos WHERE inspection_id=?',(iid,)))
+    @app.post('/uploads/prepare')
+    @access('DOM','Inspector')
+    def prepare_uploads():
+        if not photo_store.remote: abort(404)
+        try:
+            files=json.loads(request.form.get('files','[]'))
+            if not isinstance(files,list) or not 1<=len(files)<=5 or any(not isinstance(f,dict) or type(f.get('size')) is not int or f['size']<=0 for f in files): raise ValueError('Selecciona entre 1 y 5 fotografías válidas.')
+            if sum(f['size'] for f in files)>app.config['MAX_CONTENT_LENGTH']: raise ValueError('Las fotografías superan el límite total de 20 MB.')
+            photo_store.delete_staged(session.get('pending_photos',[]))
+            names=[f'{g.user["id"]}-{uuid4().hex}.upload' for _ in files]
+            session['pending_photos']=names
+            return jsonify(uploads=[dict(name=n,url=photo_store.signed_upload(n)) for n in names])
+        except (ValueError,PhotoStorageError) as error:return jsonify(error=str(error)),400
+
     @app.get('/photos/<filename>')
     @access()
     def photo(filename):
         if not one('SELECT id FROM photos WHERE filename=?',(filename,)): abort(404)
-        return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
+        if not photo_store.remote: return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
+        try: return redirect(photo_store.signed_download(filename),code=302)
+        except PhotoStorageError: abort(502,'No fue posible recuperar la fotografía. Intenta nuevamente.')
 
     @app.route('/rules',methods=['GET','POST'])
     @access('DOM')
@@ -455,6 +501,7 @@ def create_app(config=None):
 
     @app.cli.command('init-db')
     def init_db():
+        if app.config.get('DATABASE_URL'): raise click.ClickException('Aplica sql/postgres.sql y migra los datos con tools/migrate_to_supabase.py; no se inicializa desde la web.')
         db().executescript(Path(app.root_path,'schema.sql').read_text(encoding='utf-8')); migrate(db()); db().commit(); click.echo('Base de datos inicializada sin borrar registros.')
     @app.cli.command('create-user')
     @click.argument('username')
@@ -480,7 +527,7 @@ def create_app(config=None):
         configure_ev2_demo(); db().commit(); click.echo('Dos puentes de demostración configurados con EV2.')
 
     def _pull_provider():
-        items=fetch_measurements(app.config['PROVIDER_URL'],app.config['PROVIDER_TOKEN'])
+        items=cloud_records() if app.config['CLOUD_PROVIDER'] else fetch_measurements(app.config['PROVIDER_URL'],app.config['PROVIDER_TOKEN'])
         result=dict(received=0,duplicates=0,errors=[])
         db().execute('BEGIN IMMEDIATE')  # Serializa recepción manual/automática antes de deduplicar.
         for index,item in enumerate(items):
@@ -521,10 +568,22 @@ def create_app(config=None):
                 with app.app_context():
                     result=pull_provider()
                     app.logger.info('Consulta IoT simulada: %s',result)
-            with single_worker(app.config['DATABASE']):
+            with (nullcontext() if app.config.get('DATABASE_URL') else single_worker(app.config['DATABASE'])):
                 click.echo(f'Captura IoT automática simulada: intervalo {seconds:g}s. Ctrl+C para detener.')
                 run_polling(cycle,seconds,on_error=lambda error: app.logger.error('Ciclo IoT fallido; se reintentará: %s',error))
         except ValueError as error: raise click.ClickException(str(error))
+
+    @app.post('/internal/iot/pull')
+    def cron_pull():
+        token=app.config.get('CRON_SECRET')
+        if not token or not hmac.compare_digest(request.headers.get('Authorization',''),'Bearer '+token): abort(401)
+        try:
+            result=pull_provider()
+            if photo_store.remote:
+                try:photo_store.cleanup_staged()
+                except PhotoStorageError:app.logger.error('Limpieza temporal de Storage pendiente.')
+            return jsonify(result)
+        except ValueError: return jsonify(error='No fue posible consultar el proveedor. Se reintentará en el siguiente ciclo.'),503
 
     @app.post('/provider/pull')
     @access('DOM')

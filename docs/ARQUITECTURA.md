@@ -7,7 +7,7 @@
 El `before_request stage_access` bloquea rutas futuras antes de sesión/CSRF/SQLite. La recepción valida y persiste los mismos datos EV2, pero en corte omite la consulta de reglas y `evaluate`; la función también se protege como defensa adicional. Inspecciones rechaza `plan_id` antes de escrituras y omite evaluación. Las plantillas alternan menú, inicio, accesos y programación. Web, CLI y worker comparten `create_app` y deben arrancar con la misma etapa. Cambiar de modo no escribe datos ni reevalúa históricos. Los apartados siguientes conservan la arquitectura del modo completo.
 
 
-Se mantienen Flask/Jinja, SQLite, archivos fotográficos privados, proveedor HTTP independiente y worker periódico. Los cambios se concentran en el modelo de evaluación y presentación.
+En local se mantienen Flask/Jinja, SQLite, archivos fotográficos privados, proveedor HTTP independiente y worker periódico. La publicación usa PostgreSQL y Storage privados en Supabase, Flask en Vercel y Cron remoto; véase [arquitectura de nube](SUPABASE_VERCEL.md). Los cambios se concentran en el modelo de evaluación y presentación.
 
 ```mermaid
 flowchart LR
