@@ -23,6 +23,8 @@ function run(nodes) {
     return nodes.find(n => (!match[1] || n.tag === match[1]) &&
       (match[2] === 'data-bridge' ? n.dataset?.bridge !== undefined :
        match[2] === 'data-components' ? n.components :
+       match[2] === 'data-history-bridge' ? n.historyBridge :
+       match[2] === 'data-history-sensors' ? n.historySensors :
        match[2] === 'name' ? n.name === match[3] : false)) || null;
   }};
   runInNewContext(script, {document: {querySelectorAll: () => [form]}});
@@ -58,4 +60,16 @@ test('measurement sensor selection still updates EV2 units', () => {
   assert.equal(unit.value, 'm/s²');
   sensor.selectedOptions = [{dataset: {unit: '°'}}]; change();
   assert.equal(unit.value, '°');
+});
+
+test('historial reconstruye sensores por relación y conserva o reinicia selección',()=>{
+ let change;
+ const bridge={historyBridge:true,value:'1',addEventListener:(_,fn)=>change=fn};
+ const sensors={historySensors:true,value:'10',options:[option(''),option('10','1'),option('20','2')],replaceChildren(...items){this.options=items;}};
+ run([bridge,sensors]);
+ assert.deepEqual(sensors.options.map(o=>o.value),['','10']);
+ assert.equal(sensors.value,'10');
+ bridge.value='2';change();assert.deepEqual(sensors.options.map(o=>o.value),['','20']);assert.equal(sensors.value,'');
+ sensors.value='20';change();assert.equal(sensors.value,'20');
+ bridge.value='';change();assert.deepEqual(sensors.options.map(o=>o.value),['','10','20']);assert.equal(sensors.value,'20');
 });

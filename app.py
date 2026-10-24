@@ -10,6 +10,7 @@ from migrations import migrate
 from database import connect
 from photo_storage import PhotoStorage, PhotoStorageError
 from cloud_provider import cloud_records
+from pilot_time import form_timestamp
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from provider_client import fetch_measurements
@@ -107,9 +108,14 @@ def create_app(config=None):
     @app.before_request
     def prepare():
         g.user=one('SELECT * FROM users WHERE id=?',(session['user_id'],)) if session.get('user_id') else None
-        if 'csrf' not in session: session['csrf']=secrets.token_hex(32)
+        # Solo una página de formulario puede iniciar una sesión anónima.
+        # Un favicon/404/recurso paralelo no debe reemplazar su cookie.
+        if request.method=='GET' and (request.endpoint=='login' or (g.user and request.endpoint and request.endpoint!='static')) and 'csrf' not in session:
+            session['csrf']=secrets.token_hex(32)
         if request.method=='POST' and request.endpoint not in ('iot','cron_pull'):
-            if not hmac.compare_digest(str(session['csrf']),str(request.form.get('csrf',''))): abort(400, 'La sesión del formulario venció. Recarga la página.')
+            if not session.get('csrf') or not hmac.compare_digest(str(session['csrf']),str(request.form.get('csrf',''))):
+                g.csrf_failed=True
+                abort(400, 'El formulario pertenece a una sesión anterior o su token no es válido. Vuelve a cargarlo antes de enviar los datos.')
     @app.after_request
     def security(response):
         response.headers['X-Content-Type-Options']='nosniff'
@@ -124,7 +130,11 @@ def create_app(config=None):
     @app.errorhandler(400)
     @app.errorhandler(404)
     @app.errorhandler(413)
-    def error(e): return render_template('error.html',error=e),e.code
+    def error(e):
+        recovery=None
+        if g.get('csrf_failed'):
+            recovery=request.path if request.endpoint in {'login','bridges','bridge','measurements','inspections'} and g.get('user') else url_for('login')
+        return render_template('error.html',error=e,recovery=recovery),e.code
 
     @app.route('/login',methods=['GET','POST'])
     def login():
@@ -274,7 +284,9 @@ def create_app(config=None):
         if request.method=='POST':
             if g.user['role']!='DOM': abort(403)
             try:
-                mid=receive(request.form,True); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
+                data=request.form.to_dict()
+                data['measured_at']=form_timestamp(data,'measured',timestamp)
+                mid=receive(data,True); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
                 return redirect(url_for('measurements'))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El identificador externo ya se recibió.','error')
@@ -285,7 +297,7 @@ def create_app(config=None):
             if request.args.get(field): filters.append(f'substr(m.measured_at,1,10){op}?'); args.append(request.args[field])
         where=' WHERE '+' AND '.join(filters) if filters else ''
         data=rows('SELECT m.*,s.code,s.kind,b.name FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT 500',args)
-        return render_template('measurements.html',measurements=data,sensors=rows('SELECT s.*,b.name FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'))
+        return render_template('measurements.html',measurements=data,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'))
 
     @app.post('/api/v1/measurements')
     def iot():
@@ -304,7 +316,7 @@ def create_app(config=None):
     @app.get('/measurements/<int:mid>')
     @access()
     def measurement(mid):
-        m=one('SELECT m.*,s.code,s.kind,b.name,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE m.id=?',(mid,))
+        m=one('SELECT m.*,s.code,s.kind,b.name,c.bridge_id,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE m.id=?',(mid,))
         if not m: abort(404)
         return render_template('measurement.html',m=m)
 
@@ -317,7 +329,8 @@ def create_app(config=None):
             try:
                 if cutoff_mode() and request.form.get('plan_id'):
                     raise ValueError('La programación de inspecciones no está disponible en esta etapa.')
-                required(request.form,'bridge_id','component_id','inspected_at','condition','description')
+                required(request.form,'bridge_id','component_id','condition','description')
+                inspected_at=form_timestamp(request.form,'inspected',timestamp)
                 belongs(request.form['component_id'],request.form['bridge_id'])
                 if request.form['condition'] not in CONDITIONS: raise ValueError('Condición inválida.')
                 files=[f for f in request.files.getlist('photos') if f.filename]
@@ -339,7 +352,7 @@ def create_app(config=None):
                         if image.format not in ['JPEG','PNG'] or image.width*image.height>20_000_000: raise ValueError('Usa fotografías JPEG o PNG de hasta 20 megapíxeles.')
                         image.load(); images.append(image.convert('RGB'))
                     except (UnidentifiedImageError,OSError,Image.DecompressionBombError): raise ValueError('El archivo no es una fotografía JPEG o PNG válida.')
-                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=timestamp(request.form['inspected_at']),inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
+                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=inspected_at,inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
                 if not cutoff_mode() and request.form.get('plan_id'):
                     plan=get_id('inspection_plans',request.form['plan_id'])
                     if g.user['role']!='Inspector' or plan['inspector_id']!=g.user['id']: abort(403)

@@ -157,3 +157,5 @@ Línea de base conservada en documentación: término EDT 1.4.5/1.4.6 **24/11/20
 ## Compartir la aplicación real por internet
 
 Publicación gratuita temporal mediante Cloudflare Quick Tunnel en Windows: desde esta carpeta ejecutar `.\publicar-demo.ps1`; detener con `.\detener-demo.ps1`. Instrucciones, requisitos y pruebas en [PUBLICACION.md](docs/PUBLICACION.md). El script imprime la URL HTTPS asignada y conserva el corte del 26/10, SQLite y cuentas locales. El computador debe permanecer encendido y conectado; la URL cambia al reiniciar el túnel. Credenciales privadas en `instance/ACCESO_LOCAL.txt`, excluido de Git.
+
+Las correcciones de sesiones, filtros, navegación y fecha/hora del corte se describen en [Usabilidad](docs/USABILIDAD.md).

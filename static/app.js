@@ -1,4 +1,16 @@
 document.querySelectorAll('form').forEach(form=>{
+  const historyBridge=form.querySelector('[data-history-bridge]');
+  const historySensors=form.querySelector('[data-history-sensors]');
+  if(historyBridge && historySensors){
+    const options=Array.from(historySensors.options);
+    const update=()=>{
+      const selected=historySensors.value;
+      const visible=options.filter(o=>!o.value || !historyBridge.value || o.dataset.bridge===historyBridge.value);
+      historySensors.replaceChildren(...visible);
+      historySensors.value=visible.some(o=>o.value===selected)?selected:'';
+    };
+    historyBridge.addEventListener('change',update);update();
+  }
   const bridge=form.querySelector('select[data-bridge]');
   const components=form.querySelector('[data-components]');
   if(bridge && components){

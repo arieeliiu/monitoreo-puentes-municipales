@@ -181,6 +181,14 @@ class PostgresTests(SystemTests):
         self.contract=lambda *args,**kwargs:IotUpdateTests.contract(self,*args,**kwargs)
         IotUpdateTests.test_provider_rejects_inconsistent_and_missing_identity_with_evidence(self)
 
+    def test_postgres_usability_filters(self):
+        from tests.test_usability import UsabilityTests
+        UsabilityTests.test_filters_persistence_incompatible_sensor_and_details(self)
+
+    def test_postgres_usability_dates_photos(self):
+        from tests.test_usability import UsabilityTests
+        UsabilityTests.test_split_form_dates_photos_permissions_and_cutoff(self)
+
 
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))
