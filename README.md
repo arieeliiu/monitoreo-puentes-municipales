@@ -1,185 +1,148 @@
 # Monitoreo de puentes municipales
 
-**Revisión final posterior:** 108 pruebas Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Informe y confirmaciones](docs/REVISION_FINAL_EV3_UI.md). Los resultados anteriores se conservan como historial de su ejecución.
+Aplicación municipal con Flask/Jinja para registrar infraestructura, consultar mediciones, documentar inspecciones visuales y gestionar alertas. Usa SQLite en instalaciones locales o PostgreSQL y Storage privado de Supabase en la instalación Vercel.
 
-## Revisión local de interfaz EV3
+EV3 está integrada en `main`. Mediciones incluye paginación de 20 registros: [aplicación](https://monitoreo-puentes-municipales.vercel.app). El proveedor del repositorio es **simulado**; no se declara integración con sensores físicos ni aceptación municipal del piloto.
 
-Cambios confirmados en `review/ev3-ui` para revisión en GitHub, sin fusión ni despliegue. La configuración `git.deploymentEnabled` de vercel.json excluye esta rama de los despliegues automáticos. Monitoreo agrupa Mediciones y Alertas en EV3/full, conservando rutas y permisos. Alertas e Historial de operaciones consultan 20 registros por página; Alertas conserva puente, severidad, estado y fechas UTC. Campana autenticada con cantidad de abiertas y avisos nuevos sin convertir históricos en notificaciones. Reglas separa versiones vigentes e históricas.
+## Funcionalidades y etapas
 
-Ver [informe para revisión](docs/REVISION_EV3_UI.md), [resultados reales](docs/evidence/EV3_UI_TEST_RESULTS.json) y [navegador](docs/evidence/EV3_UI_BROWSER_RESULTS.json). Resultado local: 95 Python aprobadas, 10 PostgreSQL omitidas sin DSN aislado y 16 JavaScript aprobadas. Las capturas usan una base temporal, no la instalación operativa. No se agregan dependencias de ejecución.
+- **Infraestructura:** puentes, componentes y sensores, con ubicación y referencia de inclinación.
+- **Monitoreo:** Mediciones (`/measurements`) y Alertas (`/alerts`) agrupadas en la navegación, sin cambiar sus rutas ni permisos. Ambas listas y el Historial de operaciones muestran **20 registros por página**. Los filtros se conservan al navegar; no hay carga infinita de filas.
+- **Mediciones:** recepción manual por DOM, consulta del proveedor y API autenticada; valores, estado, origen, lectura/referencia/variación, detalle y enlaces a alertas asociadas.
+- **Alertas:** filtros por puente, severidad, estado y fechas; origen en medición o inspección, notas de seguimiento y cierre explícito por DOM.
+- **Notificaciones web:** campana para DOM, Inspector y Mantención con contador de alertas abiertas. Avisa solo altas posteriores a la línea base de la sesión; no notifica históricos al ingresar ni repite los IDs consumidos en esa pestaña. Consulta normal cada 30 s; lotes de hasta 20 con continuación cada 1 s y descanso de 5 s tras cuatro lotes pendientes. Sin solicitudes simultáneas; timeout de 8 s y pausa con pestaña oculta. No son notificaciones push con el sitio cerrado ni un estado persistente de “leídas”.
+- **Reglas:** DOM configura, versiona y desactiva niveles; reglas vigentes e historial se muestran separados. La regla y configuración originales de cada alerta se conservan.
+- **Inspecciones visuales:** hallazgos por componente y fotografías privadas opcionales.
+- **Historial de operaciones:** consulta reservada a DOM. Se conservan literalmente los detalles históricos; los textos futuros identifican la procedencia simulada cuando corresponde.
 
-Se mantiene el Inicio básico en EV3; panel avanzado, mantenimiento y programación siguen bloqueados. La etapa predeterminada del código permanece en EV2. El encargo identifica la publicación como EV3; esta revisión no consulta ni modifica la configuración remota. Los recuentos y afirmaciones de publicación de los apartados anteriores se conservan como registro de B-11.
+`PROJECT_STAGE` controla funciones tanto en la web como en el worker:
 
-## Incremento EV3 / B-11 — corte 09/11/2026
-
-Preparado y probado localmente el 2026-11-08; publicación pendiente de autorización. La configuración predeterminada y la publicada se conservan en EV2. Se reutilizan las reglas, el motor y el seguimiento existentes, habilitándolos en una etapa independiente sin migración ni cambios históricos.
-
-| PROJECT_STAGE | Inicio | Reglas y alertas | Mantenimiento / programación |
+| Etapa | Inicio | Reglas, alertas y campana | Mantenimiento e inspecciones programadas |
 |---|---|---|---|
-| `cutoff_2026_10_26` (por defecto) | Básico original | Deshabilitados; recepción con evaluación pendiente | Deshabilitados |
-| `cutoff_2026_11_09` | Básico | DOM configura/versiona/desactiva; evaluación de mediciones e inspecciones; consulta y seguimiento por rol | Deshabilitados |
-| `full` | Panel completo | Comportamiento anterior | Disponibles como antes |
+| `cutoff_2026_10_26` (predeterminada en código) | Básico | Deshabilitados; recepción con evaluación pendiente | Deshabilitados |
+| `cutoff_2026_11_09` (EV3) | Básico | Habilitados con permisos por rol | Deshabilitados |
+| `full` | Panel avanzado | Habilitados | Disponibles con sus permisos originales |
 
-Para probar EV3 localmente, establecer `$env:PROJECT_STAGE='cutoff_2026_11_09'` antes de iniciar web y worker. Reiniciar ambos al alternar. No modifica datos ni reevalúa registros pasados. No ejecutar configuradores de demostración sobre producción para cambiar de etapa.
+EV3 **no habilita panel avanzado, mantenimiento ni inspecciones programadas**. Sus rutas permanecen bloqueadas y las inspecciones rechazan un `plan_id` en estos cortes. Cambiar de etapa no migra ni reevalúa registros. Web y worker deben usar la misma etapa y reiniciarse al alternar.
 
-Verificación: **98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**, con SQLite temporal y PostgreSQL aislado. [Captura 1.5.2.2](docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [reglas 1.5.2.3](docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md), [evidencia JSON](docs/evidence/EV3_B11_TEST_RESULTS.json). Runner reproducible: `.\.venv\Scripts\python.exe tools/run_ev3_checks.py`. Sin el DSN PostgreSQL de pruebas registra las omisiones correspondientes.
+## Permisos
 
-## Aplicación publicada
+| Operación en EV3 | DOM | Inspector | Mantención |
+|---|---|---|---|
+| Consultar infraestructura, mediciones, alertas e inspecciones | Sí | Sí | Sí |
+| Consultar campana y contador de abiertas | Sí | Sí | Sí |
+| Administrar infraestructura, sensores y referencias | Sí | No | No |
+| Registrar medición manual o consultar proveedor desde la web | Sí | No | No |
+| Configurar, versionar y desactivar reglas | Sí | No | No |
+| Registrar inspección y fotografías | Sí | Sí | No |
+| Agregar seguimiento y relacionar inspección con alerta | Sí | Sí | No |
+| Cambiar estado/cerrar alerta con nota | Sí | No | No |
+| Consultar Historial de operaciones | Sí | No | No |
 
-Acceso: **https://monitoreo-puentes-municipales.vercel.app**. Funciona en Vercel con PostgreSQL y fotografías privadas en Supabase, sin mantener encendido el equipo local. Conserva las tres cuentas existentes y el corte del 26/10/2026. Las contraseñas y claves de servidor están excluidas de Git.
+Solo en `full`, DOM planifica mantenimiento y programaciones; Inspector atiende programaciones que tiene asignadas; Mantención actualiza exclusivamente sus actividades asignadas. Completar una actividad no cierra automáticamente una alerta. Estas capacidades posteriores no están disponibles en EV3.
 
-La captura simulada se ejecuta cada minuto mediante Supabase Cron; la consulta manual sigue disponible para DOM. [Configuración, migración, pruebas y operación](docs/SUPABASE_VERCEL.md). La instalación SQLite siguiente continúa disponible para uso local; no sincroniza automáticamente con la base publicada.
+## Fechas y horas
 
-## Versión que se presenta al 26/10/2026
+La interfaz presenta instantes en **`America/Santiago`**, con reglas de verano e invierno de `zoneinfo`/`tzdata`, mediante un único filtro Jinja. Formato: `DD/MM/AAAA HH:MM:SS (UTC-03:00)` o `(UTC-04:00)`, según la fecha. Se aplica a mediciones y recepción, alertas y notas, reglas y versiones, inspecciones, auditoría y fechas visibles del modo completo.
 
-El inicio predeterminado usa `PROJECT_STAGE=cutoff_2026_10_26`. Muestra exactamente cuatro opciones: **Inicio, Infraestructura, Mediciones e Inspecciones visuales**. El inicio resume puentes, componentes, sensores y mediciones, con accesos a esas funciones. Se conservan los tres roles, inicio/cierre de sesión y permisos.
+- La base conserva sus valores originales en **UTC**, sin migración ni reescritura. La API y el proveedor conservan su contrato ISO con zona; el ingreso ya normaliza los instantes a UTC. La conversión de presentación no alimenta el almacenamiento.
+- Los filtros Desde/Hasta de Mediciones y Alertas representan **días de Chile**. Se convierten antes de consultar a un intervalo UTC: inicio inclusivo del primer día y comienzo exclusivo del día siguiente al último. Esto incluye correctamente medianoches, segundos finales y días de 23/25 horas. Ordenamiento y paginación siguen ejecutándose en SQL sobre los registros originales.
+- Un timestamp histórico sin zona no se presume UTC ni chileno: se conserva visible con “zona horaria no registrada”. Las consultas por fechas incluyen los instantes con zona UTC explícita del contrato persistido (`+00:00` o `Z`); los históricos sin zona siguen consultables sin filtro de fechas. No se inventa su ubicación temporal ni se corrigen sus datos.
+- Fechas planificadas sin hora son días calendario: se presentan `DD/MM/AAAA` sin desplazamiento. Los campos HTML `date` mantienen `AAAA-MM-DD` y los formularios manuales continúan usando fecha/hora de Chile. Una hora inexistente o ambigua por cambio de horario se rechaza con explicación, como antes.
+- Textos libres de notas, descripciones y detalles históricos de auditoría se conservan literalmente, aunque incluyan fechas escritas por su autor.
 
-En este modo las rutas `/rules`, `/alerts`, `/alerts/<id>`, `/maintenance` y `/inspection-plans` devuelven **404** para GET y POST, antes de acceder a la base de datos o procesar CSRF. No aparecen sus enlaces ni el selector de programación de inspecciones. Un `plan_id` no vacío enviado a Inspecciones se rechaza sin crear registros/fotos ni completar programaciones. El historial de operaciones sigue disponible internamente para DOM en `/audit`.
+## Instalación local en Windows
 
-Las mediciones manuales, la API, la consulta del proveedor y el worker mantienen validaciones, unidades EV2, referencia/variación, deduplicación y auditoría. Las nuevas mediciones guardan **«Medición registrada. Evaluación por reglas pendiente de implementación»**. Se conserva su estado de recepción válido/inválido/no disponible. No consultan reglas operativas ni crean alertas; las inspecciones tampoco activan el motor. Las evaluaciones de registros anteriores se conservan como evidencia histórica.
-
-### Alternar con el modo completo
-
-```powershell
-# Predeterminado: presentación del corte (servidor y worker)
-$env:PROJECT_STAGE='cutoff_2026_10_26'
-.\start.ps1
-# En otra terminal, con la misma variable de etapa:
-$env:PROJECT_STAGE='cutoff_2026_10_26'
-.\start-iot.ps1 -Interval 60
-
-# Para recuperar los módulos completos, detener servidor/worker y reiniciar ambos:
-$env:PROJECT_STAGE='full'
-.\start.ps1
-# En la terminal del worker:
-$env:PROJECT_STAGE='full'
-.\start-iot.ps1 -Interval 60
-```
-
-`full` recupera el panel, reglas, alertas, mantenimiento, programación y evaluación original EV2. El modo se lee al crear cada proceso; usar la misma etapa en web y worker y reiniciarlos al alternar. No se crea otra base ni se ejecuta una migración para cambiar de modo. No se borran o modifican reglas, alertas, fotos, umbrales ni históricos al alternar. Registros capturados con evaluación pendiente no se reevaluan automáticamente al volver a `full`. Un nombre de etapa inválido impide iniciar para evitar activar funciones por error.
-
-Las secciones técnicas y módulos posteriores de este README describen las capacidades conservadas del **modo completo**; no implican que estén disponibles en la presentación del corte. [Mockups del corte](docs/mockups.html), [mockups completos](docs/mockups-full.html).
-
-
-Aplicación Flask/Jinja con SQLite local o PostgreSQL y Storage de Supabase en Vercel, con cinco módulos y tres roles: DOM, inspector municipal y mantención. Esta versión aplica el **Enunciado del Alcance EV2 actualizado del 22/10/2026**, que prevalece sobre especificaciones anteriores.
-
-## Instalación nueva (PowerShell, Python 3.12+)
+Python 3.12+ y PowerShell. Node.js 18+ se utiliza solo para pruebas JavaScript.
 
 ```powershell
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m flask --app app init-db
+# Solo para una base local nueva y vacía:
 .\.venv\Scripts\python.exe -m flask --app app seed-demo
+$env:PROJECT_STAGE='cutoff_2026_11_09'
 .\start.ps1
 ```
 
-Abrir http://127.0.0.1:5000. `seed-demo` muestra contraseñas aleatorias para `dom`, `inspector`, `mantencion`; solo se admite en una base vacía. La instalación local existente conserva sus cuentas y claves en `instance/ACCESO_LOCAL.txt`, excluido de Git. Para datos reales, crear usuarios con `flask --app app create-user nombre --role DOM` (también Inspector y Mantención), sin ejecutar seed-demo.
+Abrir http://127.0.0.1:5000. `seed-demo` muestra contraseñas aleatorias para `dom`, `inspector` y `mantencion`; no se ejecuta sobre una base existente. Para una instalación sin datos simulados, omitirlo y crear usuarios con `flask --app app create-user nombre --role DOM` (también admite `Inspector` y `Mantención`). Las cuentas locales existentes no se regeneran; su información privada está en `instance/`, excluido de Git.
 
-## Actualizar una instalación existente
+### Actualización y conservación de datos
 
-Detener web, worker IoT y proveedor simulado y respaldar **toda** la carpeta `instance/` (SQLite, fotos y clave de sesión). Después:
+Detener escritores y respaldar conjuntamente SQLite, fotos y clave de sesión en `instance/` antes de una migración local. `flask --app app migrate-db` aplica las migraciones compatibles. `schema.sql` es el bootstrap original: la definición vigente incluye `migrations.py` y `ev2_migration.py`.
 
-```powershell
-.\.venv\Scripts\python.exe -m flask --app app migrate-db
-.\.venv\Scripts\python.exe -m flask --app app configure-ev2-demo
-```
+Esta revisión de README/fechas **no necesita migración**. No ejecutar `seed-demo`, `configure-ev2-demo`, `configure-demo-locations` ni importadores para actualizar presentación o activar EV3. Esos configuradores son herramientas específicas del piloto; su alcance e idempotencia se describen en [verificación](docs/VERIFICACION.md) y [arquitectura](docs/ARQUITECTURA.md).
 
-`init-db` y `migrate-db` ejecutan las migraciones compatibles. `schema.sql` es el bootstrap original para permitir probar instalaciones anteriores; la definición vigente es su resultado más `migrations.py` y `ev2_migration.py`. No basta ejecutar solo el SQL base.
+Los valores históricos en mm/s siguen siendo velocidad de vibración, incompatibles con aceleración en m/s²; no se convierten ni reclasifican. Condiciones y reglas históricas conservan sus escalas y asociaciones. Las referencias nuevas de inclinación no cambian la referencia/variación guardada en mediciones anteriores.
 
-- No se borran filas, IDs, cuentas, fotografías ni relaciones. Se amplía el CHECK de inspecciones dentro de una transacción, con comprobación de claves foráneas y rollback ante errores.
-- Las mediciones originales permanecen en **mm/s** y con sus valores exactos: son velocidad de vibración histórica, **incompatible con aceleración EV2**. No se convierte ni se cambia su etiqueta. El sensor se configura para **nuevas** capturas en m/s², guardando su unidad de configuración anterior en `previous_unit`.
-- Las reglas y alertas anteriores se conservan con escala histórica; no evalúan las nuevas lecturas ni se reclasifican retrospectivamente. Las alertas antiguas muestran «sin clasificación EV2».
-- Buena, Regular, Mala y Crítica históricas se conservan literalmente con `standard=historica`. **No existe equivalencia automática** con Baja/Media/Alta/Crítica. Incluso una antigua Crítica sigue identificada como histórica. El servidor solo admite categorías EV2 en inspecciones nuevas.
-- `configure-ev2-demo` agrega los componentes faltantes Tablero/Viga/Estribo en puentes marcados como demostración. Normaliza el antiguo nombre «Tablero · prueba» a «Tablero», conservando ID y relaciones; no borra otros componentes. No agrega sensores físicos adicionales: los cuatro existentes siguen configurables.
-- En sensores de inclinación de demostración sin referencia se configura el valor simulado del JSON; no sobrescribe referencias ya definidas ni modifica sensores de puentes reales. Agrega únicamente configuraciones EV2 nunca definidas; no reactiva niveles que DOM desactivó ni sobrescribe sus cambios.
+## Configuración y arquitectura
 
-## Ubicaciones del piloto y formularios de sensores
+La aplicación usa Flask/Jinja, sin framework frontend adicional. SQLite/fotos privadas locales y el proveedor/worker son procesos independientes. En Vercel se requiere PostgreSQL y Storage privado de Supabase; no se permite usar almacenamiento local efímero para datos o fotos. [Arquitectura](docs/ARQUITECTURA.md) y [operación de nube](docs/SUPABASE_VERCEL.md) detallan migración, respaldos y Cron. Los apartados históricos de esos documentos describen sus propias ejecuciones, no sustituyen el estado de este README.
 
-DOM crea y edita sensores desde la ficha del puente. Las opciones muestran los nombres EV2 y envían `vibracion` / `inclinacion`; la edición conserva la selección. El selector de componentes de esa ficha queda habilitado sin exigir un segundo selector de puente.
+| Variable | Uso |
+|---|---|
+| `PROJECT_STAGE` | Etapa de web y worker; EV3: `cutoff_2026_11_09`. |
+| `SECRET_KEY` | Clave estable de sesión obligatoria en nube; local puede conservar `instance/session.key`. |
+| `COOKIE_SECURE=1` | Cookie solo HTTPS para uso institucional. |
+| `DATABASE_URL`, `DATABASE_SCHEMA` | PostgreSQL y esquema (`puentes` por defecto); sin URL, SQLite local. |
+| `PHOTO_STORAGE` | `local` o `supabase`; Vercel requiere `supabase`. |
+| `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET` | Acceso servidor a Storage privado; bucket predeterminado `puentes-fotos`. |
+| `PROVIDER_URL`, `PROVIDER_TOKEN` | Proveedor HTTP local y token opcional. |
+| `IOT_POLL_INTERVAL` | Intervalo de worker; predeterminado 60 s, argumento CLI tiene prioridad. |
+| `IOT_API_KEY` | Clave Bearer para POST municipal `/api/v1/measurements`; sin ella la recepción alternativa responde 503. |
+| `CLOUD_PROVIDER=1`, `CRON_SECRET` | Proveedor simulado de nube y autorización de `/internal/iot/pull`. |
+| `PUENTES_TEST_DATABASE_URL` | **Solo pruebas:** rol/esquema aislado `puentes_test`; nunca una URL productiva. |
 
-Para completar únicamente ubicaciones pendientes en una instalación existente:
+No versionar valores privados ni imprimir credenciales en logs. No copiar la base local sobre producción: las dos instalaciones no se sincronizan automáticamente. Un despliegue no respalda PostgreSQL ni los objetos de Storage.
 
-```powershell
-.\.venv\Scripts\python.exe -m flask --app app configure-demo-locations
-```
+## Operación IoT y reglas
 
-La operación es idempotente y solo alcanza los cuatro códigos originales `DEM-01/02-VIBRACION/INCLINACION`, en sus puentes marcados como simulados, cuando la ubicación está vacía o dice «Pendiente de precisar». Usa posiciones específicas según el componente actual Tablero, Viga o Estribo (ver `demo_locations.py`). Conserva ubicaciones manuales, códigos personalizados, componentes desconocidos, asociaciones, referencias, datos históricos y umbrales. No agrega sensores ni los redistribuye: los cuatro sensores originales siguen asociados a sus tableros. Las posiciones son parte de la configuración simulada del piloto. `seed-demo` y `configure-ev2-demo` también completan estas ubicaciones.
-
-## Criterios de medición y niveles EV2
-
-| Nivel | Aceleración vertical pico (m/s²) | Cambio absoluto de inclinación (°) |
-|---|---:|---:|
-| Atención | 0,5 | 0,115 |
-| Alerta | 1,0 | 0,229 |
-| Crítico | 2,5 | 0,458 |
-
-Son **parámetros asumidos del piloto académico**. Se cargan desde `config/ev2_pilot.json`, no desde constantes de evaluación. DOM puede configurar o desactivar niveles desde Reglas de alerta; guardar un nivel existente desactiva la versión anterior y crea otra, conservando la regla original de las alertas previas. Se valida que los límites numéricos sean finitos, no negativos y crecientes entre niveles. Las reglas existentes no se reevaluan retroactivamente.
-
-Comparación **inclusiva `>=`**. Se genera una sola alerta por lectura, con el **nivel más alto** alcanzado. Una aceleración de 1,0 m/s² es Alerta; 2,5 es Crítico. La ausencia de regla aplicable se informa por registro.
-
-Inclinación: **variación = abs(lectura − referencia del sensor)**. DOM administra la referencia en la ficha del sensor. Cada medición guarda lectura, referencia utilizada y variación; cambios posteriores no alteran las mediciones anteriores. El cálculo decimal evita perder un límite exacto por restas de coma flotante. Ejemplo con referencia 10°: lectura 9,771° → cambio 0,229° → Alerta. Sin referencia, se guarda la lectura y se informa que no puede evaluarse; no se genera alerta numérica por ella. La referencia inicial de demostración es 0°, configurable y simulada.
-
-Inspecciones nuevas: **Baja, Media, Alta, Crítica**. Las condiciones generan alertas por coincidencia exacta según reglas configuradas por DOM. La configuración inicial asume Media→Atención, Alta→Alerta y Crítica→Crítico; Baja no tiene regla inicial. Este mapeo solo corresponde a categorías EV2 nuevas, es configurable y no se aplica a categorías históricas. Las fotos siguen siendo opcionales.
-
-Una alerta es una situación para revisión, **no un diagnóstico estructural**. No se solicita contratar ni contactar especialistas para esta demostración; la revisión externa es previa a una eventual puesta en marcha real.
-
-## Proveedor IoT y captura periódica
-
-Flujo: Sensor → plataforma del proveedor → API del proveedor → cliente municipal. El proveedor de este repositorio es **simulado**, independiente del proceso web. No se declara integración real con hardware.
+Flujo: sensor/plataforma del proveedor → API del proveedor → cliente municipal. El proveedor incluido es simulado y exige procedencia explícita, identidad y mediciones válidas; se conservan ID externo único, deduplicación y auditoría por elemento.
 
 ```powershell
-# Terminal del proveedor
+# Terminal del proveedor local
 .\.venv\Scripts\python.exe mock_provider.py --port 5100
-# Terminal del worker
+# Otra terminal, con la misma etapa que la web
+$env:PROJECT_STAGE='cutoff_2026_11_09'
 $env:PROVIDER_URL='http://127.0.0.1:5100/measurements'
 .\start-iot.ps1 -Interval 60
-# Alternativa: prioridad del argumento sobre IOT_POLL_INTERVAL; predeterminado 60 s
-.\.venv\Scripts\python.exe -m flask --app app poll-provider --interval 15
 ```
 
-Iniciar solo un worker. Primera consulta inmediata y espera configurable entre ciclos (1–86400 s). El worker es independiente de la web, con un bloqueo de SO por base, contexto/conexión por ciclo y recuperación ante errores. `PROVIDER_TOKEN` es opcional para un futuro proveedor. El cliente tiene timeout de 3 segundos, hasta 3 intentos y esperas exponenciales 0,2/0,4 s para desconexiones, 429 y 5xx. No reintenta formatos inválidos/otros 4xx. Un fallo no detiene los ciclos siguientes ni el servidor web. Para servicio permanente, supervisar ambos procesos externamente; no se instala un servicio del sistema.
+Ejecutar un solo worker. Consulta inicial inmediata, intervalo configurable de 1–86400 s, bloqueo por base y recuperación ante fallos. El cliente HTTP tiene timeout de 3 s, hasta 3 intentos y espera exponencial para desconexiones/429/5xx. Consulta manual por DOM o `flask --app app pull-provider`. Cada elemento usa savepoint para que un registro inválido no impida guardar los válidos; se conserva la identidad/motivo de incidencias en auditoría.
 
-Consulta manual conservada: DOM → Lecturas → Consultar proveedor; o `flask --app app pull-provider`. Recepción serializada con `BEGIN IMMEDIATE`, ID externo UNIQUE, validación por elemento y rollback con savepoints; registros inválidos no impiden guardar otros válidos.
+La instalación de nube dispone de recepción protegida para Supabase Cron; el procedimiento existente programa el proveedor simulado cada minuto. No se ha modificado ni vuelto a validar el trabajo Cron remoto en esta revisión. La API alternativa mantiene Bearer `IOT_API_KEY`, JSON ISO con zona, respuestas de validación y contrato existentes; véase [contrato y operación](docs/SUPABASE_VERCEL.md).
 
-```json
-{"simulated":true,"measurements":[
-  {"external_id":"ev2-a","bridge_code":"DEM-01","kind":"vibracion","sensor_code":"DEM-01-VIBRACION","value":1.0,"unit":"m/s²","measured_at":"2026-10-22T10:00:00-03:00","status":"valido","simulated":true},
-  {"external_id":"ev2-b","bridge_code":"DEM-02","kind":"inclinacion","sensor_code":"DEM-02-INCLINACION","value":-0.229,"unit":"°","measured_at":"2026-10-22T10:00:00-03:00","status":"valido","simulated":true}
-]}
-```
+Los niveles asumidos del piloto están en `config/ev2_pilot.json`; no son un diagnóstico estructural ni umbrales validados externamente. Se compara de forma inclusiva y se genera una alerta del nivel más alto alcanzado. Inclinación usa `abs(lectura − referencia)`, con referencia y variación conservadas por lectura; sin referencia se informa que no es evaluable. Condiciones visuales nuevas usan Baja/Media/Alta/Crítica y reglas configurables, sin equivalencias automáticas con categorías históricas. Esta revisión no cambia generación de alertas, umbrales, integración ni permisos.
 
-El lote del proveedor permanece estable hasta reiniciarlo; consultar otra vez no inventa datos nuevos ni duplica registros. Incluye ambas variables para ambos puentes. Se valida bridge_code y kind contra la relación sensor/componente/puente, unidad, fecha con zona no futura, valor finito y estado. `invalido`/`no_disponible` se guardan diferenciados y no generan alertas. Nuevas capturas de vibración en mm/s se rechazan. Los errores conservan identidad y motivo en auditoría; si SQLite impide auditar, se notifican en logs del worker.
+## Seguridad y respaldo
 
-La API POST municipal alternativa se conserva con clave `IOT_API_KEY`, cabecera `Authorization: Bearer ...`. Si esa variable no está configurada responde 503; clave incorrecta 401; JSON inválido/duplicado 400; válida 201. Campos de identidad opcionales por compatibilidad, pero se validan si se suministran. Su unidad vigente también es m/s². El formulario local conserva registro manual, y `simulate_iot.py` conserva el envío manual a esta API.
+Autenticación local con hash de contraseñas, permisos del lado servidor, rotación de sesión al ingresar, CSRF, CSP y auditoría. Fotos privadas JPEG/PNG verificadas y recodificadas: hasta 5 imágenes, 20 megapíxeles por imagen y 20 MB por petición. HTTPS y secretos estables por entorno para uso institucional; en una instalación local de red, Waitress detrás de TLS.
 
-## Operación por rol
+`instance/`, `.env*`, `.vercel/`, bases, fotografías y credenciales se excluyen de Git. Respaldar SQLite/fotos/clave juntos o, en nube, PostgreSQL y Storage según el procedimiento operativo. No desactivar permisos o protecciones para ejecutar pruebas.
 
-- DOM administra infraestructura, referencias, reglas, programación y mantenimiento. Cierra alertas explícitamente con nota.
-- Inspector consulta registros, documenta inspecciones y fotos y registra el resultado de las programaciones que tiene asignadas. Puede relacionar inspecciones con alertas sin cerrarlas.
-- Mantención consulta y actualiza exclusivamente sus actividades asignadas.
-
-El panel distingue sensores y condiciones visuales, muestra lectura/referencia/variación, severidades, datos faltantes, alertas activas, pendientes de mantenimiento, próximas inspecciones y últimas observaciones con acceso a fotos. Las tareas no cierran alertas automáticamente. Los históricos no se presentan como datos EV2 evaluados. El filtro de mantenimiento por puente respeta permisos.
-
-Interfaz operativa sin rótulos de demostración ni referencias académicas fijas. La procedencia y las marcas de simulación siguen persistidas y disponibles en la documentación; no se presentan como integración real. Los errores, faltas de datos y referencias ausentes se mantienen visibles.
-
-## Pruebas y documentación
+## Pruebas y evidencia
 
 ```powershell
+.\.venv\Scripts\python.exe tools/run_ev3_checks.py --output docs/evidence/EV3_CHILE_TIME_TEST_RESULTS.json
+# Por separado:
 .\.venv\Scripts\python.exe -m unittest discover -v
-# Regresión JavaScript: Node.js 18+ (solo para pruebas; no requerido por la aplicación)
-node --test tests/frontend.test.cjs
-.\.venv\Scripts\python.exe tools/build_mockups.py
-.\.venv\Scripts\python.exe tools/build_mockups.py --stage full
+node --test tests/frontend.test.cjs tests/cloud-uploads.test.cjs tests/notifications.test.cjs
 ```
 
-Los mockups se generan con plantillas reales y base temporal; no escriben en el piloto. Ver [arquitectura](docs/ARQUITECTURA.md), [matriz individual](docs/CUMPLIMIENTO.md), [verificación](docs/VERIFICACION.md) y [diseño](docs/DISENO.md).
+El runner usa SQLite temporal y, únicamente si se proporciona la URL aislada, PostgreSQL `puentes_test`. Sin esa URL registra omisiones explícitas; no deben declararse aprobadas. Las fixtures PostgreSQL reinician **sus tablas de prueba**. Las verificaciones de navegador también usan una base local temporal, nunca registros productivos.
 
-SQLite, fotos, credenciales, backups y claves están en `instance/`, excluido de Git. Mantener respaldo conjunto y HTTPS para uso institucional. Hash de contraseñas, roles de servidor, CSRF, CSP, imágenes privadas verificadas/recodificadas y auditoría se conservan. Fotografías JPEG/PNG: hasta 5, 20 megapíxeles y petición máxima 20 MB. Para red institucional usar Waitress detrás de TLS con `COOKIE_SECURE=1` y secretos por entorno.
+| Ejecución | Resultado real | Evidencia |
+|---|---|---|
+| Revisión actual de README y fechas Chile | 117 Python aprobadas, incluidas 15 PostgreSQL aisladas; 20 JavaScript aprobadas; cero fallos, errores y omisiones. | [Resultado por caso](docs/evidence/EV3_CHILE_TIME_TEST_RESULTS.json) |
+| Corrección posterior de paginación de Mediciones | 18 pruebas afectadas aprobadas, incluida PostgreSQL; no fue una suite completa nueva. Chrome 20/20/5. | [Log](docs/evidence/EV3_MEASUREMENTS_PAGINATION_TESTS.log), [Chrome](docs/evidence/EV3_MEASUREMENTS_PAGINATION_BROWSER.json) |
+| Revisión final UI anterior | 108 Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript; cero omisiones/fallos. | [Resultado](docs/evidence/EV3_UI_FINAL_TEST_RESULTS.json) |
+| Primera revisión UI | 95 Python aprobadas, 10 PostgreSQL omitidas; 16 JavaScript. | [Resultado histórico](docs/evidence/EV3_UI_TEST_RESULTS.json) |
+| Incremento B-11 | 98 Python y 10 JavaScript aprobadas, con PostgreSQL aislado y sin omisiones. | [Resultado histórico](docs/evidence/EV3_B11_TEST_RESULTS.json) |
 
-Línea de base conservada en documentación: término EDT 1.4.5/1.4.6 **24/11/2026**; presentación **26/11/2026**. HU-09 (aceptación municipal, piloto real, capacitación y cierre) sigue pendiente; proveedor real y validación externa no verificados.
+La primera corrida de esta revisión detectó una incompatibilidad SQL entre SQLite/PostgreSQL (3 fallos y 2 errores); se corrigió y se repitió la suite completa. [Detalle de esta revisión](docs/REVISION_FECHAS_CHILE.md). No se suman ejecuciones ni se atribuyen resultados viejos a código nuevo. [Verificación detallada](docs/VERIFICACION.md), [revisión UI anterior](docs/REVISION_FINAL_EV3_UI.md), [diseño](docs/DISENO.md), [usabilidad](docs/USABILIDAD.md) y [matriz de requisitos](docs/CUMPLIMIENTO.md).
 
-## Compartir la aplicación real por internet
+## Alcance pendiente
 
-Publicación gratuita temporal mediante Cloudflare Quick Tunnel en Windows: desde esta carpeta ejecutar `.\publicar-demo.ps1`; detener con `.\detener-demo.ps1`. Instrucciones, requisitos y pruebas en [PUBLICACION.md](docs/PUBLICACION.md). El script imprime la URL HTTPS asignada y conserva el corte del 26/10, SQLite y cuentas locales. El computador debe permanecer encendido y conectado; la URL cambia al reiniciar el túnel. Credenciales privadas en `instance/ACCESO_LOCAL.txt`, excluido de Git.
+El ciclo completo de mantenimiento y programaciones pertenece a etapas posteriores; RF-7/HU-07 conservan en EV3 el seguimiento y la trazabilidad de alertas e inspecciones. HU-09, aceptación municipal, piloto real, capacitación, hardware/proveedor real y validación externa no se declaran completados.
 
-Las correcciones de sesiones, filtros, navegación y fecha/hora del corte se describen en [Usabilidad](docs/USABILIDAD.md).
+Los [mockups del corte](docs/mockups.html) y [del modo completo](docs/mockups-full.html) son bocetos históricos; no sustituyen las pantallas actuales. El [túnel temporal local](docs/PUBLICACION.md) requiere el computador encendido y es una alternativa distinta de la publicación Vercel.

@@ -46,7 +46,7 @@ def main():
         os.environ.pop(key,None)
     started=stamp()
     base=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    files=[ROOT/'app.py',*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('test_*.py')),*sorted((ROOT/'tests').glob('*.cjs')),ROOT/'static/app.js',ROOT/'static/notifications.js',ROOT/'static/app.css',Path(__file__)]
+    files=[ROOT/'app.py',ROOT/'display_time.py',ROOT/'pilot_time.py',*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('test_*.py')),*sorted((ROOT/'tests').glob('*.cjs')),ROOT/'static/app.js',ROOT/'static/notifications.js',ROOT/'static/app.css',Path(__file__)]
     hashes={str(p.relative_to(ROOT)).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     suite=unittest.defaultTestLoader.discover(str(ROOT/'tests'),top_level_dir=str(ROOT))
     result=unittest.TextTestRunner(verbosity=2,resultclass=Results).run(suite)
