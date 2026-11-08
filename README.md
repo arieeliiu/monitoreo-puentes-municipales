@@ -1,5 +1,19 @@
 # Monitoreo de puentes municipales
 
+## Incremento EV3 / B-11 — corte 09/11/2026
+
+Preparado y probado localmente el 2026-11-08; publicación pendiente de autorización. La configuración predeterminada y la publicada se conservan en EV2. Se reutilizan las reglas, el motor y el seguimiento existentes, habilitándolos en una etapa independiente sin migración ni cambios históricos.
+
+| PROJECT_STAGE | Inicio | Reglas y alertas | Mantenimiento / programación |
+|---|---|---|---|
+| `cutoff_2026_10_26` (por defecto) | Básico original | Deshabilitados; recepción con evaluación pendiente | Deshabilitados |
+| `cutoff_2026_11_09` | Básico | DOM configura/versiona/desactiva; evaluación de mediciones e inspecciones; consulta y seguimiento por rol | Deshabilitados |
+| `full` | Panel completo | Comportamiento anterior | Disponibles como antes |
+
+Para probar EV3 localmente, establecer `$env:PROJECT_STAGE='cutoff_2026_11_09'` antes de iniciar web y worker. Reiniciar ambos al alternar. No modifica datos ni reevalúa registros pasados. No ejecutar configuradores de demostración sobre producción para cambiar de etapa.
+
+Verificación: **98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**, con SQLite temporal y PostgreSQL aislado. [Captura 1.5.2.2](docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [reglas 1.5.2.3](docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md), [evidencia JSON](docs/evidence/EV3_B11_TEST_RESULTS.json). Runner reproducible: `.\.venv\Scripts\python.exe tools/run_ev3_checks.py`. Sin el DSN PostgreSQL de pruebas registra las omisiones correspondientes.
+
 ## Aplicación publicada
 
 Acceso: **https://monitoreo-puentes-municipales.vercel.app**. Funciona en Vercel con PostgreSQL y fotografías privadas en Supabase, sin mantener encendido el equipo local. Conserva las tres cuentas existentes y el corte del 26/10/2026. Las contraseñas y claves de servidor están excluidas de Git.

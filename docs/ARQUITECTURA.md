@@ -1,10 +1,20 @@
-# Arquitectura vigente — EV2 del 22/10/2026
+# Arquitectura vigente — especificación EV2 y etapas EV3
 
 ## Etapa configurable de presentación
 
-`app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida dos valores: `cutoff_2026_10_26` (predeterminado) y `full`. `cutoff_mode()` es la comprobación central compartida por control de rutas, dashboard, recepción, inspecciones y contexto Jinja. No depende de la fecha del ordenador ni de archivos de gestión.
+`app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida tres valores: `cutoff_2026_10_26` (predeterminado), `cutoff_2026_11_09` y `full`. `STAGE_FEATURES` y `feature_enabled()` centralizan las funciones disponibles para rutas, inicio, recepción, inspecciones y contexto Jinja; `cutoff_mode()` conserva su significado original de EV2. No depende del reloj ni de archivos de gestión.
 
-El `before_request stage_access` bloquea rutas futuras antes de sesión/CSRF/SQLite. La recepción valida y persiste los mismos datos EV2, pero en corte omite la consulta de reglas y `evaluate`; la función también se protege como defensa adicional. Inspecciones rechaza `plan_id` antes de escrituras y omite evaluación. Las plantillas alternan menú, inicio, accesos y programación. Web, CLI y worker comparten `create_app` y deben arrancar con la misma etapa. Cambiar de modo no escribe datos ni reevalúa históricos. Los apartados siguientes conservan la arquitectura del modo completo.
+| Etapa | alerts (reglas/evaluación/seguimiento) | advanced_dashboard | maintenance | inspection_plans |
+|---|---|---|---|---|
+| `cutoff_2026_10_26` | No | No | No | No |
+| `cutoff_2026_11_09` | Sí | No | No | No |
+| `full` | Sí | Sí | Sí | Sí |
+
+El `before_request stage_access` bloquea por función las rutas futuras antes de sesión/CSRF/base de datos. EV2 conserva recepción sin consulta de reglas ni evaluación. EV3 usa la misma recepción y motor de full, sin duplicar validaciones ni cambiar esquema, reglas o unidades: mediciones válidas evaluables e inspecciones nuevas generan alertas con la versión activa correspondiente. La ausencia de regla/referencia y las lecturas inválidas/no disponibles mantienen sus resultados existentes sin alertas.
+
+En ambos cortes las inspecciones rechazan `plan_id` antes de escrituras/fotos y omiten la consulta de programaciones. El detalle de alerta EV3 no consulta tareas ni muestra mantenimiento; sus notas y estados funcionan independientemente. El inicio EV3 usa solo el resumen básico, sin consultas del panel avanzado. No existe dependencia indispensable con EDT 1.4.5/1.4.6 o inspecciones programadas.
+
+Web, CLI y worker comparten `create_app` y deben arrancar con la misma etapa. Cambiar de modo no escribe datos ni reevalúa históricos. No hay migración ni cambio automático de configuración productiva para B-11. Los apartados siguientes describen las capacidades conservadas de full; [reportes B-11](REPORTE_1_5_2_3_REGLAS_ALERTA.md) documentan el alcance intermedio.
 
 
 En local se mantienen Flask/Jinja, SQLite, archivos fotográficos privados, proveedor HTTP independiente y worker periódico. La publicación usa PostgreSQL y Storage privados en Supabase, Flask en Vercel y Cron remoto; véase [arquitectura de nube](SUPABASE_VERCEL.md). Los cambios se concentran en el modelo de evaluación y presentación.

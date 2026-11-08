@@ -1,5 +1,16 @@
 # Verificación del corte y modo completo
 
+## EV3 / B-11 — resultado vigente del 2026-11-08
+
+Suite completa ejecutada de `2026-11-08T12:11:07-03:00` a `2026-11-08T12:18:23-03:00` (America/Santiago): **98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. PostgreSQL de pruebas estuvo habilitado; se ejecutaron diez casos de ese ambiente, sin apuntar al rol/esquema productivo. Se agregaron 12 regresiones EV3 en `tests/test_ev3_stage.py` y una en `tests/test_cloud.py`; el resto conserva pruebas previas de EV2/full.
+
+Runner: `.\.venv\Scripts\python.exe tools/run_ev3_checks.py`. Ejecuta Python y las dos suites JavaScript y genera [resultados por caso, TAP y SHA256](evidence/EV3_B11_TEST_RESULTS.json). La conexión opcional `PUENTES_TEST_DATABASE_URL` debe corresponder exclusivamente al rol restringido de pruebas; el runner elimina las variables productivas de su proceso.
+
+- [Reporte 1.5.2.2 — captura, validación, persistencia, duplicados y errores](REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md).
+- [Reporte 1.5.2.3 — reglas, severidades, alertas, permisos y versiones](REPORTE_1_5_2_3_REGLAS_ALERTA.md).
+
+Los tres modos pasan: EV2 mantiene el corte original y evaluación pendiente; EV3 habilita reglas/alertas con inicio básico y bloquea módulos futuros; full conserva panel, mantenimiento y programación. Se verificó también el nuevo corte en navegador local con SQLite temporal. No se realizó despliegue ni prueba de escritura en producción. Los resultados y recuentos de las secciones siguientes son evidencia histórica de entregas anteriores.
+
 ## Corrección de alcance al corte 26/10/2026
 
 La etapa predeterminada es `cutoff_2026_10_26`; el modo `full` se conserva explícitamente. La suite previa mantiene sus expectativas completas y configura `full` en las bases y procesos de prueba.

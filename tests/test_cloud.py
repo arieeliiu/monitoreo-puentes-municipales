@@ -200,6 +200,17 @@ class PostgresTests(SystemTests):
         self.assertEqual(self.count('measurements'),before)
         self.post('/measurements',self.data());self.assertEqual(self.count('measurements'),before+1)
 
+    def test_postgres_ev3_cutoff_rules_and_cron(self):
+        from app import EV3_STAGE
+        from tests.test_ev3_stage import Ev3StageTests
+        self.app.config['PROJECT_STAGE']=EV3_STAGE
+        Ev3StageTests.test_cron_ev3_evaluates_both_bridges_and_deduplicates(self)
+        self.assertEqual(self.client.get('/rules').status_code,200)
+        self.assertEqual(self.client.get('/alerts/1').status_code,200)
+        self.assertEqual(self.client.get('/maintenance').status_code,404)
+        self.assertEqual(self.client.get('/inspection-plans').status_code,404)
+        self.assertNotIn('Panel de monitoreo',self.client.get('/').text)
+
 
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

@@ -23,7 +23,13 @@ KINDS = {'vibracion': 'm/s²', 'inclinacion': '°'}
 CONDITIONS = ['Baja','Media','Alta','Crítica']
 SEVERITIES = ['Atención','Alerta','Crítico']
 CUTOFF_STAGE = 'cutoff_2026_10_26'
-PROJECT_STAGES = (CUTOFF_STAGE, 'full')
+EV3_STAGE = 'cutoff_2026_11_09'
+STAGE_FEATURES = {
+    CUTOFF_STAGE: frozenset(),
+    EV3_STAGE: frozenset({'alerts'}),
+    'full': frozenset({'alerts','advanced_dashboard','maintenance','inspection_plans'}),
+}
+PROJECT_STAGES = tuple(STAGE_FEATURES)
 PENDING_EVALUATION = 'Medición registrada. Evaluación por reglas pendiente de implementación'
 LABELS = {'vibracion':'Aceleración vertical pico','inclinacion':'Inclinación','visual':'Condición visual'}
 def now(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
@@ -44,7 +50,7 @@ def create_app(config=None):
     app.config['PROJECT_STAGE']=os.environ.get('PROJECT_STAGE',CUTOFF_STAGE)
     if config: app.config.update(config)
     if app.config['PROJECT_STAGE'] not in PROJECT_STAGES:
-        raise ValueError('PROJECT_STAGE debe ser cutoff_2026_10_26 o full.')
+        raise ValueError('PROJECT_STAGE debe ser '+', '.join(PROJECT_STAGES)+'.')
     if os.environ.get('VERCEL') and (not app.config.get('DATABASE_URL') or app.config['PHOTO_STORAGE']!='supabase'): raise ValueError('Vercel requiere PostgreSQL y Storage privado; no se permite almacenamiento local efímero.')
     if app.config['PHOTO_STORAGE']=='local': Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
     photo_store=PhotoStorage(app.config)
@@ -92,14 +98,18 @@ def create_app(config=None):
             return inner
         return decorator
 
+    def feature_enabled(feature):
+        return feature in STAGE_FEATURES[app.config['PROJECT_STAGE']]
+
     def cutoff_mode():
         return app.config['PROJECT_STAGE']==CUTOFF_STAGE
 
     @app.before_request
     def stage_access():
         # Antes de sesión, CSRF o acceso a SQLite: no hay efectos en rutas futuras.
-        if cutoff_mode() and request.path.split('/')[1] in {'rules','alerts','maintenance','inspection-plans'}:
-            abort(404)
+        restricted={'rules':'alerts','alerts':'alerts','maintenance':'maintenance','inspection-plans':'inspection_plans'}
+        feature=restricted.get(request.path.split('/')[1])
+        if feature and not feature_enabled(feature): abort(404)
 
     @app.teardown_appcontext
     def close(error):
@@ -125,7 +135,7 @@ def create_app(config=None):
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), cloud_photos=photo_store.remote)
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), feature_enabled=feature_enabled, cloud_photos=photo_store.remote)
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -153,7 +163,7 @@ def create_app(config=None):
     @app.get('/')
     @access()
     def dashboard():
-        if cutoff_mode():
+        if not feature_enabled('advanced_dashboard'):
             summary={table:one(f'SELECT count(*) AS n FROM {table}')["n"] for table in ('bridges','components','sensors','measurements')}
             return render_template('dashboard.html',summary=summary,bridges=rows('SELECT * FROM bridges ORDER BY code'))
         bridges=rows('SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!=\'Resuelta\') AS active FROM bridges b ORDER BY b.code')
@@ -224,7 +234,7 @@ def create_app(config=None):
         return render_template('bridge.html',b=b,components=rows('SELECT * FROM components WHERE bridge_id=?',(bid,)),sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
 
     def evaluate(kind,bridge_id,record_id,value,simulated):
-        if cutoff_mode(): return False
+        if not feature_enabled('alerts'): return False
         applicable=rows("SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(bridge_id,kind))
         matches=[r for r in applicable if (kind=='visual' and value==r['condition']) or (kind!='visual' and r['unit']==KINDS[kind] and value>=r['threshold'])]
         if matches:
@@ -266,7 +276,7 @@ def create_app(config=None):
         variation=float(abs(Decimal(str(value))-Decimal(str(reference)))) if value is not None and reference is not None else None
         if variation is not None and not math.isfinite(variation): raise ValueError('La variación calculada debe ser finita.')
         mid=insert('measurements',specification='EV2',reference_value=reference,variation=variation,sensor_id=s['id'],value=value,unit=KINDS[s['kind']],measured_at=measured_at,status=status,simulated=int(simulated),external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
-        if cutoff_mode():
+        if not feature_enabled('alerts'):
             evaluation=PENDING_EVALUATION
         else:
             applicable=bool(one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(s['bridge_id'],s['kind'])))
@@ -333,7 +343,7 @@ def create_app(config=None):
             if g.user['role'] not in ['DOM','Inspector']: abort(403)
             saved=[];staged=[]
             try:
-                if cutoff_mode() and request.form.get('plan_id'):
+                if not feature_enabled('inspection_plans') and request.form.get('plan_id'):
                     raise ValueError('La programación de inspecciones no está disponible en esta etapa.')
                 required(request.form,'bridge_id','component_id','condition','description')
                 inspected_at=form_timestamp(request.form,'inspected',timestamp)
@@ -359,7 +369,7 @@ def create_app(config=None):
                         image.load(); images.append(image.convert('RGB'))
                     except (UnidentifiedImageError,OSError,Image.DecompressionBombError): raise ValueError('El archivo no es una fotografía JPEG o PNG válida.')
                 iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=inspected_at,inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
-                if not cutoff_mode() and request.form.get('plan_id'):
+                if feature_enabled('inspection_plans') and request.form.get('plan_id'):
                     plan=get_id('inspection_plans',request.form['plan_id'])
                     if g.user['role']!='Inspector' or plan['inspector_id']!=g.user['id']: abort(403)
                     if plan['status']!='Programada' or plan['bridge_id']!=int(request.form['bridge_id']) or plan['component_id']!=int(request.form['component_id']): raise ValueError('La programación no corresponde al puente/componente o ya fue atendida.')
@@ -370,7 +380,7 @@ def create_app(config=None):
                     image_bytes=io.BytesIO(); image.save(image_bytes,'JPEG',quality=88)
                     photo_store.put(filename,image_bytes.getvalue()); saved.append(filename)
                     insert('photos',inspection_id=iid,filename=filename)
-                if not cutoff_mode(): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
+                if feature_enabled('alerts'): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
                 audit('Registrar inspección','inspections',iid); db().commit()
                 return redirect(url_for('inspection',iid=iid))
             except (ValueError,sqlite3.IntegrityError) as e:
@@ -387,7 +397,7 @@ def create_app(config=None):
         query='SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id'
         args=()
         if request.args.get('bridge_id'): query+=' WHERE i.bridge_id=?'; args=(request.args['bridge_id'],)
-        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=[] if cutoff_mode() else rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
+        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=[] if not feature_enabled('inspection_plans') else rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
     @app.get('/inspections/<int:iid>')
     @access()
     def inspection(iid):
@@ -474,7 +484,7 @@ def create_app(config=None):
                 db().execute('UPDATE alerts SET status=? WHERE id=?',(status,aid)); audit('Seguimiento de alerta','alerts',aid,status+': '+request.form['note'].strip()); db().commit()
                 return redirect(url_for('alert',aid=aid))
             except ValueError as e: db().rollback(); flash(str(e),'error')
-        return render_template('alert.html',a=a,notes=rows('SELECT n.*,u.username FROM alert_notes n JOIN users u ON u.id=n.author_id WHERE alert_id=? ORDER BY n.id',(aid,)),inspections=rows('SELECT * FROM inspections WHERE bridge_id=?',(a['bridge_id'],)),related_inspection=bool(a['inspection_id'] or one('SELECT id FROM alert_notes WHERE alert_id=? AND inspection_id IS NOT NULL',(aid,))),tasks=rows('SELECT t.*,u.username FROM tasks t JOIN users u ON u.id=t.assignee_id WHERE alert_id=?',(aid,)))
+        return render_template('alert.html',a=a,notes=rows('SELECT n.*,u.username FROM alert_notes n JOIN users u ON u.id=n.author_id WHERE alert_id=? ORDER BY n.id',(aid,)),inspections=rows('SELECT * FROM inspections WHERE bridge_id=?',(a['bridge_id'],)),related_inspection=bool(a['inspection_id'] or one('SELECT id FROM alert_notes WHERE alert_id=? AND inspection_id IS NOT NULL',(aid,))),tasks=[] if not feature_enabled('maintenance') else rows('SELECT t.*,u.username FROM tasks t JOIN users u ON u.id=t.assignee_id WHERE alert_id=?',(aid,)))
 
     @app.route('/maintenance',methods=['GET','POST'])
     @access()

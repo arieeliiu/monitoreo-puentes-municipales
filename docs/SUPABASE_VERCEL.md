@@ -1,5 +1,13 @@
 # Publicación con Vercel y Supabase
 
+## Preparación EV3 / B-11 — publicación pendiente
+
+El 2026-11-08 se verificó `cutoff_2026_11_09` con SQLite temporal y PostgreSQL aislado: 98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Reportes y resultados vigentes](VERIFICACION.md). No se cambió el código desplegado, ninguna variable de Vercel, Cron, Storage ni la base productiva durante B-11.
+
+Con aprobación del usuario, el paso posterior es enviar el commit, establecer `PROJECT_STAGE=cutoff_2026_11_09` únicamente en el entorno autorizado y desplegar. No necesita migración ni recarga de datos/umbrales. No ejecutar el importador o configurador demo para activarlo. Después comprobar login/roles, reglas/alertas y siguiente captura Cron, conservando fotos, históricos, secretos e intervalo existentes. La recepción nueva usará reglas activas de ese entorno; los registros pendientes anteriores no se reevalúan automáticamente.
+
+El Cron remoto usa la etapa de la aplicación: EV2 conserva evaluación pendiente, EV3 evalúa sin panel avanzado/mantenimiento/programación, full conserva todo. La configuración EV2 documentada debajo continúa siendo la referencia de la publicación actual; no se actualizó automáticamente. Los recuentos de pruebas de la sección histórica de nube corresponden a su entrega original.
+
 URL estable: https://monitoreo-puentes-municipales.vercel.app
 
 ## Componentes y seguridad

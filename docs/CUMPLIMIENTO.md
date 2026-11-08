@@ -1,5 +1,22 @@
 # Matriz individual de criterios oficiales y alcance EV2
 
+## EV3 / B-11 — incremento del 09/11/2026
+
+Verificación real del 2026-11-08. EDT 1.4.4 queda habilitada en `cutoff_2026_11_09`, reutilizando configuración/versiones DOM, evaluación numérica y visual, alertas y seguimiento existentes. No se modifica la matriz oficial histórica que sigue ni los trabajos B-01/B-02/B-03.
+
+| Comprobación B-11 | Resultado | Evidencia |
+|---|---|---|
+| Infraestructura, mediciones e inspecciones | Conservados con permisos, filtros y fotografías | Suite completa y reporte 1.5.2.2 |
+| Crear/editar/desactivar umbrales; versiones e históricos | Aprobado; límites personalizados demuestran uso de configuración | `test_configurable_thresholds_versions_disable_and_invalid_rules` |
+| Vibración, variación de inclinación y condición visual | Aprobado; comparación inclusiva y mayor severidad | Reporte 1.5.2.3 |
+| Inválidos/no disponibles, deduplicación, identidad y trazabilidad | Aprobado con SQLite y PostgreSQL aislado | Reporte 1.5.2.2 y JSON |
+| DOM, Inspector y Mantención; CSRF | Permisos conservados; cambios de estado explícitos por DOM | `test_alert_followup_roles_and_csrf` |
+| Fuera del incremento: panel completo, mantenimiento y programación | Ocultos y bloqueados; sin dependencia técnica necesaria | Navegación, 404 y trazado SQL EV3 |
+| Compatibilidad EV2 / EV3 / full | Aprobada; filas conservadas al alternar | `test_switching_three_modes_preserves_rows_and_has_no_future_queries` y suites previas |
+| Reportes EDT 1.5.2.2 y 1.5.2.3 | Elaborados con fecha y resultados reales | [Captura](REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [reglas](REPORTE_1_5_2_3_REGLAS_ALERTA.md) |
+
+Resultado global: **98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. [Resultado verificable y hashes](evidence/EV3_B11_TEST_RESULTS.json). B-11 se considera técnicamente completado en pruebas; publicación, activación del corte y comprobación posterior en Vercel quedan pendientes de autorización. No se afirma aceptación municipal ni diagnóstico automático de seguridad estructural.
+
 ## Alcance visible del corte 26/10/2026
 
 Esta matriz conserva la evidencia de implementación del modo `full`. La presentación predeterminada corresponde exclusivamente al alcance solicitado para el corte, sin cambiar las fechas ni los porcentajes de la documentación de gestión.

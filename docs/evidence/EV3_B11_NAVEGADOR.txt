@@ -1,0 +1,6 @@
+Revisión manual de navegador local: 2026-11-08T15:09:24.796Z
+Etapa cutoff_2026_11_09; SQLite temporal de fixture; DOM.
+Reglas: formulario y configuraciones históricas visibles; navegación sin mantenimiento ni programación.
+Browser tab: 2, Title: "Puentes · Monitoreo municipal", URL: "http://127.0.0.1:5012/alerts/1".
+There has been no change in the accessibility tree.
+The focused UI element is 1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5012/alerts/1
