@@ -247,5 +247,12 @@ class PostgresTests(SystemTests):
         self.login('dom')
         MonitoringUiTests.test_institutional_future_audit_preserves_historical_rows(self)
 
+    def test_postgres_measurements_pagination(self):
+        from app import EV3_STAGE
+        from tests.test_monitoring_ui import MonitoringUiTests
+        self.app.config['PROJECT_STAGE']=EV3_STAGE
+        self.populated=lambda count=45:MonitoringUiTests.populated(self,count)
+        MonitoringUiTests.test_measurements_pagination_preserves_filters_roles_and_history(self)
+
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

@@ -162,5 +162,24 @@ class MonitoringUiTests(SystemTests):
             self.assertNotIn('Entorno de demostración',html)
             self.assertNotIn('proveedor académico',html)
 
+    def test_measurements_pagination_preserves_filters_roles_and_history(self):
+        self.populated(45)
+        before=[tuple(row) for row in self.db.execute('SELECT * FROM measurements ORDER BY id')]
+        for name in ('dom','inspector','worker'):
+            self.login(name)
+            pages=[self.client.get('/measurements?page='+str(p)).text for p in (1,2,3,999)]
+            ids=[[int(i) for i in re.findall(r'aria-label="Ver detalle de medición (\d+)"',html)] for html in pages]
+            self.assertEqual(ids,[list(range(45,25,-1)),list(range(25,5,-1)),[5,4,3,2,1],[5,4,3,2,1]])
+            self.assertNotIn('rel="prev"',pages[0]);self.assertNotIn('rel="next"',pages[2])
+        query='/measurements?bridge_id=1&component_id=1&sensor_id=1&from=2026-01-01&to=2026-01-02'
+        first=self.client.get(query).text
+        link=next(a['href'] for a in Links(first).links if a.get('rel')=='next')
+        for part in ('bridge_id=1','component_id=1','sensor_id=1','from=2026-01-01','to=2026-01-02','page=2'):self.assertIn(part,link)
+        second=self.client.get(link).text
+        self.assertIn('Página 2 de 2',second);self.assertEqual(len(re.findall(r'aria-label="Ver detalle de medición (\d+)"',second)),20)
+        self.assertIn('Sin mediciones disponibles',self.client.get('/measurements?bridge_id=2').text)
+        for page in ('0','-1','bad','999999999999999999999999999999'):self.assertEqual(self.client.get('/measurements?page='+page).status_code,400)
+        self.assertEqual(before,[tuple(row) for row in self.db.execute('SELECT * FROM measurements ORDER BY id')])
+
 def load_tests(loader, standard, pattern):
     return unittest.TestSuite(MonitoringUiTests(n) for n in MonitoringUiTests.__dict__ if n.startswith('test_'))

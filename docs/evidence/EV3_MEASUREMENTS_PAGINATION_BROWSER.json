@@ -1,0 +1,12 @@
+{
+  "environment": "Chrome, SQLite temporal de laboratorio",
+  "page_sizes": [
+    20,
+    20,
+    5
+  ],
+  "filtered_page_2": 3,
+  "filters_preserved": true,
+  "mobile_pagination_visible": true,
+  "errors": []
+}

@@ -1,5 +1,9 @@
 # Verificación del corte y modo completo
 
+## Corrección posterior: paginación de Mediciones
+
+Se sustituyó el límite de 500 filas por COUNT y LIMIT 20/OFFSET, utilizando el paginador existente. Conserva orden por fecha/ID descendente, puente, componente, sensor, fechas y permisos. No altera registros. **18 pruebas afectadas aprobadas, incluida paginación real sobre PostgreSQL aislado puentes_test; cero omisiones y fallos.** Chrome verificó 20/20/5 filas, filtros conservados y controles visibles a 390 px. [Log](evidence/EV3_MEASUREMENTS_PAGINATION_TESTS.log) y [navegador](evidence/EV3_MEASUREMENTS_PAGINATION_BROWSER.json). Los resultados anteriores corresponden a sus propias ejecuciones.
+
 **Revisión final posterior:** 108 pruebas Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Informe y confirmaciones](REVISION_FINAL_EV3_UI.md). Los resultados anteriores se conservan como historial de su ejecución.
 
 ## Resultado de revisión de interfaz EV3

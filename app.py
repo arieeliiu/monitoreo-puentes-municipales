@@ -314,8 +314,10 @@ def create_app(config=None):
         for field,op in [('from','>='),('to','<=')]:
             if request.args.get(field): filters.append(f'substr(m.measured_at,1,10){op}?'); args.append(request.args[field])
         where=' WHERE '+' AND '.join(filters) if filters else ''
-        data=rows('SELECT m.*,s.code,s.kind,b.name,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT 500',args)
-        return render_template('measurements.html',measurements=data,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.code AS bridge_code FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY c.bridge_id,c.id'))
+        source=' FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'
+        pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
+        data=rows('SELECT m.*,s.code,s.kind,b.name,c.name AS component'+source+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
+        return render_template('measurements.html',measurements=data,pager=pager,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.code AS bridge_code FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY c.bridge_id,c.id'))
 
     @app.post('/api/v1/measurements')
     def iot():
