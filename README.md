@@ -1,5 +1,7 @@
 # Monitoreo de puentes municipales
 
+**Revisión final posterior:** 108 pruebas Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Informe y confirmaciones](docs/REVISION_FINAL_EV3_UI.md). Los resultados anteriores se conservan como historial de su ejecución.
+
 ## Revisión local de interfaz EV3
 
 Cambios confirmados en `review/ev3-ui` para revisión en GitHub, sin fusión ni despliegue. La configuración `git.deploymentEnabled` de vercel.json excluye esta rama de los despliegues automáticos. Monitoreo agrupa Mediciones y Alertas en EV3/full, conservando rutas y permisos. Alertas e Historial de operaciones consultan 20 registros por página; Alertas conserva puente, severidad, estado y fechas UTC. Campana autenticada con cantidad de abiertas y avisos nuevos sin convertir históricos en notificaciones. Reglas separa versiones vigentes e históricas.

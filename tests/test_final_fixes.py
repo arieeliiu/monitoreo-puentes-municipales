@@ -202,7 +202,7 @@ class FinalFixTests(SystemTests):
             self.fail('Tiempo agotado: ' + label)
 
         def errors():
-            return self.db.execute("SELECT count(*) FROM audit WHERE action='Error al consultar proveedor ficticio'").fetchone()[0]
+            return self.db.execute("SELECT count(*) FROM audit WHERE action='Error al consultar proveedor IoT'").fetchone()[0]
 
         with (self.path / 'processes.log').open('w', encoding='utf-8') as log:
             try:
@@ -210,7 +210,7 @@ class FinalFixTests(SystemTests):
                 wait_for(lambda: errors() >= 1, 'error inicial de conexión auditado')
                 provider = launch(['mock_provider.py', '--port', str(port)])
                 wait_for(lambda: self.count('measurements') == 4, 'captura automática de ambos puentes')
-                wait_for(lambda: self.db.execute("SELECT count(*) FROM audit WHERE action='Consultar proveedor ficticio'").fetchone()[0] >= 2, 'segunda consulta automática')
+                wait_for(lambda: self.db.execute("SELECT count(*) FROM audit WHERE action='Consultar proveedor IoT'").fetchone()[0] >= 2, 'segunda consulta automática')
                 self.assertEqual(self.count('measurements'), 4)
                 self.assertEqual(self.count('alerts'), 4 if expected_alerts else 0)
                 stop_process(provider)

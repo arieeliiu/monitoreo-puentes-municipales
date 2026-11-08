@@ -8,7 +8,7 @@ Alertas e historial ejecutan COUNT más SELECT con LIMIT 20/OFFSET, ordenados po
 
 GET `/api/v1/alert-notifications` exige sesión y rol DOM/Inspector/Mantención. En EV2 se bloquea antes de acceder a BD. Cada consulta obtiene abiertas (Activa/En atención) y último ID con un agregado; solo si hay IDs posteriores hace un segundo SELECT limitado a 20. La primera consulta fija una línea base sin avisos históricos. El cursor se conserva por usuario/etapa/sesión de login en sessionStorage de la pestaña. El identificador de sesión de avisos rota al autenticar y la respuesta se comprueba para impedir consumir una sesión cambiada.
 
-Cliente sin dependencias externas: consulta cada 30 s, timeout de 8 s, sin solapamiento, pausa de consultas en pestaña oculta, reintento de fallos transitorios y detención ante 401/403 o cambio de sesión. Usa textContent para contenido y enlaces locales por ID. No existe estado de lectura, nueva tabla ni escritura de históricos. Ver [regresiones y límites](REVISION_EV3_UI.md).
+Cliente sin dependencias externas: consulta normal cada 30 s; si `has_more` indica pendientes, continúa cada 1 s con descanso de 5 s tras cuatro lotes (20 por lote); timeout de 8 s, sin solapamiento, pausa de consultas en pestaña oculta, reintento de fallos transitorios y detención ante 401/403 o cambio de sesión. Usa textContent para contenido y enlaces locales por ID. No existe estado de lectura, nueva tabla ni escritura de históricos. Ver [regresiones y límites](REVISION_EV3_UI.md).
 
 ## Etapa configurable de presentación
 

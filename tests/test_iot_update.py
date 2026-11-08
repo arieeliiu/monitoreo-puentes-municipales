@@ -35,7 +35,7 @@ class IotUpdateTests(SystemTests):
             self.assertEqual(self.post('/provider/pull').status_code,302)
             self.assertEqual(self.count('measurements'),2)
             self.post('/provider/pull');self.assertEqual(self.count('measurements'),2)
-            details=self.db.execute("SELECT details FROM audit WHERE action='Consultar proveedor ficticio' ORDER BY id DESC").fetchone()[0]
+            details=self.db.execute("SELECT details FROM audit WHERE action='Consultar proveedor IoT' ORDER BY id DESC").fetchone()[0]
             for code in ['wrong-bridge','wrong-type','wrong-second','missing','missing-kind']:self.assertIn(code,details)
             self.assertIn('no coincide',details)
             self.login('dom');self.assertIn('wrong-bridge',self.client.get('/audit').get_data(as_text=True))
@@ -75,7 +75,7 @@ class IotUpdateTests(SystemTests):
             self.assertEqual(result.exit_code,0,result.output)
             self.assertEqual(len(calls),3);self.assertEqual(waits,[7,7,7]);self.assertEqual(len(errors),1)
             self.assertEqual(self.count('measurements'),1)
-            self.assertEqual(self.db.execute("SELECT count(*) FROM audit WHERE action='Error al consultar proveedor ficticio'").fetchone()[0],1)
+            self.assertEqual(self.db.execute("SELECT count(*) FROM audit WHERE action='Error al consultar proveedor IoT'").fetchone()[0],1)
             self.assertEqual(self.client.get('/').status_code,200)
             self.post('/provider/pull');self.assertEqual(self.count('measurements'),1)
         finally:server.shutdown();server.server_close();thread.join()

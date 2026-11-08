@@ -212,5 +212,40 @@ class PostgresTests(SystemTests):
         self.assertNotIn('Panel de monitoreo',self.client.get('/').text)
 
 
+    def test_postgres_monitoring_pagination_filters_and_audit(self):
+        import re
+        from app import EV3_STAGE
+        from tests.test_monitoring_ui import MonitoringUiTests
+        self.app.config['PROJECT_STAGE']=EV3_STAGE
+        self.populated=lambda count=45:MonitoringUiTests.populated(self,count)
+        self.populated()
+        pages=[self.client.get('/alerts?page='+str(p)).text for p in (1,2,3,999)]
+        ids=[[int(i) for i in re.findall(r'class="row-link alert-row" href="/alerts/(\d+)"',p)] for p in pages]
+        self.assertEqual(ids,[list(range(45,25,-1)),list(range(25,5,-1)),[5,4,3,2,1],[5,4,3,2,1]])
+        self.populated=lambda count=45:None
+        MonitoringUiTests.test_filters_persist_dates_severity_status_bridge_and_empty(self)
+        MonitoringUiTests.test_audit_pagination_and_roles(self)
+
+    def test_postgres_notifications_roles_batches_and_historical_audit(self):
+        from app import EV3_STAGE
+        from tests.test_monitoring_ui import MonitoringUiTests
+        self.app.config['PROJECT_STAGE']=EV3_STAGE
+        MonitoringUiTests.populated(self,45)
+        for name in ('dom','inspector','worker'):
+            self.login(name)
+            baseline=self.client.get('/api/v1/alert-notifications').json
+            self.assertEqual(baseline['open_count'],45);self.assertEqual(baseline['alerts'],[])
+            cursor='0';ids=[]
+            for size,more in ((20,True),(20,True),(5,False)):
+                batch=self.client.get('/api/v1/alert-notifications?after='+cursor).json
+                self.assertEqual(len(batch['alerts']),size);self.assertEqual(batch['has_more'],more)
+                ids.extend(a['id'] for a in batch['alerts']);cursor=batch['cursor']
+            self.assertEqual(len(set(ids)),45)
+            self.assertEqual(self.client.get('/api/v1/alert-notifications?after='+cursor).json['alerts'],[])
+            self.assertEqual(self.client.get('/maintenance').status_code,404)
+            self.assertEqual(self.client.get('/inspection-plans').status_code,404)
+        self.login('dom')
+        MonitoringUiTests.test_institutional_future_audit_preserves_historical_rows(self)
+
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

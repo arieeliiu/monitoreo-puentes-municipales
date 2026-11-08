@@ -3,15 +3,19 @@
   'use strict';
   function createAlertPoller({url, key, epoch, fetcher, storage, onCount, onAlert, onStatus,
     isVisible = () => true, setTimer = setTimeout, clearTimer = clearTimeout}) {
-    let cursor = null, timer, busy = false, stopped = false;
+    let cursor = null, timer, busy = false, stopped = false, drainBatches = 0;
     try { const saved = storage.getItem(key); if (/^\d+$/.test(saved || '')) cursor = saved; } catch {}
-    const schedule = () => { if (!stopped) timer = setTimer(poll, 30000); };
+    // Lotes de 20: hasta cuatro consultas por ráfaga, separadas por 1 s.
+    // Si quedan pendientes, descansar 5 s; sin pendientes/error, consultar en 30 s.
+    const schedule = (delay = 30000) => { if (!stopped) timer = setTimer(poll, delay); };
     const stop = () => { stopped = true; clearTimer(timer); };
     async function poll() {
       if (stopped || busy) return;
       clearTimer(timer);
-      if (!isVisible()) { schedule(); return; }
+      if (!isVisible()) { drainBatches = 0; schedule(); return; }
       busy = true;
+      let nextDelay = 30000;
+      const previousCursor = cursor;
       const controller = new AbortController();
       const timeout = setTimer(() => controller.abort(), 8000);
       try {
@@ -29,7 +33,8 @@
           stop(); onStatus('La sesión cambió. Vuelve a cargar la página.'); return;
         }
         if (!Number.isSafeInteger(data.open_count) || data.open_count < 0 ||
-            !/^\d+$/.test(data.cursor) || !Array.isArray(data.alerts)) throw new Error('Respuesta inválida');
+            !/^\d+$/.test(data.cursor) || !Array.isArray(data.alerts) || typeof data.has_more !== 'boolean') throw new Error('Respuesta inválida');
+        if (!baseline && !data.reset && BigInt(data.cursor) < BigInt(cursor)) throw new Error('Cursor inválido');
         onCount(data.open_count);
         if (!baseline && !data.reset) {
           for (const alert of data.alerts) {
@@ -42,11 +47,17 @@
         }
         cursor = data.cursor;
         try { storage.setItem(key, cursor); } catch {}
+        if (!baseline && !data.reset && data.has_more && data.alerts.length > 0 && BigInt(cursor) > BigInt(previousCursor)) {
+          drainBatches += 1;
+          nextDelay = drainBatches < 4 ? 1000 : 5000;
+          if (drainBatches === 4) drainBatches = 0;
+        } else drainBatches = 0;
         onStatus('Actualizado. Los avisos nuevos aparecerán aquí; el historial completo está en Alertas.');
       } catch {
+        drainBatches = 0;
         if (!stopped) onStatus('No se pudo actualizar. Se reintentará automáticamente.');
       } finally {
-        busy = false; clearTimer(timeout); schedule();
+        busy = false; clearTimer(timeout); schedule(nextDelay);
       }
     }
     return {poll, stop};

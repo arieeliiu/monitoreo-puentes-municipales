@@ -87,8 +87,9 @@ class MonitoringUiTests(SystemTests):
         self.populated(25);before=self.snapshot()
         initial=self.api();self.assertEqual(initial.status_code,200)
         self.assertEqual(initial.json['alerts'],[]);self.assertEqual(initial.json['cursor'],'25')
-        self.assertEqual(initial.json['open_count'],25)
+        self.assertEqual(initial.json['open_count'],25);self.assertFalse(initial.json['has_more'])
         one=self.api('?after=0').json;two=self.api('?after='+one['cursor']).json
+        self.assertTrue(one['has_more']);self.assertFalse(two['has_more'])
         self.assertEqual([len(one['alerts']),len(two['alerts'])],[20,5]);self.assertEqual(two['cursor'],'25')
         self.assertEqual(self.api('?after=25').json['alerts'],[])
         self.assertEqual(self.api('?after=9999').json['cursor'],'25');self.assertTrue(self.api('?after=9999').json['reset'])
@@ -144,6 +145,22 @@ class MonitoringUiTests(SystemTests):
         self.assertEqual(before,self.snapshot())
         for name in ('inspector','worker'):
             self.login(name);self.assertEqual(self.client.get('/rules').status_code,403)
+
+    def test_institutional_future_audit_preserves_historical_rows(self):
+        self.db.execute("INSERT INTO audit(author,action,entity,details,created_at) VALUES('DOM','Consultar proveedor ficticio','provider','Descripción histórica original','2026-01-01')")
+        self.db.commit()
+        old=tuple(self.db.execute("SELECT * FROM audit WHERE action='Consultar proveedor ficticio'").fetchone())
+        with patch('app.fetch_measurements',return_value=[]):
+            self.assertEqual(self.post('/provider/pull').status_code,302)
+        self.assertEqual(tuple(self.db.execute('SELECT * FROM audit WHERE id=?',(old[0],)).fetchone()),old)
+        current=self.db.execute("SELECT details FROM audit WHERE action='Consultar proveedor IoT' ORDER BY id DESC").fetchone()
+        self.assertIsNotNone(current);self.assertIn('Origen: proveedor simulado.',current[0])
+        html=self.client.get('/audit').text
+        self.assertIn('Consultar proveedor ficticio',html);self.assertIn('Descripción histórica original',html)
+        for path in ('/','/measurements','/alerts','/rules','/audit'):
+            html=self.client.get(path).text
+            self.assertNotIn('Entorno de demostración',html)
+            self.assertNotIn('proveedor académico',html)
 
 def load_tests(loader, standard, pattern):
     return unittest.TestSuite(MonitoringUiTests(n) for n in MonitoringUiTests.__dict__ if n.startswith('test_'))

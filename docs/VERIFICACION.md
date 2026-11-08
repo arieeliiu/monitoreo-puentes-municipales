@@ -1,5 +1,7 @@
 # Verificación del corte y modo completo
 
+**Revisión final posterior:** 108 pruebas Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Informe y confirmaciones](REVISION_FINAL_EV3_UI.md). Los resultados anteriores se conservan como historial de su ejecución.
+
 ## Resultado de revisión de interfaz EV3
 
 Ejecutado localmente el 08/11/2026: 105 casos Python descubiertos; 95 aprobados, 10 PostgreSQL omitidos por falta de DSN de pruebas aislado, 0 fallos y 0 errores. Las tres suites JavaScript suman 16 aprobadas, 0 fallos. Las suites JS se repitieron después del ajuste de ciclo de vida de navegación; no se cuentan dos veces. [JSON con casos y hashes](evidence/EV3_UI_TEST_RESULTS.json), [TAP final](evidence/EV3_UI_FINAL_JS.tap), [log completo](evidence/EV3_UI_TEST_RUN.log).

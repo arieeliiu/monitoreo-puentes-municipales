@@ -523,7 +523,7 @@ def create_app(config=None):
         if cursor is not None and not reset and cursor<maximum:
             fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.id>? AND a.id<=? ORDER BY a.id LIMIT 20',(cursor,maximum))
         next_cursor=fresh[-1]['id'] if fresh else maximum
-        return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,
+        return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,has_more=bool(fresh and next_cursor<maximum),
                        alerts=[dict(id=str(a['id']),title=a['name']+' · '+a['label'],
                                     severity=a['severity'] if a['standard']=='EV2' else 'Histórica',
                                     status=a['status'],url=url_for('alert',aid=a['id'])) for a in fresh])
@@ -625,7 +625,7 @@ def create_app(config=None):
         for index,item in enumerate(items):
             db().execute('SAVEPOINT provider_item')
             try:
-                if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor académico debe identificar simulated=true.')
+                if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor no confirmó la procedencia simulada del registro.')
                 required(item,'external_id')
                 validate_identity(item,provider=True)
                 if one('SELECT id FROM measurements WHERE external_id=?',(item['external_id'],)):
@@ -636,7 +636,8 @@ def create_app(config=None):
                 db().execute('ROLLBACK TO provider_item');db().execute('RELEASE provider_item')
                 identity={key:item.get(key) for key in ['external_id','sensor_code','bridge_code','kind']} if isinstance(item,dict) else {'registro':'no es objeto'}
                 result['errors'].append(f'Registro {index+1} {identity}: {error}')
-        audit('Consultar proveedor ficticio','measurements',None,str(result)); db().commit()
+        audit('Consultar proveedor IoT','measurements',None,
+              f"Origen: proveedor simulado. Recibidas: {result['received']}; duplicadas: {result['duplicates']}; incidencias: {len(result['errors'])}. "+'; '.join(result['errors'])); db().commit()
         return result
 
     def pull_provider():
@@ -645,7 +646,7 @@ def create_app(config=None):
             db().rollback()
             message=str(error) if isinstance(error,ValueError) else 'Error de persistencia IoT: '+type(error).__name__
             try:
-                audit('Error al consultar proveedor ficticio','measurements',None,message);db().commit()
+                audit('Error al consultar proveedor IoT','measurements',None,'Origen: proveedor simulado. '+message);db().commit()
             except sqlite3.Error:
                 db().rollback();app.logger.exception('No se pudo persistir el error IoT')
             raise ValueError(message) from error
@@ -682,7 +683,7 @@ def create_app(config=None):
     def provider_pull():
         try:
             result=pull_provider()
-            flash(f"Recepción del proveedor: {result['received']} recibidas, {result['duplicates']} duplicadas. "+' '.join(result['errors']),'warning' if result['errors'] else 'success')
+            flash(f"Recepción del proveedor: {result['received']} recibidas, {result['duplicates']} duplicadas. "+(f"{len(result['errors'])} incidencias; consulta el Historial de operaciones." if result['errors'] else ''),'warning' if result['errors'] else 'success')
         except ValueError as error: flash(str(error),'error')
         return redirect(url_for('measurements'))
 
@@ -742,7 +743,7 @@ def create_app(config=None):
                 if not one("SELECT id FROM rules WHERE bridge_id=? AND kind='visual' AND condition=? AND standard='EV2'",(b['id'],condition)):
                     insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,simulated=1,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
         complete_demo_locations(db())
-        audit('Actualizar demostración EV2','bridges',None);db().commit()
+        audit('Actualizar configuración de monitoreo','bridges',None,'Configuración de origen simulado; se conservan las versiones y los registros anteriores.');db().commit()
 
     @app.cli.command('configure-demo-locations')
     def demo_locations_command():

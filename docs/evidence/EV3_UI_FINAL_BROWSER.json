@@ -1,0 +1,86 @@
+{
+  "environment": "Chrome headless, SQLite temporal de laboratorio; no producción",
+  "historical_baseline": 45,
+  "new_alerts": 45,
+  "drain_ms": 2370,
+  "batches": [
+    {
+      "at": 1794164867561,
+      "size": 20,
+      "more": true,
+      "cursor": "65"
+    },
+    {
+      "at": 1794164868571,
+      "size": 20,
+      "more": true,
+      "cursor": "85"
+    },
+    {
+      "at": 1794164869579,
+      "size": 5,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164869928,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164870293,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164870398,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164870495,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164870576,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164870656,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164871257,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164871353,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    },
+    {
+      "at": 1794164871918,
+      "size": 0,
+      "more": false,
+      "cursor": "90"
+    }
+  ],
+  "roles": [
+    "DOM",
+    "Inspector",
+    "Mantención"
+  ],
+  "page_errors": []
+}
