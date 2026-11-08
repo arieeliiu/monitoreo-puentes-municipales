@@ -114,11 +114,13 @@ class CorrectionsTests(SystemTests):
     def test_official_views_and_required_fields(self):
         self.rule();self.post('/measurements',self.measurement());self.task()
         page=self.client.get('/alerts/1').get_data(as_text=True)
-        self.assertIn('/measurements/1',page);self.assertIn('2026-',page)
+        self.assertIn('/measurements/1',page)
+        from display_time import chile_datetime
+        self.assertIn(chile_datetime(self.db.execute('SELECT created_at FROM alerts WHERE id=1').fetchone()[0]),page)
         self.assertNotIn('Entorno de demostración',page)
         self.assertNotIn('PRUEBA',page)
         page=self.client.get('/measurements?bridge_id=1').get_data(as_text=True)
-        for value in ['Puente de prueba','S1','Aceleración vertical pico','9.0','2026-01-01T13:00:00+00:00']:self.assertIn(value,page)
+        for value in ['Puente de prueba','S1','Aceleración vertical pico','9.0','01/01/2026 10:00:00 (UTC-03:00)']:self.assertIn(value,page)
         count=self.count('tasks')
         response=self.task(description='',follow_redirects=True)
         self.assertIn('obligatorio',response.get_data(as_text=True));self.assertEqual(self.count('tasks'),count)

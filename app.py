@@ -11,6 +11,7 @@ from database import connect
 from photo_storage import PhotoStorage, PhotoStorageError
 from cloud_provider import cloud_records
 from pilot_time import form_timestamp
+from display_time import chile_datetime, calendar_date, local_date_bounds
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from provider_client import fetch_measurements
@@ -54,6 +55,8 @@ def create_app(config=None):
     if os.environ.get('VERCEL') and (not app.config.get('DATABASE_URL') or app.config['PHOTO_STORAGE']!='supabase'): raise ValueError('Vercel requiere PostgreSQL y Storage privado; no se permite almacenamiento local efímero.')
     if app.config['PHOTO_STORAGE']=='local': Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
     photo_store=PhotoStorage(app.config)
+    app.add_template_filter(chile_datetime)
+    app.add_template_filter(calendar_date)
 
     def db():
         if 'db' not in g:
@@ -290,6 +293,19 @@ def create_app(config=None):
         audit('Recibir medición simulada' if simulated else 'Recibir medición','measurements',mid)
         return mid
 
+    def local_date_filters(column, filters, args):
+        try:
+            lower,upper=local_date_bounds(request.args.get('from',''),request.args.get('to',''))
+        except ValueError as error: abort(400,str(error))
+        if lower or upper:
+            # El contrato persistido es UTC ISO. No asignar una zona a históricos
+            # sin zona registrada; permanecen visibles en consultas sin fechas.
+            filters.append(f"(substr({column},length({column})-5)='+00:00' OR substr({column},length({column}),1)='Z')")
+        for bound,operator in ((lower,'>='),(upper,'<')):
+            if bound:
+                filters.append(f"substr(replace({column},' ','T'),1,19){operator}?")
+                args.append(bound[:19])
+
     @app.route('/measurements',methods=['GET','POST'])
     @access()
     def measurements():
@@ -311,8 +327,7 @@ def create_app(config=None):
         filters=[]; args=[]
         for field,column in [('bridge_id','c.bridge_id'),('component_id','c.id'),('sensor_id','s.id')]:
             if request.args.get(field): filters.append(column+'=?'); args.append(request.args[field])
-        for field,op in [('from','>='),('to','<=')]:
-            if request.args.get(field): filters.append(f'substr(m.measured_at,1,10){op}?'); args.append(request.args[field])
+        local_date_filters('m.measured_at',filters,args)
         where=' WHERE '+' AND '.join(filters) if filters else ''
         source=' FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'
         pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
@@ -496,15 +511,7 @@ def create_app(config=None):
             elif request.args['severity'] in SEVERITIES:
                 filters.append("a.standard='EV2' AND a.severity=?");args.append(request.args['severity'])
             else: abort(400,'Severidad inválida.')
-        dates={}
-        for field,operator in [('from','>='),('to','<=')]:
-            if request.args.get(field):
-                try:
-                    dates[field]=date.fromisoformat(request.args[field]).isoformat()
-                    if dates[field]!=request.args[field]: raise ValueError()
-                except ValueError: abort(400,'Usa fechas válidas en formato AAAA-MM-DD.')
-                filters.append(f'substr(a.created_at,1,10){operator}?');args.append(dates[field])
-        if dates.get('from','')>dates.get('to','9999-12-31'): abort(400,'Desde no puede ser posterior a Hasta.')
+        local_date_filters('a.created_at',filters,args)
         where=' WHERE '+' AND '.join(filters) if filters else ''
         source=' FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id'
         pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])

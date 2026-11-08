@@ -254,5 +254,13 @@ class PostgresTests(SystemTests):
         self.populated=lambda count=45:MonitoringUiTests.populated(self,count)
         MonitoringUiTests.test_measurements_pagination_preserves_filters_roles_and_history(self)
 
+    def test_postgres_chile_dates_filters_and_pagination(self):
+        from tests.test_chile_time import ChileTimeViewTests
+        ChileTimeViewTests.test_local_day_filters_pagination_and_unchanged_utc(self)
+
+    def test_postgres_chile_dates_rendering_and_history(self):
+        from tests.test_chile_time import ChileTimeViewTests
+        ChileTimeViewTests.test_all_visible_timestamps_and_unknown_history_are_preserved(self)
+
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

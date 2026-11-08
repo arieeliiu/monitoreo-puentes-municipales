@@ -1,0 +1,14 @@
+{
+  "environment": "Chrome headless, SQLite temporal; no producción",
+  "facts": [
+    "/measurements: fecha local visible",
+    "/measurements/1: fecha local visible",
+    "/alerts: fecha local visible",
+    "/alerts/1: fecha local visible",
+    "/rules: fecha local visible",
+    "/audit: fecha local visible"
+  ],
+  "local_date_filters_preserved": true,
+  "pagination": true,
+  "page_errors": []
+}

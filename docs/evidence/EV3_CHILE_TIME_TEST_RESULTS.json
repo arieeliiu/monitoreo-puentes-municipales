@@ -1,0 +1,1175 @@
+{
+  "started_at": "2026-11-08T18:24:04-03:00",
+  "finished_at": "2026-11-08T18:35:04-03:00",
+  "timezone": "America/Santiago",
+  "base_commit": "8af14f9f783086f108b2fda15fb6d39ad7011287",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "sqlite": "3.53.1",
+    "postgres_tests_enabled": true,
+    "production_database_used": false
+  },
+  "source_sha256": {
+    "app.py": "89e313f51a7b355d6362ad684fac53289dd12255909aa4bb2cd778716562eabc",
+    "display_time.py": "71878b7b063ab3aabb37e328eed048162fdef4764b7c547e597d88220948965b",
+    "pilot_time.py": "353a11aea0b27cecdc0fc4a5ae11d8ed4e7926fcd746142975ffbd5b5f5119af",
+    "templates/alert.html": "872add14bebd9d228e6fb217020429fafd45bdb71e9463736b77f864eaadc5bc",
+    "templates/alerts.html": "72f2ab0e31af91533a73fa1907e924acf1fdba2a9e86ed7407ddd57e9ddfb065",
+    "templates/audit.html": "6fd34f410ebb78235cfdac2b9d1eae1f463b0e68980a4c6ef7a30dd7783c5f80",
+    "templates/base.html": "bc76124a899746893d51c84c0d124ea4c41369ede3a8d0959eaa84ecfccc9d0b",
+    "templates/bridge.html": "38cb23bb6647786e71905f1e25956b7165b521702561ee46948acfa53b829265",
+    "templates/bridges.html": "eb4cd99d4cbec39251821597251e45f1b89464acf434207000e1dbec2442a68d",
+    "templates/dashboard.html": "42600d3402c69ffd0b712d6befbfdeac3a20927a27fab6b472bbe52effaec346",
+    "templates/error.html": "512aa6d2a6b5f5280c4ad231c4d5da7f89b11f41a9f24f166bb72687f372135f",
+    "templates/inspection.html": "595ed03d02702b9ec83965614e0dc19a8ec76bee40dbec761812ec6f5dda4b65",
+    "templates/inspection_plans.html": "090a618966377baa58601775fd61619a8f5cf5be0ef2b76a0d34b5c3a4dfe172",
+    "templates/inspections.html": "7e736b771fdca5c4b42f9fabc5574c13fbd81ee985d62abf9cd8a0ef405be74a",
+    "templates/login.html": "aa055c433e7ecc0b76f62c2689819b1efd8dc45f338a8b4193d821e37b49431e",
+    "templates/macros.html": "5bf570fd48b2fc4add660a03c5e3ae167ad4c72897a458447ab5a886432672ee",
+    "templates/maintenance.html": "6aef434d1eb88a7b8ca07522e087109132fa4251ea76e266f46ade5f277c89ab",
+    "templates/measurement.html": "e84d9df69231acd2f2a4132c580708b2a5b3e7071efcc75599ec65cc0ab4e17e",
+    "templates/measurements.html": "9407cdb909a920040a9cd9fbb8b272ef41826cfd5824f1af481410c54a5fbeca",
+    "templates/rules.html": "45066e8bd09c52598137a0a5342e8e50c5ffe7ae245c212d4672069df1262665",
+    "tests/test_app.py": "5aa86ae8cf04cfeec17114c7b7a820b6240c464d9d6950f707ca866c9a8de959",
+    "tests/test_chile_time.py": "11cbc93571c714bcbdb9d1bb74f8f8cc8e509e37125d2b2f631928acac07296a",
+    "tests/test_cloud.py": "5f1920bb38f19c88436044a694f3b76244fde47528bb3b511c3497661012189b",
+    "tests/test_corrections.py": "659262fc46f0f48eef522308848dc9cdf5b6bbae8ce1527c2f478824aa8598c0",
+    "tests/test_ev2.py": "32530c464c4f29bdaf5828f6e84e2eab0c2246fe789b9e9b686cc78200dc65bd",
+    "tests/test_ev3_stage.py": "9e0081999d49f0ae9cdbab0959a1fd257183df3741f2df7c81efd01c32220ae6",
+    "tests/test_final_fixes.py": "57988783093c7ef0a5a6146e26af743d3b60af5df0635eb052f83d049900ca6d",
+    "tests/test_iot_update.py": "3b108f28e1cf638da05cef65c850583862bb3f6d48cbcd917f97af131b18c253",
+    "tests/test_measurement_components.py": "0640d09765050f7a01f30d951b424a71f86f67198b79ad536ed2cd2e17a98bba",
+    "tests/test_monitoring_ui.py": "438588337fae0f525e6b5d7503b2fada181a2168d5b2008f1ae3e5d4c0a3bace",
+    "tests/test_project_stage.py": "e828147ecf5c0c387c5e1c94efc61b8d2393646acbe7abbf225a84c449e930f3",
+    "tests/test_usability.py": "96148c85ebdc5447a4545ad1e36d01880d0ee4ecea885e0ebcafafb506d29cbd",
+    "tests/cloud-uploads.test.cjs": "3c4c312a63a9a7e83956ab14e69c2b9afb08b4a2e9c3976b2206e14cb8988b3b",
+    "tests/frontend.test.cjs": "3d28902e2fe8e1ff59a98a7472ce6f4cc64f70bfd212091e1528d36041d340e5",
+    "tests/notifications.test.cjs": "a5403f1f258be4b37580b6c46b35e8e6a16dd4e5408e0d0d72cc6bec818bb63c",
+    "static/app.js": "8a1fffe84d0c80be5e48229e52b8f3e000190a2a32ddc570f0e5df9f0437fcd7",
+    "static/notifications.js": "19a017217d5e25de68b80af10389f44c26527299e5d54f3dfebdddbe940020bd",
+    "static/app.css": "c466c8b750377cea3099ab620b831f164db5f3c6124ceef54d3e909565c8d570",
+    "tools/run_ev3_checks.py": "06d4b7dc58dcc08dc49cab7b1c0d2189b6b8288fe837b2a10269c89af23a8bce"
+  },
+  "python": {
+    "run": 117,
+    "passed": 117,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "cases": [
+      {
+        "test": "tests.test_app.SystemTests.test_academic_rule_without_real_reference",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:05-03:00",
+        "duration_seconds": 2.407
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_alert_threshold_and_simulation",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:07-03:00",
+        "duration_seconds": 2.609
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_all_pages_render",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:10-03:00",
+        "duration_seconds": 2.656
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_bad_photo_and_cross_bridge_inspection_rollback",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:12-03:00",
+        "duration_seconds": 2.703
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_bridge_crud_and_duplicates",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:15-03:00",
+        "duration_seconds": 2.5
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_components_sensors_validation_and_edits",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:17-03:00",
+        "duration_seconds": 2.578
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_cross_bridge_task_and_bad_assignee",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:20-03:00",
+        "duration_seconds": 2.469
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_csrf_and_xss",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:22-03:00",
+        "duration_seconds": 2.406
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_dashboard_empty_and_missing_latest",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:25-03:00",
+        "duration_seconds": 2.532
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_dom_task_edit_and_inspector_followup",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:27-03:00",
+        "duration_seconds": 2.984
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_inclination_and_visual_alert",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:30-03:00",
+        "duration_seconds": 2.484
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_iot_auth_idempotency_and_unavailable_configuration",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:33-03:00",
+        "duration_seconds": 2.438
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_maintenance_assignment_tracking_and_explicit_resolution",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:35-03:00",
+        "duration_seconds": 3.969
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_malformed_api_fields",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:39-03:00",
+        "duration_seconds": 2.468
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_measurement_validation_and_history",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:42-03:00",
+        "duration_seconds": 2.5
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_persistence_after_app_recreation",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:44-03:00",
+        "duration_seconds": 2.422
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_photo_upload_and_authorization",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:47-03:00",
+        "duration_seconds": 2.938
+      },
+      {
+        "test": "tests.test_app.SystemTests.test_role_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:50-03:00",
+        "duration_seconds": 3.265
+      },
+      {
+        "test": "tests.test_chile_time.ChileTimeUnitTests.test_local_bounds_dst_and_invalid_dates",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:53-03:00",
+        "duration_seconds": 0.0
+      },
+      {
+        "test": "tests.test_chile_time.ChileTimeUnitTests.test_summer_winter_midnight_and_explicit_offsets",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:53-03:00",
+        "duration_seconds": 0.0
+      },
+      {
+        "test": "tests.test_chile_time.ChileTimeUnitTests.test_unknown_zone_bad_values_and_calendar_dates",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:53-03:00",
+        "duration_seconds": 0.0
+      },
+      {
+        "test": "tests.test_chile_time.ChileTimeViewTests.test_all_visible_timestamps_and_unknown_history_are_preserved",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:53-03:00",
+        "duration_seconds": 2.578
+      },
+      {
+        "test": "tests.test_chile_time.ChileTimeViewTests.test_local_day_filters_pagination_and_unchanged_utc",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:55-03:00",
+        "duration_seconds": 2.75
+      },
+      {
+        "test": "tests.test_cloud.CloudTests.test_serverless_requires_stable_secret_and_no_local_files",
+        "status": "passed",
+        "started_at": "2026-11-08T18:24:58-03:00",
+        "duration_seconds": 2.469
+      },
+      {
+        "test": "tests.test_cloud.CloudTests.test_private_storage_upload_read_authorization_and_compensation",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:01-03:00",
+        "duration_seconds": 3.375
+      },
+      {
+        "test": "tests.test_cloud.CloudTests.test_direct_uploads_authorization_limits_validation_and_cleanup",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:04-03:00",
+        "duration_seconds": 3.531
+      },
+      {
+        "test": "tests.test_cloud.CloudTests.test_cron_secret_cloud_provider_dedup_and_cutoff",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:08-03:00",
+        "duration_seconds": 2.422
+      },
+      {
+        "test": "tests.test_cloud.CloudTests.test_parameters_do_not_rewrite_sql_literals",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:10-03:00",
+        "duration_seconds": 2.344
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_infrastructure_and_sensors",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:12-03:00",
+        "duration_seconds": 18.14
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_measurements_and_alerts_full",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:30-03:00",
+        "duration_seconds": 27.094
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_private_photos_and_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:25:58-03:00",
+        "duration_seconds": 10.188
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_cutoff_receipt_and_duplicate_cron",
+        "status": "passed",
+        "started_at": "2026-11-08T18:26:08-03:00",
+        "duration_seconds": 19.047
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_migration_preserves_rows_hashes_photos_and_ids",
+        "status": "passed",
+        "started_at": "2026-11-08T18:26:27-03:00",
+        "duration_seconds": 13.171
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_provider_savepoints_and_evidence",
+        "status": "passed",
+        "started_at": "2026-11-08T18:26:40-03:00",
+        "duration_seconds": 14.704
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_usability_filters",
+        "status": "passed",
+        "started_at": "2026-11-08T18:26:55-03:00",
+        "duration_seconds": 14.828
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_usability_dates_photos",
+        "status": "passed",
+        "started_at": "2026-11-08T18:27:09-03:00",
+        "duration_seconds": 16.406
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_component_history_and_manual",
+        "status": "passed",
+        "started_at": "2026-11-08T18:27:26-03:00",
+        "duration_seconds": 18.703
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_ev3_cutoff_rules_and_cron",
+        "status": "passed",
+        "started_at": "2026-11-08T18:27:45-03:00",
+        "duration_seconds": 13.672
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_monitoring_pagination_filters_and_audit",
+        "status": "passed",
+        "started_at": "2026-11-08T18:27:58-03:00",
+        "duration_seconds": 33.156
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_notifications_roles_batches_and_historical_audit",
+        "status": "passed",
+        "started_at": "2026-11-08T18:28:31-03:00",
+        "duration_seconds": 38.5
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_measurements_pagination",
+        "status": "passed",
+        "started_at": "2026-11-08T18:29:10-03:00",
+        "duration_seconds": 32.141
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_chile_dates_filters_and_pagination",
+        "status": "passed",
+        "started_at": "2026-11-08T18:29:42-03:00",
+        "duration_seconds": 57.609
+      },
+      {
+        "test": "tests.test_cloud.PostgresTests.test_postgres_chile_dates_rendering_and_history",
+        "status": "passed",
+        "started_at": "2026-11-08T18:30:40-03:00",
+        "duration_seconds": 16.063
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_sensor_location_and_variable",
+        "status": "passed",
+        "started_at": "2026-11-08T18:30:56-03:00",
+        "duration_seconds": 2.25
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_migration_preserves_every_existing_table_row",
+        "status": "passed",
+        "started_at": "2026-11-08T18:30:58-03:00",
+        "duration_seconds": 2.265
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_no_rule_received_notice",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:00-03:00",
+        "duration_seconds": 2.266
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_signed_and_absolute_inclination_boundaries",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:03-03:00",
+        "duration_seconds": 2.359
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_provider_http_end_to_end_two_bridges_dedup_and_errors",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:05-03:00",
+        "duration_seconds": 3.391
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_retry_connection_and_bad_json",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:08-03:00",
+        "duration_seconds": 2.75
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_schedule_roles_result_and_dashboard",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:11-03:00",
+        "duration_seconds": 3.125
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_schedule_validations_and_cancel",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:14-03:00",
+        "duration_seconds": 3.625
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_unassigned_inspector_cannot_record_plan",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:18-03:00",
+        "duration_seconds": 3.109
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_official_views_and_required_fields",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:21-03:00",
+        "duration_seconds": 2.844
+      },
+      {
+        "test": "tests.test_corrections.CorrectionsTests.test_maintenance_filter_and_missing_alert_relations",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:24-03:00",
+        "duration_seconds": 3.891
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_numeric_levels_positive_negative_and_exact_limits",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:28-03:00",
+        "duration_seconds": 2.5
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_reference_offset_snapshot_missing_and_invalid",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:30-03:00",
+        "duration_seconds": 2.437
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_old_units_are_never_relabelled",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:33-03:00",
+        "duration_seconds": 2.297
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_visual_categories_and_configured_alerts",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:35-03:00",
+        "duration_seconds": 2.344
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_rule_configuration_versions_and_highest_only",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:37-03:00",
+        "duration_seconds": 2.797
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_demo_setup_is_idempotent_and_customizable",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:40-03:00",
+        "duration_seconds": 2.297
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_professional_ui_and_severity_styles_all_roles",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:42-03:00",
+        "duration_seconds": 3.734
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_ev2_provider_flow_both_bridges",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:46-03:00",
+        "duration_seconds": 2.875
+      },
+      {
+        "test": "tests.test_ev2.Ev2Tests.test_fresh_demo_has_three_components_per_bridge",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:49-03:00",
+        "duration_seconds": 3.656
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_stage_configuration_navigation_permissions_and_blocked_writes",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:53-03:00",
+        "duration_seconds": 3.906,
+        "facts": {
+          "measurements": 1,
+          "inspections": 0,
+          "rule_versions": 19,
+          "alerts": 1,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 3,
+              "severity": "Crítico",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_numeric_boundaries_engine_reused",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:56-03:00",
+        "duration_seconds": 2.454,
+        "facts": {
+          "measurements": 14,
+          "inspections": 0,
+          "rule_versions": 18,
+          "alerts": 12,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 2,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 3,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 4,
+              "inspection_id": null,
+              "rule_id": 2,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 5,
+              "inspection_id": null,
+              "rule_id": 2,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 6,
+              "inspection_id": null,
+              "rule_id": 3,
+              "severity": "Crítico",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 7,
+              "inspection_id": null,
+              "rule_id": 3,
+              "severity": "Crítico",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 9,
+              "inspection_id": null,
+              "rule_id": 4,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 10,
+              "inspection_id": null,
+              "rule_id": 4,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 11,
+              "inspection_id": null,
+              "rule_id": 5,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 12,
+              "inspection_id": null,
+              "rule_id": 5,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 13,
+              "inspection_id": null,
+              "rule_id": 6,
+              "severity": "Crítico",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 14,
+              "inspection_id": null,
+              "rule_id": 6,
+              "severity": "Crítico",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_reference_snapshot_engine_reused",
+        "status": "passed",
+        "started_at": "2026-11-08T18:31:59-03:00",
+        "duration_seconds": 2.375,
+        "facts": {
+          "measurements": 5,
+          "inspections": 0,
+          "rule_versions": 18,
+          "alerts": 4,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada",
+            "Falta referencia del sensor: medición no evaluable"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 4,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 2,
+              "inspection_id": null,
+              "rule_id": 5,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 3,
+              "inspection_id": null,
+              "rule_id": 6,
+              "severity": "Crítico",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 4,
+              "inspection_id": null,
+              "rule_id": 6,
+              "severity": "Crítico",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_visual_engine_reused",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:01-03:00",
+        "duration_seconds": 2.296,
+        "facts": {
+          "measurements": 0,
+          "inspections": 4,
+          "rule_versions": 18,
+          "alerts": 3,
+          "alert_notes": 0,
+          "evaluations": [],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": null,
+              "inspection_id": 2,
+              "rule_id": 7,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": null,
+              "inspection_id": 3,
+              "rule_id": 8,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": null,
+              "inspection_id": 4,
+              "rule_id": 9,
+              "severity": "Crítico",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_configurable_thresholds_versions_disable_and_invalid_rules",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:04-03:00",
+        "duration_seconds": 2.422,
+        "facts": {
+          "measurements": 6,
+          "inspections": 0,
+          "rule_versions": 4,
+          "alerts": 5,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 3,
+              "inspection_id": null,
+              "rule_id": 4,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 4,
+              "inspection_id": null,
+              "rule_id": 2,
+              "severity": "Alerta",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 5,
+              "inspection_id": null,
+              "rule_id": 3,
+              "severity": "Crítico",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 1,
+              "measurement_id": 6,
+              "inspection_id": null,
+              "rule_id": 2,
+              "severity": "Alerta",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_capture_invalid_missing_no_rule_and_api_dedup_traceability",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:06-03:00",
+        "duration_seconds": 2.344,
+        "facts": {
+          "measurements": 4,
+          "inspections": 0,
+          "rule_versions": 1,
+          "alerts": 1,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada",
+            "No evaluada: dato invalido",
+            "No evaluada: dato no_disponible",
+            "Sin regla aplicable"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_http_provider_two_bridges_dedup",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:08-03:00",
+        "duration_seconds": 2.828,
+        "facts": {
+          "measurements": 2,
+          "inspections": 0,
+          "rule_versions": 18,
+          "alerts": 2,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 2,
+              "measurement_id": 2,
+              "inspection_id": null,
+              "rule_id": 14,
+              "severity": "Alerta",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_provider_inconsistent_records_and_savepoints",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:11-03:00",
+        "duration_seconds": 2.781,
+        "facts": {
+          "measurements": 2,
+          "inspections": 0,
+          "rule_versions": 0,
+          "alerts": 0,
+          "alert_notes": 0,
+          "evaluations": [
+            "Falta referencia del sensor: medición no evaluable",
+            "Sin regla aplicable"
+          ],
+          "alert_sources": []
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_alert_followup_roles_and_csrf",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:14-03:00",
+        "duration_seconds": 3.579,
+        "facts": {
+          "measurements": 1,
+          "inspections": 0,
+          "rule_versions": 1,
+          "alerts": 1,
+          "alert_notes": 3,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Resuelta"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_forged_plan_rejected_before_inspection_and_photos",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:18-03:00",
+        "duration_seconds": 2.843,
+        "facts": {
+          "measurements": 0,
+          "inspections": 0,
+          "rule_versions": 0,
+          "alerts": 0,
+          "alert_notes": 0,
+          "evaluations": [],
+          "alert_sources": []
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_switching_three_modes_preserves_rows_and_has_no_future_queries",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:20-03:00",
+        "duration_seconds": 2.625,
+        "facts": {
+          "measurements": 1,
+          "inspections": 0,
+          "rule_versions": 18,
+          "alerts": 1,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 3,
+              "severity": "Crítico",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_ev3_stage.Ev3StageTests.test_cron_ev3_evaluates_both_bridges_and_deduplicates",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:23-03:00",
+        "duration_seconds": 2.407,
+        "facts": {
+          "measurements": 2,
+          "inspections": 0,
+          "rule_versions": 2,
+          "alerts": 2,
+          "alert_notes": 0,
+          "evaluations": [
+            "Evaluada"
+          ],
+          "alert_sources": [
+            {
+              "bridge_id": 1,
+              "measurement_id": 1,
+              "inspection_id": null,
+              "rule_id": 1,
+              "severity": "Atención",
+              "status": "Activa"
+            },
+            {
+              "bridge_id": 2,
+              "measurement_id": 2,
+              "inspection_id": null,
+              "rule_id": 2,
+              "severity": "Atención",
+              "status": "Activa"
+            }
+          ]
+        }
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_create_both_types_from_rendered_forms",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:25-03:00",
+        "duration_seconds": 2.328
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_edit_both_types_keeps_selection_and_updates_data",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:28-03:00",
+        "duration_seconds": 2.343
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_rendered_sensor_forms_role_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:30-03:00",
+        "duration_seconds": 3.141
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_pilot_locations_preserve_manual_data_associations_and_rules",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:33-03:00",
+        "duration_seconds": 2.297
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_locations_skip_nonpilot_and_unknown_components",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:36-03:00",
+        "duration_seconds": 2.297
+      },
+      {
+        "test": "tests.test_final_fixes.FinalFixTests.test_real_provider_and_periodic_worker_restart_recovery",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:38-03:00",
+        "duration_seconds": 21.047
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_vibration_nonnegative_finite_threshold",
+        "status": "passed",
+        "started_at": "2026-11-08T18:32:59-03:00",
+        "duration_seconds": 2.406
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_provider_rejects_inconsistent_and_missing_identity_with_evidence",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:01-03:00",
+        "duration_seconds": 2.844
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_optional_api_identity_is_validated_without_breaking_legacy",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:04-03:00",
+        "duration_seconds": 2.375
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_provider_default_json_includes_two_bridges_and_types",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:07-03:00",
+        "duration_seconds": 2.25
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_automatic_worker_recovers_and_deduplicates_real_http",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:09-03:00",
+        "duration_seconds": 2.875
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_worker_interval_environment_lock_and_bad_json",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:12-03:00",
+        "duration_seconds": 2.265
+      },
+      {
+        "test": "tests.test_iot_update.IotUpdateTests.test_mockups_cover_current_real_views",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:14-03:00",
+        "duration_seconds": 2.297
+      },
+      {
+        "test": "tests.test_measurement_components.MeasurementComponentTests.test_combined_history_filters_and_empty_component",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:16-03:00",
+        "duration_seconds": 2.344
+      },
+      {
+        "test": "tests.test_measurement_components.MeasurementComponentTests.test_components_from_database_and_forms",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:19-03:00",
+        "duration_seconds": 2.344
+      },
+      {
+        "test": "tests.test_measurement_components.MeasurementComponentTests.test_dom_actions_before_history_closed_form_and_role_restrictions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:21-03:00",
+        "duration_seconds": 3.218
+      },
+      {
+        "test": "tests.test_measurement_components.MeasurementComponentTests.test_manual_rejects_mismatched_relationships_and_preserves_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:24-03:00",
+        "duration_seconds": 3.282
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_pagination_real_limits_newest_first_and_boundaries",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:27-03:00",
+        "duration_seconds": 2.375
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_filters_persist_dates_severity_status_bridge_and_empty",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:30-03:00",
+        "duration_seconds": 2.468
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_audit_pagination_and_roles",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:32-03:00",
+        "duration_seconds": 3.657
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_notifications_baseline_batched_monotonic_and_no_writes",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:36-03:00",
+        "duration_seconds": 2.359
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_notification_roles_login_reset_stage_gate_and_query_budget",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:38-03:00",
+        "duration_seconds": 4.156
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_measurement_and_visual_alert_traceability_and_tabs",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:42-03:00",
+        "duration_seconds": 4.203
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_rules_versions_stay_separate_and_records_unchanged",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:47-03:00",
+        "duration_seconds": 3.25
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_institutional_future_audit_preserves_historical_rows",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:50-03:00",
+        "duration_seconds": 2.469
+      },
+      {
+        "test": "tests.test_monitoring_ui.MonitoringUiTests.test_measurements_pagination_preserves_filters_roles_and_history",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:52-03:00",
+        "duration_seconds": 3.735
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_default_environment_explicit_full_and_invalid_stage",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:56-03:00",
+        "duration_seconds": 2.375
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_three_roles_four_navigation_links_simple_home_and_logout",
+        "status": "passed",
+        "started_at": "2026-11-08T18:33:58-03:00",
+        "duration_seconds": 3.796
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_future_routes_block_get_post_with_or_without_csrf_no_database_changes",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:02-03:00",
+        "duration_seconds": 4.485
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_manual_and_api_store_pending_without_reading_rules",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:07-03:00",
+        "duration_seconds": 2.39
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_dom_sensor_forms_create",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:09-03:00",
+        "duration_seconds": 2.344
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_dom_sensor_forms_edit_and_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:11-03:00",
+        "duration_seconds": 3.281
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_dom_bridges_create_edit_and_permissions",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:15-03:00",
+        "duration_seconds": 3.204
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_inspection_photos_and_visual_categories_no_alerts",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:18-03:00",
+        "duration_seconds": 3.703
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_forged_plan_cannot_create_inspection_or_complete_plan",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:22-03:00",
+        "duration_seconds": 2.734
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_real_provider_worker_retries_deduplicates_without_alerts",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:24-03:00",
+        "duration_seconds": 21.125
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_cutoff_mockups_match_enabled_routes_only",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:45-03:00",
+        "duration_seconds": 2.375
+      },
+      {
+        "test": "tests.test_project_stage.ProjectStageTests.test_switching_preserves_populated_history_photos_rules_and_full_engine",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:48-03:00",
+        "duration_seconds": 3.094
+      },
+      {
+        "test": "tests.test_usability.UsabilityTests.test_chilean_time_offsets_gaps_ambiguities_invalid_future",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:51-03:00",
+        "duration_seconds": 2.422
+      },
+      {
+        "test": "tests.test_usability.UsabilityTests.test_clean_login_roles_first_post_and_csrf_race",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:53-03:00",
+        "duration_seconds": 4.078
+      },
+      {
+        "test": "tests.test_usability.UsabilityTests.test_filters_persistence_incompatible_sensor_and_details",
+        "status": "passed",
+        "started_at": "2026-11-08T18:34:57-03:00",
+        "duration_seconds": 2.406
+      },
+      {
+        "test": "tests.test_usability.UsabilityTests.test_split_form_dates_photos_permissions_and_cutoff",
+        "status": "passed",
+        "started_at": "2026-11-08T18:35:00-03:00",
+        "duration_seconds": 3.875
+      }
+    ]
+  },
+  "javascript": {
+    "exit_code": 0,
+    "counts": {
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0
+    },
+    "stdout": "TAP version 13\n# Subtest: rechaza más de 20 MB antes de subir y conserva el formulario\nok 1 - rechaza más de 20 MB antes de subir y conserva el formulario\n  ---\n  duration_ms: 2.2164\n  type: 'test'\n  ...\n# Subtest: sube directamente con token temporal y envía solo el manifiesto al backend\nok 2 - sube directamente con token temporal y envía solo el manifiesto al backend\n  ---\n  duration_ms: 1.3424\n  type: 'test'\n  ...\n# Subtest: un fallo de Storage conserva los archivos y habilita reintentar\nok 3 - un fallo de Storage conserva los archivos y habilita reintentar\n  ---\n  duration_ms: 1.0311\n  type: 'test'\n  ...\n# Subtest: una inspección sin fotos conserva el envío nativo\nok 4 - una inspección sin fotos conserva el envío nativo\n  ---\n  duration_ms: 2.1065\n  type: 'test'\n  ...\n# Subtest: sensor form without bridge selector keeps every component available\nok 5 - sensor form without bridge selector keeps every component available\n  ---\n  duration_ms: 2.0588\n  type: 'test'\n  ...\n# Subtest: bridge selector still filters components and clears an incompatible choice\nok 6 - bridge selector still filters components and clears an incompatible choice\n  ---\n  duration_ms: 1.1738\n  type: 'test'\n  ...\n# Subtest: measurement sensor selection still updates EV2 units\nok 7 - measurement sensor selection still updates EV2 units\n  ---\n  duration_ms: 0.7654\n  type: 'test'\n  ...\n# Subtest: historial reconstruye sensores por relación y conserva o reinicia selección\nok 8 - historial reconstruye sensores por relación y conserva o reinicia selección\n  ---\n  duration_ms: 2.8794\n  type: 'test'\n  ...\n# Subtest: historial encadena puente, componente y sensor, incluyendo componentes vacíos\nok 9 - historial encadena puente, componente y sensor, incluyendo componentes vacíos\n  ---\n  duration_ms: 1.7655\n  type: 'test'\n  ...\n# Subtest: registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles\nok 10 - registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles\n  ---\n  duration_ms: 1.1194\n  type: 'test'\n  ...\n# Subtest: baseline ignores historical alerts and open count is not unread count\nok 11 - baseline ignores historical alerts and open count is not unread count\n  ---\n  duration_ms: 2.0563\n  type: 'test'\n  ...\n# Subtest: new alerts notify once and cursor survives navigation\nok 12 - new alerts notify once and cursor survives navigation\n  ---\n  duration_ms: 0.5139\n  type: 'test'\n  ...\n# Subtest: new user or login starts its own baseline\nok 13 - new user or login starts its own baseline\n  ---\n  duration_ms: 0.2302\n  type: 'test'\n  ...\n# Subtest: expiry and session switch stop polling without displaying another user response\nok 14 - expiry and session switch stop polling without displaying another user response\n  ---\n  duration_ms: 1.7122\n  type: 'test'\n  ...\n# Subtest: errors retry without advancing cursor, hidden pages do not fetch, reset is silent\nok 15 - errors retry without advancing cursor, hidden pages do not fetch, reset is silent\n  ---\n  duration_ms: 0.3514\n  type: 'test'\n  ...\n# Subtest: overlapping calls issue only one request\nok 16 - overlapping calls issue only one request\n  ---\n  duration_ms: 0.1699\n  type: 'test'\n  ...\n# Subtest: pending batches drain in one-second steps and return to normal polling\nok 17 - pending batches drain in one-second steps and return to normal polling\n  ---\n  duration_ms: 0.397\n  type: 'test'\n  ...\n# Subtest: large backlog pauses after four batches instead of flooding the server\nok 18 - large backlog pauses after four batches instead of flooding the server\n  ---\n  duration_ms: 0.3671\n  type: 'test'\n  ...\n# Subtest: failed or non-progressing drains fall back to 30 seconds and retain cursor\nok 19 - failed or non-progressing drains fall back to 30 seconds and retain cursor\n  ---\n  duration_ms: 0.3991\n  type: 'test'\n  ...\n# Subtest: hidden page suspends backlog queries and resumes without duplicate alerts\nok 20 - hidden page suspends backlog queries and resumes without duplicate alerts\n  ---\n  duration_ms: 0.5336\n  type: 'test'\n  ...\n1..20\n# tests 20\n# suites 0\n# pass 20\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 330.0421\n",
+    "stderr": ""
+  }
+}

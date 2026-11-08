@@ -1,0 +1,8 @@
+test_postgres_measurements_and_alerts_full (tests.test_cloud.PostgresTests.test_postgres_measurements_and_alerts_full) ... ok
+test_postgres_chile_dates_filters_and_pagination (tests.test_cloud.PostgresTests.test_postgres_chile_dates_filters_and_pagination) ... ok
+test_postgres_chile_dates_rendering_and_history (tests.test_cloud.PostgresTests.test_postgres_chile_dates_rendering_and_history) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 100.532s
+
+OK
