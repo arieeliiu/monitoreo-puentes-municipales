@@ -1,5 +1,13 @@
 # Monitoreo de puentes municipales
 
+## Revisión local de interfaz EV3
+
+Cambios confirmados en `review/ev3-ui` para revisión en GitHub, sin fusión ni despliegue. La configuración `git.deploymentEnabled` de vercel.json excluye esta rama de los despliegues automáticos. Monitoreo agrupa Mediciones y Alertas en EV3/full, conservando rutas y permisos. Alertas e Historial de operaciones consultan 20 registros por página; Alertas conserva puente, severidad, estado y fechas UTC. Campana autenticada con cantidad de abiertas y avisos nuevos sin convertir históricos en notificaciones. Reglas separa versiones vigentes e históricas.
+
+Ver [informe para revisión](docs/REVISION_EV3_UI.md), [resultados reales](docs/evidence/EV3_UI_TEST_RESULTS.json) y [navegador](docs/evidence/EV3_UI_BROWSER_RESULTS.json). Resultado local: 95 Python aprobadas, 10 PostgreSQL omitidas sin DSN aislado y 16 JavaScript aprobadas. Las capturas usan una base temporal, no la instalación operativa. No se agregan dependencias de ejecución.
+
+Se mantiene el Inicio básico en EV3; panel avanzado, mantenimiento y programación siguen bloqueados. La etapa predeterminada del código permanece en EV2. El encargo identifica la publicación como EV3; esta revisión no consulta ni modifica la configuración remota. Los recuentos y afirmaciones de publicación de los apartados anteriores se conservan como registro de B-11.
+
 ## Incremento EV3 / B-11 — corte 09/11/2026
 
 Preparado y probado localmente el 2026-11-08; publicación pendiente de autorización. La configuración predeterminada y la publicada se conservan en EV2. Se reutilizan las reglas, el motor y el seguimiento existentes, habilitándolos en una etapa independiente sin migración ni cambios históricos.
@@ -150,7 +158,7 @@ La API POST municipal alternativa se conserva con clave `IOT_API_KEY`, cabecera 
 
 El panel distingue sensores y condiciones visuales, muestra lectura/referencia/variación, severidades, datos faltantes, alertas activas, pendientes de mantenimiento, próximas inspecciones y últimas observaciones con acceso a fotos. Las tareas no cierran alertas automáticamente. Los históricos no se presentan como datos EV2 evaluados. El filtro de mantenimiento por puente respeta permisos.
 
-Interfaz: solo una indicación discreta «Entorno de demostración» por pantalla; sin HU/EDT, etiquetas repetidas de prueba ni fechas académicas. La marca de simulación sigue persistida. Los errores, faltas de datos y referencias ausentes se mantienen visibles.
+Interfaz operativa sin rótulos de demostración ni referencias académicas fijas. La procedencia y las marcas de simulación siguen persistidas y disponibles en la documentación; no se presentan como integración real. Los errores, faltas de datos y referencias ausentes se mantienen visibles.
 
 ## Pruebas y documentación
 

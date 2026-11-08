@@ -92,7 +92,7 @@ class Ev2Tests(SystemTests):
             for path in ['/','/bridges','/bridges/1','/measurements','/inspections','/alerts','/alerts/1','/maintenance','/inspection-plans']:
                 response=self.client.get(path);self.assertEqual(response.status_code,200,(role,path))
                 text=response.get_data(as_text=True)
-                self.assertEqual(text.count('Entorno de demostración'),1,(role,path))
+                self.assertEqual(text.count('Entorno de demostración'),0,(role,path))
                 for forbidden in ['PRUEBA','HU-','EDT','26 NOV','piloto académico','Integración IoT real pendiente']:
                     self.assertNotIn(forbidden,text,(role,path,forbidden))
         self.assertIn('severity-critical',self.client.get('/').get_data(as_text=True))

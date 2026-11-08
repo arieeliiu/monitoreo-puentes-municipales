@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: rechaza más de 20 MB antes de subir y conserva el formulario
+ok 1 - rechaza más de 20 MB antes de subir y conserva el formulario
+  ---
+  duration_ms: 3.0448
+  type: 'test'
+  ...
+# Subtest: sube directamente con token temporal y envía solo el manifiesto al backend
+ok 2 - sube directamente con token temporal y envía solo el manifiesto al backend
+  ---
+  duration_ms: 1.3773
+  type: 'test'
+  ...
+# Subtest: un fallo de Storage conserva los archivos y habilita reintentar
+ok 3 - un fallo de Storage conserva los archivos y habilita reintentar
+  ---
+  duration_ms: 1.3248
+  type: 'test'
+  ...
+# Subtest: una inspección sin fotos conserva el envío nativo
+ok 4 - una inspección sin fotos conserva el envío nativo
+  ---
+  duration_ms: 2.7607
+  type: 'test'
+  ...
+# Subtest: sensor form without bridge selector keeps every component available
+ok 5 - sensor form without bridge selector keeps every component available
+  ---
+  duration_ms: 2.5169
+  type: 'test'
+  ...
+# Subtest: bridge selector still filters components and clears an incompatible choice
+ok 6 - bridge selector still filters components and clears an incompatible choice
+  ---
+  duration_ms: 1.1518
+  type: 'test'
+  ...
+# Subtest: measurement sensor selection still updates EV2 units
+ok 7 - measurement sensor selection still updates EV2 units
+  ---
+  duration_ms: 0.9075
+  type: 'test'
+  ...
+# Subtest: historial reconstruye sensores por relación y conserva o reinicia selección
+ok 8 - historial reconstruye sensores por relación y conserva o reinicia selección
+  ---
+  duration_ms: 2.6758
+  type: 'test'
+  ...
+# Subtest: historial encadena puente, componente y sensor, incluyendo componentes vacíos
+ok 9 - historial encadena puente, componente y sensor, incluyendo componentes vacíos
+  ---
+  duration_ms: 1.2789
+  type: 'test'
+  ...
+# Subtest: registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles
+ok 10 - registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles
+  ---
+  duration_ms: 0.9943
+  type: 'test'
+  ...
+# Subtest: baseline ignores historical alerts and open count is not unread count
+ok 11 - baseline ignores historical alerts and open count is not unread count
+  ---
+  duration_ms: 1.6439
+  type: 'test'
+  ...
+# Subtest: new alerts notify once and cursor survives navigation
+ok 12 - new alerts notify once and cursor survives navigation
+  ---
+  duration_ms: 0.4628
+  type: 'test'
+  ...
+# Subtest: new user or login starts its own baseline
+ok 13 - new user or login starts its own baseline
+  ---
+  duration_ms: 0.235
+  type: 'test'
+  ...
+# Subtest: expiry and session switch stop polling without displaying another user response
+ok 14 - expiry and session switch stop polling without displaying another user response
+  ---
+  duration_ms: 0.2715
+  type: 'test'
+  ...
+# Subtest: errors retry without advancing cursor, hidden pages do not fetch, reset is silent
+ok 15 - errors retry without advancing cursor, hidden pages do not fetch, reset is silent
+  ---
+  duration_ms: 0.9669
+  type: 'test'
+  ...
+# Subtest: overlapping calls issue only one request
+ok 16 - overlapping calls issue only one request
+  ---
+  duration_ms: 0.2227
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 289.782

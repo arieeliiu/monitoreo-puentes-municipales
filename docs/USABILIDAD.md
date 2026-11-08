@@ -1,5 +1,11 @@
 # Correcciones de usabilidad del corte 26/10
 
+## Revisión Monitoreo de EV3
+
+Nueva navegación compartida para Mediciones y Alertas en EV3/full; URLs anteriores conservadas y selección activa en detalles. Paginación del servidor de 20 filas para alertas y auditoría. Alertas filtra por puente, severidad, estado y fechas UTC; las selecciones acompañan todos los enlaces de página. Reglas vigentes y versiones anteriores se consultan por separado, sin modificar su evaluación. La medición enlaza alertas asociadas; estas mantienen su origen de medición o inspección.
+
+La campana expresa cantidad de abiertas y solo avisa altas posteriores a la línea base de la sesión. No requiere aceptar notificaciones del navegador ni incorpora correo o servicios externos. Se retiraron rótulos técnicos fijos; los valores y textos de registros existentes se conservan. [Evidencia, archivos y asuntos pendientes](REVISION_EV3_UI.md).
+
 ## Hallazgos y cambios
 
 1. Sesión/CSRF: se reprodujo un 400 al recibir la cookie de un GET anónimo a `/favicon.ico` después del GET de login, antes de enviar su formulario. `prepare()` inicializaba una sesión para cualquier ruta, incluso 404 y recursos. Ahora únicamente un GET de login o una página autenticada inicia el token; las respuestas anónimas auxiliares no emiten cookies. Login sigue borrando la sesión y rotando el token, logout la elimina. Tokens ausentes, incorrectos o anteriores se rechazan. El error ofrece un enlace GET para volver al formulario; jamás reenvía el POST. Se conserva Secure/SameSite y no se modifica SECRET_KEY ni variables de Vercel. Esta reproducción demuestra una causa posible; no prueba que todos los 400 previamente observados tuvieran ese origen. Los formularios abiertos antes de cambiar de usuario deben volver a cargarse.

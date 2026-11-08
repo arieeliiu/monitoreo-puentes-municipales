@@ -1,5 +1,11 @@
 # Matriz individual de criterios oficiales y alcance EV2
 
+## Revisión de interfaz EV3
+
+La reorganización corresponde a usabilidad de las funciones habilitadas de B-11. No implementa EDT 1.4.5, EDT 1.4.6 ni inspecciones programadas. El Inicio sigue básico en cutoff_2026_11_09; las rutas futuras continúan en 404, incluso con POST manipulado. DOM mantiene configuración/estado de alertas; Inspector conserva notas y registro visual; Mantención consulta alertas y no modifica seguimiento. EV2 continúa sin alertas y full conserva sus funciones.
+
+Se agregan paginación real, filtros persistentes, enlaces de trazabilidad, separación visual de versiones y avisos autenticados. No se cambian umbrales, datos, versionamiento, identidades, validación de origen, CSRF ni contratos de captura. [Informe verificable de la revisión](REVISION_EV3_UI.md). La matriz B-11 y resultados históricos siguientes no se sustituyen ni se contabilizan como pruebas nuevas.
+
 ## EV3 / B-11 — incremento del 09/11/2026
 
 Verificación real del 2026-11-08. EDT 1.4.4 queda habilitada en `cutoff_2026_11_09`, reutilizando configuración/versiones DOM, evaluación numérica y visual, alertas y seguimiento existentes. No se modifica la matriz oficial histórica que sigue ni los trabajos B-01/B-02/B-03.

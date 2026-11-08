@@ -1,0 +1,15 @@
+{
+  "captured_at": "2026-11-08T17:53:56.814Z",
+  "environment": "Chrome headless; SQLite temporal de laboratorio; sin datos productivos",
+  "passed": true,
+  "facts": [
+    "Login DOM: 45 abiertas, sin notificar las históricas.",
+    "Alertas: Siguiente conserva estado y muestra página 2.",
+    "Alerta nueva #46: contador 46, aviso con enlace directo, sin repetición tras otra consulta.",
+    "Atrás/Adelante: la página restaurada conserva las consultas de la campana.",
+    "Viewport móvil 390px: sin desbordamiento horizontal de la página.",
+    "Inspector: campana disponible, históricos silenciosos, reglas 403 y mantenimiento 404.",
+    "Mantención: campana disponible, históricos silenciosos, reglas 403 y mantenimiento 404."
+  ],
+  "page_errors": []
+}
