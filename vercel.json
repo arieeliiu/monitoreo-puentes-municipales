@@ -1,1 +1,1 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","framework":"flask","functions":{"wsgi.py":{"maxDuration":60}},"git":{"deploymentEnabled":{"review/ev3-b11":false}}}
+{"$schema":"https://openapi.vercel.sh/vercel.json","framework":"flask","functions":{"wsgi.py":{"maxDuration":60}},"git":{"deploymentEnabled":{"review/ev3-b11":false,"review/ev3-ui":false,"main":false}}}

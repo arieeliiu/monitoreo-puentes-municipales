@@ -39,7 +39,7 @@ class Ev3StageTests(Ev2Tests):
         self.config();self.post('/measurements',self.measurement(value='2.5'))
         for role in ('dom','inspector','worker'):
             self.login(role)
-            expected=['Inicio','Infraestructura','Mediciones','Inspecciones visuales','Alertas']
+            expected=['Inicio','Infraestructura','Monitoreo','Inspecciones visuales']
             if role=='dom':expected+=['Reglas de alerta','Historial de operaciones']
             for path in ('/','/bridges/1','/measurements','/inspections','/alerts','/alerts/1'):
                 result=self.client.get(path);self.assertEqual(result.status_code,200,(role,path))
@@ -47,9 +47,9 @@ class Ev3StageTests(Ev2Tests):
                 for link in ('/maintenance','/inspection-plans'):
                     self.assertNotIn('href="'+link,text)
                 self.assertNotIn('name="plan_id"',text)
-                self.assertEqual(text.count('Entorno de demostración'),1)
+                self.assertEqual(text.count('Entorno de demostración'),0)
             home=self.client.get('/').text
-            for future in ('Panel de monitoreo','Actividades de mantenimiento','Próximas inspecciones','<svg'):
+            for future in ('Panel de monitoreo','Actividades de mantenimiento','Próximas inspecciones','<canvas','bridge-drawing'):
                 self.assertNotIn(future,home)
             self.assertEqual(self.client.get('/rules').status_code,200 if role=='dom' else 403)
             self.assertEqual(self.rule(threshold='0.4').status_code,302 if role=='dom' else 403)

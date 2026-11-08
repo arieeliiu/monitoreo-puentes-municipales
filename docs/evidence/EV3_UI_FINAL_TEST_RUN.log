@@ -1,0 +1,249 @@
+C:\Users\westl\Desktop\puentes\tests\test_monitoring_ui.py:78: SyntaxWarning: invalid escape sequence '\d'
+  ids=[[int(i) for i in re.findall('data-audit-id="(\d+)"',p)] for p in pages]
+test_academic_rule_without_real_reference (tests.test_app.SystemTests.test_academic_rule_without_real_reference) ... ok
+test_alert_threshold_and_simulation (tests.test_app.SystemTests.test_alert_threshold_and_simulation) ... ok
+test_all_pages_render (tests.test_app.SystemTests.test_all_pages_render) ... ok
+test_bad_photo_and_cross_bridge_inspection_rollback (tests.test_app.SystemTests.test_bad_photo_and_cross_bridge_inspection_rollback) ... ok
+test_bridge_crud_and_duplicates (tests.test_app.SystemTests.test_bridge_crud_and_duplicates) ... ok
+test_components_sensors_validation_and_edits (tests.test_app.SystemTests.test_components_sensors_validation_and_edits) ... ok
+test_cross_bridge_task_and_bad_assignee (tests.test_app.SystemTests.test_cross_bridge_task_and_bad_assignee) ... ok
+test_csrf_and_xss (tests.test_app.SystemTests.test_csrf_and_xss) ... ok
+test_dashboard_empty_and_missing_latest (tests.test_app.SystemTests.test_dashboard_empty_and_missing_latest) ... ok
+test_dom_task_edit_and_inspector_followup (tests.test_app.SystemTests.test_dom_task_edit_and_inspector_followup) ... ok
+test_inclination_and_visual_alert (tests.test_app.SystemTests.test_inclination_and_visual_alert) ... ok
+test_iot_auth_idempotency_and_unavailable_configuration (tests.test_app.SystemTests.test_iot_auth_idempotency_and_unavailable_configuration) ... ok
+test_maintenance_assignment_tracking_and_explicit_resolution (tests.test_app.SystemTests.test_maintenance_assignment_tracking_and_explicit_resolution) ... ok
+test_malformed_api_fields (tests.test_app.SystemTests.test_malformed_api_fields) ... ok
+test_measurement_validation_and_history (tests.test_app.SystemTests.test_measurement_validation_and_history) ... ok
+test_persistence_after_app_recreation (tests.test_app.SystemTests.test_persistence_after_app_recreation) ... ok
+test_photo_upload_and_authorization (tests.test_app.SystemTests.test_photo_upload_and_authorization) ... ok
+test_role_permissions (tests.test_app.SystemTests.test_role_permissions) ... ok
+test_serverless_requires_stable_secret_and_no_local_files (tests.test_cloud.CloudTests.test_serverless_requires_stable_secret_and_no_local_files) ... ok
+test_private_storage_upload_read_authorization_and_compensation (tests.test_cloud.CloudTests.test_private_storage_upload_read_authorization_and_compensation) ... ok
+test_direct_uploads_authorization_limits_validation_and_cleanup (tests.test_cloud.CloudTests.test_direct_uploads_authorization_limits_validation_and_cleanup) ... ok
+test_cron_secret_cloud_provider_dedup_and_cutoff (tests.test_cloud.CloudTests.test_cron_secret_cloud_provider_dedup_and_cutoff) ... ok
+test_parameters_do_not_rewrite_sql_literals (tests.test_cloud.CloudTests.test_parameters_do_not_rewrite_sql_literals) ... ok
+test_postgres_infrastructure_and_sensors (tests.test_cloud.PostgresTests.test_postgres_infrastructure_and_sensors) ... ok
+test_postgres_measurements_and_alerts_full (tests.test_cloud.PostgresTests.test_postgres_measurements_and_alerts_full) ... ok
+test_postgres_private_photos_and_permissions (tests.test_cloud.PostgresTests.test_postgres_private_photos_and_permissions) ... ok
+test_postgres_cutoff_receipt_and_duplicate_cron (tests.test_cloud.PostgresTests.test_postgres_cutoff_receipt_and_duplicate_cron) ... ok
+test_postgres_migration_preserves_rows_hashes_photos_and_ids (tests.test_cloud.PostgresTests.test_postgres_migration_preserves_rows_hashes_photos_and_ids) ... ok
+test_postgres_provider_savepoints_and_evidence (tests.test_cloud.PostgresTests.test_postgres_provider_savepoints_and_evidence) ... ok
+test_postgres_usability_filters (tests.test_cloud.PostgresTests.test_postgres_usability_filters) ... ok
+test_postgres_usability_dates_photos (tests.test_cloud.PostgresTests.test_postgres_usability_dates_photos) ... ok
+test_postgres_component_history_and_manual (tests.test_cloud.PostgresTests.test_postgres_component_history_and_manual) ... ok
+test_postgres_ev3_cutoff_rules_and_cron (tests.test_cloud.PostgresTests.test_postgres_ev3_cutoff_rules_and_cron) ... ok
+test_postgres_monitoring_pagination_filters_and_audit (tests.test_cloud.PostgresTests.test_postgres_monitoring_pagination_filters_and_audit) ... ok
+test_postgres_notifications_roles_batches_and_historical_audit (tests.test_cloud.PostgresTests.test_postgres_notifications_roles_batches_and_historical_audit) ... ok
+test_sensor_location_and_variable (tests.test_corrections.CorrectionsTests.test_sensor_location_and_variable) ... ok
+test_migration_preserves_every_existing_table_row (tests.test_corrections.CorrectionsTests.test_migration_preserves_every_existing_table_row) ... ok
+test_no_rule_received_notice (tests.test_corrections.CorrectionsTests.test_no_rule_received_notice) ... ok
+test_signed_and_absolute_inclination_boundaries (tests.test_corrections.CorrectionsTests.test_signed_and_absolute_inclination_boundaries) ... ok
+test_provider_http_end_to_end_two_bridges_dedup_and_errors (tests.test_corrections.CorrectionsTests.test_provider_http_end_to_end_two_bridges_dedup_and_errors) ... ok
+test_retry_connection_and_bad_json (tests.test_corrections.CorrectionsTests.test_retry_connection_and_bad_json) ... ok
+test_schedule_roles_result_and_dashboard (tests.test_corrections.CorrectionsTests.test_schedule_roles_result_and_dashboard) ... ok
+test_schedule_validations_and_cancel (tests.test_corrections.CorrectionsTests.test_schedule_validations_and_cancel) ... ok
+test_unassigned_inspector_cannot_record_plan (tests.test_corrections.CorrectionsTests.test_unassigned_inspector_cannot_record_plan) ... ok
+test_official_views_and_required_fields (tests.test_corrections.CorrectionsTests.test_official_views_and_required_fields) ... ok
+test_maintenance_filter_and_missing_alert_relations (tests.test_corrections.CorrectionsTests.test_maintenance_filter_and_missing_alert_relations) ... ok
+test_numeric_levels_positive_negative_and_exact_limits (tests.test_ev2.Ev2Tests.test_numeric_levels_positive_negative_and_exact_limits) ... ok
+test_reference_offset_snapshot_missing_and_invalid (tests.test_ev2.Ev2Tests.test_reference_offset_snapshot_missing_and_invalid) ... ok
+test_old_units_are_never_relabelled (tests.test_ev2.Ev2Tests.test_old_units_are_never_relabelled) ... ok
+test_visual_categories_and_configured_alerts (tests.test_ev2.Ev2Tests.test_visual_categories_and_configured_alerts) ... ok
+test_rule_configuration_versions_and_highest_only (tests.test_ev2.Ev2Tests.test_rule_configuration_versions_and_highest_only) ... ok
+test_demo_setup_is_idempotent_and_customizable (tests.test_ev2.Ev2Tests.test_demo_setup_is_idempotent_and_customizable) ... ok
+test_professional_ui_and_severity_styles_all_roles (tests.test_ev2.Ev2Tests.test_professional_ui_and_severity_styles_all_roles) ... ok
+test_ev2_provider_flow_both_bridges (tests.test_ev2.Ev2Tests.test_ev2_provider_flow_both_bridges) ... ok
+test_fresh_demo_has_three_components_per_bridge (tests.test_ev2.Ev2Tests.test_fresh_demo_has_three_components_per_bridge) ... ok
+test_stage_configuration_navigation_permissions_and_blocked_writes (tests.test_ev3_stage.Ev3StageTests.test_stage_configuration_navigation_permissions_and_blocked_writes) ... ok
+test_numeric_boundaries_engine_reused (tests.test_ev3_stage.Ev3StageTests.test_numeric_boundaries_engine_reused) ... ok
+test_reference_snapshot_engine_reused (tests.test_ev3_stage.Ev3StageTests.test_reference_snapshot_engine_reused) ... ok
+test_visual_engine_reused (tests.test_ev3_stage.Ev3StageTests.test_visual_engine_reused) ... ok
+test_configurable_thresholds_versions_disable_and_invalid_rules (tests.test_ev3_stage.Ev3StageTests.test_configurable_thresholds_versions_disable_and_invalid_rules) ... ok
+test_capture_invalid_missing_no_rule_and_api_dedup_traceability (tests.test_ev3_stage.Ev3StageTests.test_capture_invalid_missing_no_rule_and_api_dedup_traceability) ... ok
+test_http_provider_two_bridges_dedup (tests.test_ev3_stage.Ev3StageTests.test_http_provider_two_bridges_dedup) ... ok
+test_provider_inconsistent_records_and_savepoints (tests.test_ev3_stage.Ev3StageTests.test_provider_inconsistent_records_and_savepoints) ... ok
+test_alert_followup_roles_and_csrf (tests.test_ev3_stage.Ev3StageTests.test_alert_followup_roles_and_csrf) ... ok
+test_forged_plan_rejected_before_inspection_and_photos (tests.test_ev3_stage.Ev3StageTests.test_forged_plan_rejected_before_inspection_and_photos) ... ok
+test_switching_three_modes_preserves_rows_and_has_no_future_queries (tests.test_ev3_stage.Ev3StageTests.test_switching_three_modes_preserves_rows_and_has_no_future_queries) ... ok
+test_cron_ev3_evaluates_both_bridges_and_deduplicates (tests.test_ev3_stage.Ev3StageTests.test_cron_ev3_evaluates_both_bridges_and_deduplicates) ... ok
+test_create_both_types_from_rendered_forms (tests.test_final_fixes.FinalFixTests.test_create_both_types_from_rendered_forms) ... ok
+test_edit_both_types_keeps_selection_and_updates_data (tests.test_final_fixes.FinalFixTests.test_edit_both_types_keeps_selection_and_updates_data) ... ok
+test_rendered_sensor_forms_role_permissions (tests.test_final_fixes.FinalFixTests.test_rendered_sensor_forms_role_permissions) ... ok
+test_pilot_locations_preserve_manual_data_associations_and_rules (tests.test_final_fixes.FinalFixTests.test_pilot_locations_preserve_manual_data_associations_and_rules) ... ok
+test_locations_skip_nonpilot_and_unknown_components (tests.test_final_fixes.FinalFixTests.test_locations_skip_nonpilot_and_unknown_components) ... ok
+test_real_provider_and_periodic_worker_restart_recovery (tests.test_final_fixes.FinalFixTests.test_real_provider_and_periodic_worker_restart_recovery) ... ok
+test_vibration_nonnegative_finite_threshold (tests.test_iot_update.IotUpdateTests.test_vibration_nonnegative_finite_threshold) ... ok
+test_provider_rejects_inconsistent_and_missing_identity_with_evidence (tests.test_iot_update.IotUpdateTests.test_provider_rejects_inconsistent_and_missing_identity_with_evidence) ... ok
+test_optional_api_identity_is_validated_without_breaking_legacy (tests.test_iot_update.IotUpdateTests.test_optional_api_identity_is_validated_without_breaking_legacy) ... ok
+test_provider_default_json_includes_two_bridges_and_types (tests.test_iot_update.IotUpdateTests.test_provider_default_json_includes_two_bridges_and_types) ... ok
+test_automatic_worker_recovers_and_deduplicates_real_http (tests.test_iot_update.IotUpdateTests.test_automatic_worker_recovers_and_deduplicates_real_http) ... ok
+test_worker_interval_environment_lock_and_bad_json (tests.test_iot_update.IotUpdateTests.test_worker_interval_environment_lock_and_bad_json) ... ok
+test_mockups_cover_current_real_views (tests.test_iot_update.IotUpdateTests.test_mockups_cover_current_real_views) ... ok
+test_combined_history_filters_and_empty_component (tests.test_measurement_components.MeasurementComponentTests.test_combined_history_filters_and_empty_component) ... ok
+test_components_from_database_and_forms (tests.test_measurement_components.MeasurementComponentTests.test_components_from_database_and_forms) ... ok
+test_dom_actions_before_history_closed_form_and_role_restrictions (tests.test_measurement_components.MeasurementComponentTests.test_dom_actions_before_history_closed_form_and_role_restrictions) ... ok
+test_manual_rejects_mismatched_relationships_and_preserves_permissions (tests.test_measurement_components.MeasurementComponentTests.test_manual_rejects_mismatched_relationships_and_preserves_permissions) ... ok
+test_pagination_real_limits_newest_first_and_boundaries (tests.test_monitoring_ui.MonitoringUiTests.test_pagination_real_limits_newest_first_and_boundaries) ... ok
+test_filters_persist_dates_severity_status_bridge_and_empty (tests.test_monitoring_ui.MonitoringUiTests.test_filters_persist_dates_severity_status_bridge_and_empty) ... ok
+test_audit_pagination_and_roles (tests.test_monitoring_ui.MonitoringUiTests.test_audit_pagination_and_roles) ... ok
+test_notifications_baseline_batched_monotonic_and_no_writes (tests.test_monitoring_ui.MonitoringUiTests.test_notifications_baseline_batched_monotonic_and_no_writes) ... ok
+test_notification_roles_login_reset_stage_gate_and_query_budget (tests.test_monitoring_ui.MonitoringUiTests.test_notification_roles_login_reset_stage_gate_and_query_budget) ... ok
+test_measurement_and_visual_alert_traceability_and_tabs (tests.test_monitoring_ui.MonitoringUiTests.test_measurement_and_visual_alert_traceability_and_tabs) ... ok
+test_rules_versions_stay_separate_and_records_unchanged (tests.test_monitoring_ui.MonitoringUiTests.test_rules_versions_stay_separate_and_records_unchanged) ... ok
+test_institutional_future_audit_preserves_historical_rows (tests.test_monitoring_ui.MonitoringUiTests.test_institutional_future_audit_preserves_historical_rows) ... ok
+test_default_environment_explicit_full_and_invalid_stage (tests.test_project_stage.ProjectStageTests.test_default_environment_explicit_full_and_invalid_stage) ... ok
+test_three_roles_four_navigation_links_simple_home_and_logout (tests.test_project_stage.ProjectStageTests.test_three_roles_four_navigation_links_simple_home_and_logout) ... ok
+test_future_routes_block_get_post_with_or_without_csrf_no_database_changes (tests.test_project_stage.ProjectStageTests.test_future_routes_block_get_post_with_or_without_csrf_no_database_changes) ... ok
+test_manual_and_api_store_pending_without_reading_rules (tests.test_project_stage.ProjectStageTests.test_manual_and_api_store_pending_without_reading_rules) ... ok
+test_cutoff_dom_sensor_forms_create (tests.test_project_stage.ProjectStageTests.test_cutoff_dom_sensor_forms_create) ... ok
+test_cutoff_dom_sensor_forms_edit_and_permissions (tests.test_project_stage.ProjectStageTests.test_cutoff_dom_sensor_forms_edit_and_permissions) ... ok
+test_cutoff_dom_bridges_create_edit_and_permissions (tests.test_project_stage.ProjectStageTests.test_cutoff_dom_bridges_create_edit_and_permissions) ... ok
+test_cutoff_inspection_photos_and_visual_categories_no_alerts (tests.test_project_stage.ProjectStageTests.test_cutoff_inspection_photos_and_visual_categories_no_alerts) ... ok
+test_forged_plan_cannot_create_inspection_or_complete_plan (tests.test_project_stage.ProjectStageTests.test_forged_plan_cannot_create_inspection_or_complete_plan) ... ok
+test_cutoff_real_provider_worker_retries_deduplicates_without_alerts (tests.test_project_stage.ProjectStageTests.test_cutoff_real_provider_worker_retries_deduplicates_without_alerts) ... ok
+test_cutoff_mockups_match_enabled_routes_only (tests.test_project_stage.ProjectStageTests.test_cutoff_mockups_match_enabled_routes_only) ... ok
+test_switching_preserves_populated_history_photos_rules_and_full_engine (tests.test_project_stage.ProjectStageTests.test_switching_preserves_populated_history_photos_rules_and_full_engine) ... ok
+test_chilean_time_offsets_gaps_ambiguities_invalid_future (tests.test_usability.UsabilityTests.test_chilean_time_offsets_gaps_ambiguities_invalid_future) ... ok
+test_clean_login_roles_first_post_and_csrf_race (tests.test_usability.UsabilityTests.test_clean_login_roles_first_post_and_csrf_race) ... ok
+test_filters_persistence_incompatible_sensor_and_details (tests.test_usability.UsabilityTests.test_filters_persistence_incompatible_sensor_and_details) ... ok
+test_split_form_dates_photos_permissions_and_cutoff (tests.test_usability.UsabilityTests.test_split_form_dates_photos_permissions_and_cutoff) ... ok
+
+----------------------------------------------------------------------
+Ran 108 tests in 533.204s
+
+OK
+Migración verificada. Informe privado: C:\Users\westl\AppData\Local\Temp\tmptpqiyf8s\migration-report.json
+Migración verificada. Informe privado: C:\Users\westl\AppData\Local\Temp\tmptpqiyf8s\migration-report.json
+TAP version 13
+# Subtest: rechaza más de 20 MB antes de subir y conserva el formulario
+ok 1 - rechaza más de 20 MB antes de subir y conserva el formulario
+  ---
+  duration_ms: 2.7778
+  type: 'test'
+  ...
+# Subtest: sube directamente con token temporal y envía solo el manifiesto al backend
+ok 2 - sube directamente con token temporal y envía solo el manifiesto al backend
+  ---
+  duration_ms: 2.143
+  type: 'test'
+  ...
+# Subtest: un fallo de Storage conserva los archivos y habilita reintentar
+ok 3 - un fallo de Storage conserva los archivos y habilita reintentar
+  ---
+  duration_ms: 0.9193
+  type: 'test'
+  ...
+# Subtest: una inspección sin fotos conserva el envío nativo
+ok 4 - una inspección sin fotos conserva el envío nativo
+  ---
+  duration_ms: 1.5146
+  type: 'test'
+  ...
+# Subtest: sensor form without bridge selector keeps every component available
+ok 5 - sensor form without bridge selector keeps every component available
+  ---
+  duration_ms: 2.0155
+  type: 'test'
+  ...
+# Subtest: bridge selector still filters components and clears an incompatible choice
+ok 6 - bridge selector still filters components and clears an incompatible choice
+  ---
+  duration_ms: 0.7837
+  type: 'test'
+  ...
+# Subtest: measurement sensor selection still updates EV2 units
+ok 7 - measurement sensor selection still updates EV2 units
+  ---
+  duration_ms: 0.693
+  type: 'test'
+  ...
+# Subtest: historial reconstruye sensores por relación y conserva o reinicia selección
+ok 8 - historial reconstruye sensores por relación y conserva o reinicia selección
+  ---
+  duration_ms: 2.3826
+  type: 'test'
+  ...
+# Subtest: historial encadena puente, componente y sensor, incluyendo componentes vacíos
+ok 9 - historial encadena puente, componente y sensor, incluyendo componentes vacíos
+  ---
+  duration_ms: 1.4764
+  type: 'test'
+  ...
+# Subtest: registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles
+ok 10 - registro manual exige puente y componente antes de ofrecer sensores y limpia selecciones incompatibles
+  ---
+  duration_ms: 0.8567
+  type: 'test'
+  ...
+# Subtest: baseline ignores historical alerts and open count is not unread count
+ok 11 - baseline ignores historical alerts and open count is not unread count
+  ---
+  duration_ms: 2.6226
+  type: 'test'
+  ...
+# Subtest: new alerts notify once and cursor survives navigation
+ok 12 - new alerts notify once and cursor survives navigation
+  ---
+  duration_ms: 0.4172
+  type: 'test'
+  ...
+# Subtest: new user or login starts its own baseline
+ok 13 - new user or login starts its own baseline
+  ---
+  duration_ms: 0.178
+  type: 'test'
+  ...
+# Subtest: expiry and session switch stop polling without displaying another user response
+ok 14 - expiry and session switch stop polling without displaying another user response
+  ---
+  duration_ms: 1.3806
+  type: 'test'
+  ...
+# Subtest: errors retry without advancing cursor, hidden pages do not fetch, reset is silent
+ok 15 - errors retry without advancing cursor, hidden pages do not fetch, reset is silent
+  ---
+  duration_ms: 0.3656
+  type: 'test'
+  ...
+# Subtest: overlapping calls issue only one request
+ok 16 - overlapping calls issue only one request
+  ---
+  duration_ms: 0.5094
+  type: 'test'
+  ...
+# Subtest: pending batches drain in one-second steps and return to normal polling
+ok 17 - pending batches drain in one-second steps and return to normal polling
+  ---
+  duration_ms: 0.5016
+  type: 'test'
+  ...
+# Subtest: large backlog pauses after four batches instead of flooding the server
+ok 18 - large backlog pauses after four batches instead of flooding the server
+  ---
+  duration_ms: 0.3935
+  type: 'test'
+  ...
+# Subtest: failed or non-progressing drains fall back to 30 seconds and retain cursor
+ok 19 - failed or non-progressing drains fall back to 30 seconds and retain cursor
+  ---
+  duration_ms: 0.4091
+  type: 'test'
+  ...
+# Subtest: hidden page suspends backlog queries and resumes without duplicate alerts
+ok 20 - hidden page suspends backlog queries and resumes without duplicate alerts
+  ---
+  duration_ms: 0.3539
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 277.1876
+
+Evidencia guardada en docs\evidence\EV3_UI_FINAL_TEST_RESULTS.json

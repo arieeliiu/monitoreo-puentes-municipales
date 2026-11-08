@@ -109,7 +109,7 @@ def create_app(config=None):
         # Antes de sesión, CSRF o acceso a SQLite: no hay efectos en rutas futuras.
         restricted={'rules':'alerts','alerts':'alerts','maintenance':'maintenance','inspection-plans':'inspection_plans'}
         feature=restricted.get(request.path.split('/')[1])
-        if feature and not feature_enabled(feature): abort(404)
+        if (feature and not feature_enabled(feature)) or (request.endpoint=='alert_notifications' and not feature_enabled('alerts')): abort(404)
 
     @app.teardown_appcontext
     def close(error):
@@ -122,6 +122,8 @@ def create_app(config=None):
         # Un favicon/404/recurso paralelo no debe reemplazar su cookie.
         if request.method=='GET' and (request.endpoint=='login' or (g.user and request.endpoint and request.endpoint!='static')) and 'csrf' not in session:
             session['csrf']=secrets.token_hex(32)
+        if g.user and 'notification_epoch' not in session:
+            session['notification_epoch']=secrets.token_hex(12)
         if request.method=='POST' and request.endpoint not in ('iot','cron_pull'):
             if not session.get('csrf') or not hmac.compare_digest(str(session['csrf']),str(request.form.get('csrf',''))):
                 g.csrf_failed=True
@@ -135,7 +137,7 @@ def create_app(config=None):
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), feature_enabled=feature_enabled, cloud_photos=photo_store.remote)
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), feature_enabled=feature_enabled, cloud_photos=photo_store.remote, notification_epoch=session.get('notification_epoch',''))
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -151,7 +153,7 @@ def create_app(config=None):
         if request.method=='POST':
             u=one('SELECT * FROM users WHERE username=?',(request.form.get('username',''),))
             if u and check_password_hash(u['password'],request.form.get('password','')):
-                session.clear(); session['user_id']=u['id']; session['csrf']=secrets.token_hex(32)
+                session.clear(); session['user_id']=u['id']; session['csrf']=secrets.token_hex(32); session['notification_epoch']=secrets.token_hex(12)
                 g.user=u; audit('Inicio de sesión','users',u['id']); db().commit()
                 return redirect(url_for('dashboard'))
             flash('Usuario o contraseña incorrectos.','error')
@@ -334,7 +336,7 @@ def create_app(config=None):
     def measurement(mid):
         m=one('SELECT m.*,s.code,s.kind,b.name,c.bridge_id,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE m.id=?',(mid,))
         if not m: abort(404)
-        return render_template('measurement.html',m=m)
+        return render_template('measurement.html',m=m,associated_alerts=[] if not feature_enabled('alerts') else rows('SELECT id,status,severity,standard FROM alerts WHERE measurement_id=? ORDER BY id DESC',(mid,)))
 
     @app.route('/inspections',methods=['GET','POST'])
     @access()
@@ -458,15 +460,74 @@ def create_app(config=None):
             except (ValueError,sqlite3.IntegrityError) as e: db().rollback(); flash(str(e),'error')
         return render_template('rules.html',rules=rows('SELECT r.*,b.name FROM rules r JOIN bridges b ON b.id=r.bridge_id ORDER BY r.id DESC'),bridges=rows('SELECT * FROM bridges'))
 
+    def positive_integer(value, field, allow_zero=False):
+        try:
+            if not value.isascii() or not value.isdigit(): raise ValueError()
+            number=int(value)
+            if number < (0 if allow_zero else 1) or number > 9223372036854775807: raise ValueError()
+            return number
+        except (ValueError, AttributeError): abort(400, f'El parámetro {field} no es válido.')
+
+    def pagination(total):
+        page=positive_integer(request.args.get('page','1'),'page')
+        pages=max(1,(total+19)//20)
+        page=min(page,pages)
+        def link(number):
+            params=request.args.to_dict();params['page']=number
+            return url_for(request.endpoint,**params)
+        return dict(page=page,pages=pages,total=total,offset=(page-1)*20,
+                    previous=link(page-1) if page>1 else None,
+                    next=link(page+1) if page<pages else None)
+
     @app.get('/alerts')
     @access()
     def alerts():
-        query='SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id'
-        args=[]; filters=[]
-        for field in ['bridge_id','status']:
-            if request.args.get(field): filters.append('a.'+field+'=?'); args.append(request.args[field])
-        if filters: query+=' WHERE '+' AND '.join(filters)
-        return render_template('alerts.html',alerts=rows(query+' ORDER BY a.id DESC',args),bridges=rows('SELECT * FROM bridges'))
+        filters=[];args=[]
+        if request.args.get('bridge_id'):
+            filters.append('a.bridge_id=?');args.append(positive_integer(request.args['bridge_id'],'bridge_id'))
+        if request.args.get('status'):
+            if request.args['status'] not in ('Activa','En atención','Resuelta'): abort(400,'Estado inválido.')
+            filters.append('a.status=?');args.append(request.args['status'])
+        if request.args.get('severity'):
+            if request.args['severity']=='historica':
+                filters.append("a.standard!='EV2'")
+            elif request.args['severity'] in SEVERITIES:
+                filters.append("a.standard='EV2' AND a.severity=?");args.append(request.args['severity'])
+            else: abort(400,'Severidad inválida.')
+        dates={}
+        for field,operator in [('from','>='),('to','<=')]:
+            if request.args.get(field):
+                try:
+                    dates[field]=date.fromisoformat(request.args[field]).isoformat()
+                    if dates[field]!=request.args[field]: raise ValueError()
+                except ValueError: abort(400,'Usa fechas válidas en formato AAAA-MM-DD.')
+                filters.append(f'substr(a.created_at,1,10){operator}?');args.append(dates[field])
+        if dates.get('from','')>dates.get('to','9999-12-31'): abort(400,'Desde no puede ser posterior a Hasta.')
+        where=' WHERE '+' AND '.join(filters) if filters else ''
+        source=' FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id'
+        pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
+        data=rows('SELECT a.*,b.name,r.label'+source+where+' ORDER BY a.created_at DESC,a.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
+        return render_template('alerts.html',alerts=data,pager=pager,bridges=rows('SELECT * FROM bridges ORDER BY code'))
+
+    @app.get('/api/v1/alert-notifications')
+    def alert_notifications():
+        if not g.user: return jsonify(error='Autenticación requerida.'),401
+        if g.user['role'] not in ('DOM','Inspector','Mantención'): abort(403)
+        after=request.args.get('after')
+        cursor=positive_integer(after,'after',allow_zero=True) if after is not None else None
+        summary=one("SELECT count(CASE WHEN status!='Resuelta' THEN 1 END) AS open_count,COALESCE(max(id),0) AS latest_id FROM alerts")
+        maximum=summary['latest_id']
+        fresh=[]
+        # Primera consulta establece la línea base. No convierte históricos en avisos.
+        reset=cursor is not None and cursor>maximum
+        if cursor is not None and not reset and cursor<maximum:
+            fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.id>? AND a.id<=? ORDER BY a.id LIMIT 20',(cursor,maximum))
+        next_cursor=fresh[-1]['id'] if fresh else maximum
+        return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,has_more=bool(fresh and next_cursor<maximum),
+                       alerts=[dict(id=str(a['id']),title=a['name']+' · '+a['label'],
+                                    severity=a['severity'] if a['standard']=='EV2' else 'Histórica',
+                                    status=a['status'],url=url_for('alert',aid=a['id'])) for a in fresh])
+
     @app.route('/alerts/<int:aid>',methods=['GET','POST'])
     @access()
     def alert(aid):
@@ -526,7 +587,9 @@ def create_app(config=None):
 
     @app.get('/audit')
     @access('DOM')
-    def audit_page(): return render_template('audit.html',events=rows('SELECT * FROM audit ORDER BY id DESC LIMIT 500'))
+    def audit_page():
+        pager=pagination(one('SELECT count(*) AS total FROM audit')['total'])
+        return render_template('audit.html',events=rows('SELECT * FROM audit ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?',(20,pager['offset'])),pager=pager)
 
     @app.cli.command('init-db')
     def init_db():
@@ -562,7 +625,7 @@ def create_app(config=None):
         for index,item in enumerate(items):
             db().execute('SAVEPOINT provider_item')
             try:
-                if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor académico debe identificar simulated=true.')
+                if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor no confirmó la procedencia simulada del registro.')
                 required(item,'external_id')
                 validate_identity(item,provider=True)
                 if one('SELECT id FROM measurements WHERE external_id=?',(item['external_id'],)):
@@ -573,7 +636,8 @@ def create_app(config=None):
                 db().execute('ROLLBACK TO provider_item');db().execute('RELEASE provider_item')
                 identity={key:item.get(key) for key in ['external_id','sensor_code','bridge_code','kind']} if isinstance(item,dict) else {'registro':'no es objeto'}
                 result['errors'].append(f'Registro {index+1} {identity}: {error}')
-        audit('Consultar proveedor ficticio','measurements',None,str(result)); db().commit()
+        audit('Consultar proveedor IoT','measurements',None,
+              f"Origen: proveedor simulado. Recibidas: {result['received']}; duplicadas: {result['duplicates']}; incidencias: {len(result['errors'])}. "+'; '.join(result['errors'])); db().commit()
         return result
 
     def pull_provider():
@@ -582,7 +646,7 @@ def create_app(config=None):
             db().rollback()
             message=str(error) if isinstance(error,ValueError) else 'Error de persistencia IoT: '+type(error).__name__
             try:
-                audit('Error al consultar proveedor ficticio','measurements',None,message);db().commit()
+                audit('Error al consultar proveedor IoT','measurements',None,'Origen: proveedor simulado. '+message);db().commit()
             except sqlite3.Error:
                 db().rollback();app.logger.exception('No se pudo persistir el error IoT')
             raise ValueError(message) from error
@@ -619,7 +683,7 @@ def create_app(config=None):
     def provider_pull():
         try:
             result=pull_provider()
-            flash(f"Recepción del proveedor: {result['received']} recibidas, {result['duplicates']} duplicadas. "+' '.join(result['errors']),'warning' if result['errors'] else 'success')
+            flash(f"Recepción del proveedor: {result['received']} recibidas, {result['duplicates']} duplicadas. "+(f"{len(result['errors'])} incidencias; consulta el Historial de operaciones." if result['errors'] else ''),'warning' if result['errors'] else 'success')
         except ValueError as error: flash(str(error),'error')
         return redirect(url_for('measurements'))
 
@@ -679,7 +743,7 @@ def create_app(config=None):
                 if not one("SELECT id FROM rules WHERE bridge_id=? AND kind='visual' AND condition=? AND standard='EV2'",(b['id'],condition)):
                     insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,simulated=1,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
         complete_demo_locations(db())
-        audit('Actualizar demostración EV2','bridges',None);db().commit()
+        audit('Actualizar configuración de monitoreo','bridges',None,'Configuración de origen simulado; se conservan las versiones y los registros anteriores.');db().commit()
 
     @app.cli.command('configure-demo-locations')
     def demo_locations_command():

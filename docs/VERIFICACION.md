@@ -1,5 +1,15 @@
 # Verificación del corte y modo completo
 
+**Revisión final posterior:** 108 pruebas Python aprobadas, incluidas 12 PostgreSQL; 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Informe y confirmaciones](REVISION_FINAL_EV3_UI.md). Los resultados anteriores se conservan como historial de su ejecución.
+
+## Resultado de revisión de interfaz EV3
+
+Ejecutado localmente el 08/11/2026: 105 casos Python descubiertos; 95 aprobados, 10 PostgreSQL omitidos por falta de DSN de pruebas aislado, 0 fallos y 0 errores. Las tres suites JavaScript suman 16 aprobadas, 0 fallos. Las suites JS se repitieron después del ajuste de ciclo de vida de navegación; no se cuentan dos veces. [JSON con casos y hashes](evidence/EV3_UI_TEST_RESULTS.json), [TAP final](evidence/EV3_UI_FINAL_JS.tap), [log completo](evidence/EV3_UI_TEST_RUN.log).
+
+Siete regresiones nuevas de servidor y seis de notificaciones cubren 20/20/5 filas, LIMIT/OFFSET real, filtros/fechas persistentes, estados vacíos/límites, roles, sesiones distintas, línea base, lotes de avisos, una sola consulta agregada cuando no hay altas, ID de sesión, rechazo de parámetros, trazabilidad, versiones y conservación de filas. Se actualizaron únicamente las expectativas previas de menú, rótulo de demostración y SVG del icono de campana; el bloqueo del panel avanzado se conserva y comprueba por contenido y consultas.
+
+Chrome verificó DOM/Inspector/Mantención, navegación y paginación, alerta nueva con enlace y contador, ausencia de repetición y viewport de 390 px sin desbordamiento global. [Resultados del navegador](evidence/EV3_UI_BROWSER_RESULTS.json). Bases SQLite temporales; no se probó ni escribió en producción. PostgreSQL real, dispositivos físicos y publicación quedan fuera de esta comprobación. [Reporte completo](REVISION_EV3_UI.md).
+
 ## EV3 / B-11 — resultado vigente del 2026-11-08
 
 Suite completa ejecutada de `2026-11-08T12:11:07-03:00` a `2026-11-08T12:18:23-03:00` (America/Santiago): **98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. PostgreSQL de pruebas estuvo habilitado; se ejecutaron diez casos de ese ambiente, sin apuntar al rol/esquema productivo. Se agregaron 12 regresiones EV3 en `tests/test_ev3_stage.py` y una en `tests/test_cloud.py`; el resto conserva pruebas previas de EV2/full.

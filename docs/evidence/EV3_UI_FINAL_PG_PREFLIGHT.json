@@ -1,0 +1,11 @@
+{
+  "test_url_available": true,
+  "connected": true,
+  "safe_to_run": true,
+  "current_user": "puentes_test",
+  "superuser": false,
+  "bypassrls": false,
+  "test_schema_usage": true,
+  "production_schema_usage": false,
+  "accessible_tables_outside_test": 0
+}

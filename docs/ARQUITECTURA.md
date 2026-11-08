@@ -1,5 +1,15 @@
 # Arquitectura vigente — especificación EV2 y etapas EV3
 
+## Navegación, paginación y avisos EV3
+
+Se conservan los feature flags y todos los contratos de recepción/evaluación. `/measurements` y `/alerts` siguen siendo vistas separadas. El detalle de medición consulta sus alertas solo si la etapa las habilita. Reglas no cambia su motor: la separación se realiza en Jinja a partir de active y standard.
+
+Alertas e historial ejecutan COUNT más SELECT con LIMIT 20/OFFSET, ordenados por created_at DESC,id DESC; las páginas fuera de rango se ajustan a la última, los parámetros inválidos se rechazan y los filtros se conservan en los enlaces. No hay paginación cosmética en JavaScript.
+
+GET `/api/v1/alert-notifications` exige sesión y rol DOM/Inspector/Mantención. En EV2 se bloquea antes de acceder a BD. Cada consulta obtiene abiertas (Activa/En atención) y último ID con un agregado; solo si hay IDs posteriores hace un segundo SELECT limitado a 20. La primera consulta fija una línea base sin avisos históricos. El cursor se conserva por usuario/etapa/sesión de login en sessionStorage de la pestaña. El identificador de sesión de avisos rota al autenticar y la respuesta se comprueba para impedir consumir una sesión cambiada.
+
+Cliente sin dependencias externas: consulta normal cada 30 s; si `has_more` indica pendientes, continúa cada 1 s con descanso de 5 s tras cuatro lotes (20 por lote); timeout de 8 s, sin solapamiento, pausa de consultas en pestaña oculta, reintento de fallos transitorios y detención ante 401/403 o cambio de sesión. Usa textContent para contenido y enlaces locales por ID. No existe estado de lectura, nueva tabla ni escritura de históricos. Ver [regresiones y límites](REVISION_EV3_UI.md).
+
 ## Etapa configurable de presentación
 
 `app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida tres valores: `cutoff_2026_10_26` (predeterminado), `cutoff_2026_11_09` y `full`. `STAGE_FEATURES` y `feature_enabled()` centralizan las funciones disponibles para rutas, inicio, recepción, inspecciones y contexto Jinja; `cutoff_mode()` conserva su significado original de EV2. No depende del reloj ni de archivos de gestión.
