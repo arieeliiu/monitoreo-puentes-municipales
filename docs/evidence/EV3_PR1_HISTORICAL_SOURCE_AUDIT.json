@@ -1,0 +1,318 @@
+{
+  "audited_at": "2026-11-14T22:02:58-03:00",
+  "historical_evidence": "docs/evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+  "historical_evidence_sha256": "b0cc8195738e5c34a4dfaef03b941981f3f4ad0eee9830da507520eabd9441df",
+  "historical_base_commit": "e191aed818b8ee94296594f633ed2afe8111ec3d",
+  "comparison_commit": "229e224adaccb915751b53e56465bf38e5d5dcd4",
+  "comparison_worktree_status": "",
+  "files_compared": 61,
+  "all_match": true,
+  "interpretation": "Los bytes de los archivos del manifiesto histórico coinciden con el worktree limpio de comparison_commit. La ejecución original ocurrió con cambios locales sobre historical_base_commit; no se ejecutó en comparison_commit, creado después. Este cotejo no es una nueva ejecución.",
+  "files": {
+    "app.py": {
+      "recorded_sha256": "1db273e6a5ae7f9a2f5da8827ec5cefee44926b0d434481b3e7525a82e46556e",
+      "current_sha256": "1db273e6a5ae7f9a2f5da8827ec5cefee44926b0d434481b3e7525a82e46556e",
+      "matches": true
+    },
+    "cloud_provider.py": {
+      "recorded_sha256": "71022a04b318664a54ebc084ef36ebd6ba483a5f3cf634488e250781ef79aa1c",
+      "current_sha256": "71022a04b318664a54ebc084ef36ebd6ba483a5f3cf634488e250781ef79aa1c",
+      "matches": true
+    },
+    "database.py": {
+      "recorded_sha256": "2a3aabfdf62743d80f061aba21e85554488422be5a8aae505002413485ec7faa",
+      "current_sha256": "2a3aabfdf62743d80f061aba21e85554488422be5a8aae505002413485ec7faa",
+      "matches": true
+    },
+    "demo_locations.py": {
+      "recorded_sha256": "226d47817aae0da16ee829dbf6dd88d1db9a2229d33eea2653d656fbde205f56",
+      "current_sha256": "226d47817aae0da16ee829dbf6dd88d1db9a2229d33eea2653d656fbde205f56",
+      "matches": true
+    },
+    "display_time.py": {
+      "recorded_sha256": "71878b7b063ab3aabb37e328eed048162fdef4764b7c547e597d88220948965b",
+      "current_sha256": "71878b7b063ab3aabb37e328eed048162fdef4764b7c547e597d88220948965b",
+      "matches": true
+    },
+    "ev2_migration.py": {
+      "recorded_sha256": "1ec087082c7041e6ce33468824881a15d1f57a248068b51ff9d806ef3e35035c",
+      "current_sha256": "1ec087082c7041e6ce33468824881a15d1f57a248068b51ff9d806ef3e35035c",
+      "matches": true
+    },
+    "migrations.py": {
+      "recorded_sha256": "8863b8b8a7739a4a40f3edce504c24ff18a3a269354c98414323555b2a440527",
+      "current_sha256": "8863b8b8a7739a4a40f3edce504c24ff18a3a269354c98414323555b2a440527",
+      "matches": true
+    },
+    "mock_provider.py": {
+      "recorded_sha256": "974eea13e064c4838ad1ef678ce6a96533bb6064808ec3e186d6429089a14a8c",
+      "current_sha256": "974eea13e064c4838ad1ef678ce6a96533bb6064808ec3e186d6429089a14a8c",
+      "matches": true
+    },
+    "photo_storage.py": {
+      "recorded_sha256": "530e91ba6f6b70ba9b2f24cc28a58d56052c7aa9b787805cea087bafb91d90b5",
+      "current_sha256": "530e91ba6f6b70ba9b2f24cc28a58d56052c7aa9b787805cea087bafb91d90b5",
+      "matches": true
+    },
+    "pilot_time.py": {
+      "recorded_sha256": "353a11aea0b27cecdc0fc4a5ae11d8ed4e7926fcd746142975ffbd5b5f5119af",
+      "current_sha256": "353a11aea0b27cecdc0fc4a5ae11d8ed4e7926fcd746142975ffbd5b5f5119af",
+      "matches": true
+    },
+    "polling.py": {
+      "recorded_sha256": "cede992b028af53bea8dadc498d7ac00bfd598daf38432cbebfe6e846ea2bb15",
+      "current_sha256": "cede992b028af53bea8dadc498d7ac00bfd598daf38432cbebfe6e846ea2bb15",
+      "matches": true
+    },
+    "provider_client.py": {
+      "recorded_sha256": "339cdd6327592185910f88ecc75bb8b997a034967fc7583a9afca991d00c092e",
+      "current_sha256": "339cdd6327592185910f88ecc75bb8b997a034967fc7583a9afca991d00c092e",
+      "matches": true
+    },
+    "reference_data.py": {
+      "recorded_sha256": "57b3c971c55cb1547390c6a88107da7f112e85e76e3b87f35a5233d273bb6154",
+      "current_sha256": "57b3c971c55cb1547390c6a88107da7f112e85e76e3b87f35a5233d273bb6154",
+      "matches": true
+    },
+    "reference_migration.py": {
+      "recorded_sha256": "0f3b18bfb135bb6778a4ae359757c135778b5f6170c7d5660ecfa0504c02a093",
+      "current_sha256": "0f3b18bfb135bb6778a4ae359757c135778b5f6170c7d5660ecfa0504c02a093",
+      "matches": true
+    },
+    "simulate_iot.py": {
+      "recorded_sha256": "b23206bc667b454d339c26de1bf3f5ed03f527020b0d70cc3313fcaf09932521",
+      "current_sha256": "b23206bc667b454d339c26de1bf3f5ed03f527020b0d70cc3313fcaf09932521",
+      "matches": true
+    },
+    "wsgi.py": {
+      "recorded_sha256": "51198a1d26f0466a190230692f59d0d6934c000365a6e23d71411ba9fdfedfbe",
+      "current_sha256": "51198a1d26f0466a190230692f59d0d6934c000365a6e23d71411ba9fdfedfbe",
+      "matches": true
+    },
+    "schema.sql": {
+      "recorded_sha256": "533fbb13f28db3a2194a8747afca781fcf2052c351f222893dafb2bc7758aa21",
+      "current_sha256": "533fbb13f28db3a2194a8747afca781fcf2052c351f222893dafb2bc7758aa21",
+      "matches": true
+    },
+    "vercel.json": {
+      "recorded_sha256": "70a15b151bb7cfeef6b869c33d893d510e88a9d2fe4cf04476a2d556734bef1e",
+      "current_sha256": "70a15b151bb7cfeef6b869c33d893d510e88a9d2fe4cf04476a2d556734bef1e",
+      "matches": true
+    },
+    "config/ev2_pilot.json": {
+      "recorded_sha256": "605f7966f776fd910c30368633b0f22b666405b8cb59a643a78d7074348f82c2",
+      "current_sha256": "605f7966f776fd910c30368633b0f22b666405b8cb59a643a78d7074348f82c2",
+      "matches": true
+    },
+    "sql/postgres.sql": {
+      "recorded_sha256": "247230860361b1978f3f7af732e359c1df9cd2f21cfcf9852d63e1e342539fbf",
+      "current_sha256": "247230860361b1978f3f7af732e359c1df9cd2f21cfcf9852d63e1e342539fbf",
+      "matches": true
+    },
+    "sql/schedule_iot.sql": {
+      "recorded_sha256": "0e6fdce14b53acaf3a44168445a0aba72644e9188baf9e47dc9ffae38cb2d86b",
+      "current_sha256": "0e6fdce14b53acaf3a44168445a0aba72644e9188baf9e47dc9ffae38cb2d86b",
+      "matches": true
+    },
+    "templates/alert.html": {
+      "recorded_sha256": "872add14bebd9d228e6fb217020429fafd45bdb71e9463736b77f864eaadc5bc",
+      "current_sha256": "872add14bebd9d228e6fb217020429fafd45bdb71e9463736b77f864eaadc5bc",
+      "matches": true
+    },
+    "templates/alerts.html": {
+      "recorded_sha256": "72f2ab0e31af91533a73fa1907e924acf1fdba2a9e86ed7407ddd57e9ddfb065",
+      "current_sha256": "72f2ab0e31af91533a73fa1907e924acf1fdba2a9e86ed7407ddd57e9ddfb065",
+      "matches": true
+    },
+    "templates/audit.html": {
+      "recorded_sha256": "e049bb06ab1528c8affb6a5afef21d24b20e924c21493d5129986814f271de14",
+      "current_sha256": "e049bb06ab1528c8affb6a5afef21d24b20e924c21493d5129986814f271de14",
+      "matches": true
+    },
+    "templates/base.html": {
+      "recorded_sha256": "bc76124a899746893d51c84c0d124ea4c41369ede3a8d0959eaa84ecfccc9d0b",
+      "current_sha256": "bc76124a899746893d51c84c0d124ea4c41369ede3a8d0959eaa84ecfccc9d0b",
+      "matches": true
+    },
+    "templates/bridge.html": {
+      "recorded_sha256": "38cb23bb6647786e71905f1e25956b7165b521702561ee46948acfa53b829265",
+      "current_sha256": "38cb23bb6647786e71905f1e25956b7165b521702561ee46948acfa53b829265",
+      "matches": true
+    },
+    "templates/bridges.html": {
+      "recorded_sha256": "eb4cd99d4cbec39251821597251e45f1b89464acf434207000e1dbec2442a68d",
+      "current_sha256": "eb4cd99d4cbec39251821597251e45f1b89464acf434207000e1dbec2442a68d",
+      "matches": true
+    },
+    "templates/dashboard.html": {
+      "recorded_sha256": "be57b5bc580c75a0258ec532b991ff64f1df9226abcb467390db53b2492fa023",
+      "current_sha256": "be57b5bc580c75a0258ec532b991ff64f1df9226abcb467390db53b2492fa023",
+      "matches": true
+    },
+    "templates/error.html": {
+      "recorded_sha256": "512aa6d2a6b5f5280c4ad231c4d5da7f89b11f41a9f24f166bb72687f372135f",
+      "current_sha256": "512aa6d2a6b5f5280c4ad231c4d5da7f89b11f41a9f24f166bb72687f372135f",
+      "matches": true
+    },
+    "templates/inspection.html": {
+      "recorded_sha256": "595ed03d02702b9ec83965614e0dc19a8ec76bee40dbec761812ec6f5dda4b65",
+      "current_sha256": "595ed03d02702b9ec83965614e0dc19a8ec76bee40dbec761812ec6f5dda4b65",
+      "matches": true
+    },
+    "templates/inspection_plans.html": {
+      "recorded_sha256": "090a618966377baa58601775fd61619a8f5cf5be0ef2b76a0d34b5c3a4dfe172",
+      "current_sha256": "090a618966377baa58601775fd61619a8f5cf5be0ef2b76a0d34b5c3a4dfe172",
+      "matches": true
+    },
+    "templates/inspections.html": {
+      "recorded_sha256": "7e736b771fdca5c4b42f9fabc5574c13fbd81ee985d62abf9cd8a0ef405be74a",
+      "current_sha256": "7e736b771fdca5c4b42f9fabc5574c13fbd81ee985d62abf9cd8a0ef405be74a",
+      "matches": true
+    },
+    "templates/login.html": {
+      "recorded_sha256": "aa055c433e7ecc0b76f62c2689819b1efd8dc45f338a8b4193d821e37b49431e",
+      "current_sha256": "aa055c433e7ecc0b76f62c2689819b1efd8dc45f338a8b4193d821e37b49431e",
+      "matches": true
+    },
+    "templates/macros.html": {
+      "recorded_sha256": "5bf570fd48b2fc4add660a03c5e3ae167ad4c72897a458447ab5a886432672ee",
+      "current_sha256": "5bf570fd48b2fc4add660a03c5e3ae167ad4c72897a458447ab5a886432672ee",
+      "matches": true
+    },
+    "templates/maintenance.html": {
+      "recorded_sha256": "6aef434d1eb88a7b8ca07522e087109132fa4251ea76e266f46ade5f277c89ab",
+      "current_sha256": "6aef434d1eb88a7b8ca07522e087109132fa4251ea76e266f46ade5f277c89ab",
+      "matches": true
+    },
+    "templates/measurement.html": {
+      "recorded_sha256": "e84d9df69231acd2f2a4132c580708b2a5b3e7071efcc75599ec65cc0ab4e17e",
+      "current_sha256": "e84d9df69231acd2f2a4132c580708b2a5b3e7071efcc75599ec65cc0ab4e17e",
+      "matches": true
+    },
+    "templates/measurements.html": {
+      "recorded_sha256": "9407cdb909a920040a9cd9fbb8b272ef41826cfd5824f1af481410c54a5fbeca",
+      "current_sha256": "9407cdb909a920040a9cd9fbb8b272ef41826cfd5824f1af481410c54a5fbeca",
+      "matches": true
+    },
+    "templates/rules.html": {
+      "recorded_sha256": "45066e8bd09c52598137a0a5342e8e50c5ffe7ae245c212d4672069df1262665",
+      "current_sha256": "45066e8bd09c52598137a0a5342e8e50c5ffe7ae245c212d4672069df1262665",
+      "matches": true
+    },
+    "tests/test_app.py": {
+      "recorded_sha256": "5aa86ae8cf04cfeec17114c7b7a820b6240c464d9d6950f707ca866c9a8de959",
+      "current_sha256": "5aa86ae8cf04cfeec17114c7b7a820b6240c464d9d6950f707ca866c9a8de959",
+      "matches": true
+    },
+    "tests/test_chile_time.py": {
+      "recorded_sha256": "11cbc93571c714bcbdb9d1bb74f8f8cc8e509e37125d2b2f631928acac07296a",
+      "current_sha256": "11cbc93571c714bcbdb9d1bb74f8f8cc8e509e37125d2b2f631928acac07296a",
+      "matches": true
+    },
+    "tests/test_cloud.py": {
+      "recorded_sha256": "5e74a40eabd69ce72be1ed6ca8e8ccc0cb51558f8228355e658a3772a3c4e4c1",
+      "current_sha256": "5e74a40eabd69ce72be1ed6ca8e8ccc0cb51558f8228355e658a3772a3c4e4c1",
+      "matches": true
+    },
+    "tests/test_corrections.py": {
+      "recorded_sha256": "659262fc46f0f48eef522308848dc9cdf5b6bbae8ce1527c2f478824aa8598c0",
+      "current_sha256": "659262fc46f0f48eef522308848dc9cdf5b6bbae8ce1527c2f478824aa8598c0",
+      "matches": true
+    },
+    "tests/test_ev2.py": {
+      "recorded_sha256": "32530c464c4f29bdaf5828f6e84e2eab0c2246fe789b9e9b686cc78200dc65bd",
+      "current_sha256": "32530c464c4f29bdaf5828f6e84e2eab0c2246fe789b9e9b686cc78200dc65bd",
+      "matches": true
+    },
+    "tests/test_ev3_closure.py": {
+      "recorded_sha256": "d643c9858c316de3d7306ebd634eb5ffca3077a2d3bd2442cd94e2b370a271ba",
+      "current_sha256": "d643c9858c316de3d7306ebd634eb5ffca3077a2d3bd2442cd94e2b370a271ba",
+      "matches": true
+    },
+    "tests/test_ev3_stage.py": {
+      "recorded_sha256": "9e0081999d49f0ae9cdbab0959a1fd257183df3741f2df7c81efd01c32220ae6",
+      "current_sha256": "9e0081999d49f0ae9cdbab0959a1fd257183df3741f2df7c81efd01c32220ae6",
+      "matches": true
+    },
+    "tests/test_final_fixes.py": {
+      "recorded_sha256": "a4ab691eee21ec25bdf6e2844db5dd616a739f02e47d00edebff620fba31dcbc",
+      "current_sha256": "a4ab691eee21ec25bdf6e2844db5dd616a739f02e47d00edebff620fba31dcbc",
+      "matches": true
+    },
+    "tests/test_iot_update.py": {
+      "recorded_sha256": "fa28511b638bcccf856d36b70e6e7581db98d782c836ce73479ce12fdba60aae",
+      "current_sha256": "fa28511b638bcccf856d36b70e6e7581db98d782c836ce73479ce12fdba60aae",
+      "matches": true
+    },
+    "tests/test_measurement_components.py": {
+      "recorded_sha256": "0640d09765050f7a01f30d951b424a71f86f67198b79ad536ed2cd2e17a98bba",
+      "current_sha256": "0640d09765050f7a01f30d951b424a71f86f67198b79ad536ed2cd2e17a98bba",
+      "matches": true
+    },
+    "tests/test_monitoring_ui.py": {
+      "recorded_sha256": "438588337fae0f525e6b5d7503b2fada181a2168d5b2008f1ae3e5d4c0a3bace",
+      "current_sha256": "438588337fae0f525e6b5d7503b2fada181a2168d5b2008f1ae3e5d4c0a3bace",
+      "matches": true
+    },
+    "tests/test_project_stage.py": {
+      "recorded_sha256": "e828147ecf5c0c387c5e1c94efc61b8d2393646acbe7abbf225a84c449e930f3",
+      "current_sha256": "e828147ecf5c0c387c5e1c94efc61b8d2393646acbe7abbf225a84c449e930f3",
+      "matches": true
+    },
+    "tests/test_usability.py": {
+      "recorded_sha256": "96148c85ebdc5447a4545ad1e36d01880d0ee4ecea885e0ebcafafb506d29cbd",
+      "current_sha256": "96148c85ebdc5447a4545ad1e36d01880d0ee4ecea885e0ebcafafb506d29cbd",
+      "matches": true
+    },
+    "tests/cloud-uploads.test.cjs": {
+      "recorded_sha256": "64bd82c9c8f1ddae15abe5e0d57c6a33f6629bd4e4306bde656d6932fd593fbe",
+      "current_sha256": "64bd82c9c8f1ddae15abe5e0d57c6a33f6629bd4e4306bde656d6932fd593fbe",
+      "matches": true
+    },
+    "tests/frontend.test.cjs": {
+      "recorded_sha256": "3d28902e2fe8e1ff59a98a7472ce6f4cc64f70bfd212091e1528d36041d340e5",
+      "current_sha256": "3d28902e2fe8e1ff59a98a7472ce6f4cc64f70bfd212091e1528d36041d340e5",
+      "matches": true
+    },
+    "tests/notifications.test.cjs": {
+      "recorded_sha256": "a5403f1f258be4b37580b6c46b35e8e6a16dd4e5408e0d0d72cc6bec818bb63c",
+      "current_sha256": "a5403f1f258be4b37580b6c46b35e8e6a16dd4e5408e0d0d72cc6bec818bb63c",
+      "matches": true
+    },
+    "static/app.js": {
+      "recorded_sha256": "8a1fffe84d0c80be5e48229e52b8f3e000190a2a32ddc570f0e5df9f0437fcd7",
+      "current_sha256": "8a1fffe84d0c80be5e48229e52b8f3e000190a2a32ddc570f0e5df9f0437fcd7",
+      "matches": true
+    },
+    "static/cloud-uploads.js": {
+      "recorded_sha256": "06b74a0c43d2d6a8f9d39a704b5eff2d1dce2b6318b337ab2ac06012ab67ad1f",
+      "current_sha256": "06b74a0c43d2d6a8f9d39a704b5eff2d1dce2b6318b337ab2ac06012ab67ad1f",
+      "matches": true
+    },
+    "static/notifications.js": {
+      "recorded_sha256": "19a017217d5e25de68b80af10389f44c26527299e5d54f3dfebdddbe940020bd",
+      "current_sha256": "19a017217d5e25de68b80af10389f44c26527299e5d54f3dfebdddbe940020bd",
+      "matches": true
+    },
+    "static/app.css": {
+      "recorded_sha256": "c466c8b750377cea3099ab620b831f164db5f3c6124ceef54d3e909565c8d570",
+      "current_sha256": "c466c8b750377cea3099ab620b831f164db5f3c6124ceef54d3e909565c8d570",
+      "matches": true
+    },
+    "tools/rename_reference_identifiers.py": {
+      "recorded_sha256": "8e4a41882a98fe40dd995e36f5104e15efe043ec645a3369adc18835ec9b0e0d",
+      "current_sha256": "8e4a41882a98fe40dd995e36f5104e15efe043ec645a3369adc18835ec9b0e0d",
+      "matches": true
+    },
+    "tools/build_mockups.py": {
+      "recorded_sha256": "83a2aa54622f17fc061eb8cdbf33903fb2c3f00da1dc9caa990dbd3e9bd0e648",
+      "current_sha256": "83a2aa54622f17fc061eb8cdbf33903fb2c3f00da1dc9caa990dbd3e9bd0e648",
+      "matches": true
+    },
+    "tools/run_ev3_checks.py": {
+      "recorded_sha256": "9812b5e0c1454fc4cb391deb14ee4b5ff7c60deb6ad1994b69967c2ff3aaedd9",
+      "current_sha256": "9812b5e0c1454fc4cb391deb14ee4b5ff7c60deb6ad1994b69967c2ff3aaedd9",
+      "matches": true
+    }
+  }
+}
