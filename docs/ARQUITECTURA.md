@@ -2,9 +2,17 @@
 
 ## Cierre técnico EV3 — revisión del 2026-11-14
 
-`cutoff_2026_11_28` añade únicamente advanced_dashboard y maintenance al corte B-11. El panel consulta/renderiza programaciones solo si inspection_plans está habilitada (full). Se reutilizan consultas, motor, estados y permisos sin cambio de esquema. `reference_data.py` comparte códigos neutrales entre seed y proveedores; [migración D7](MIGRACION_REFERENCIAS_D7.md) explícita y separada del arranque. [Informes y límites](CIERRE_TECNICO_EV3.md). Las fechas anteriores del documento son referencias históricas; los hitos vigentes son los del resumen de esta tarea.
+`cutoff_2026_11_28` añade únicamente advanced_dashboard y maintenance al corte B-11. El panel consulta/renderiza programaciones solo si inspection_plans está habilitada (full). Se reutilizan consultas, motor, estados y permisos. La habilitación funcional del corte es independiente del retiro de columnas de la revisión de Christian, descrito a continuación. `reference_data.py` comparte códigos neutrales entre seed y proveedores; [migración D7](MIGRACION_REFERENCIAS_D7.md) explícita y separada del arranque. [Informes y límites](CIERRE_TECNICO_EV3.md). Las fechas anteriores del documento son referencias históricas; los hitos vigentes son los del resumen de esta tarea.
 
 La [verificación final del PR #1](CIERRE_TECNICO_EV3.md) diferencia el commit base del código probado mediante blobs Git, hashes SHA-256 y estado del worktree. [Plan operativo de publicación](PLAN_PUBLICACION_EV3.md); sin despliegue ni migración productiva ejecutados.
+
+## Modelo y contrato revisados: 15/11/2026
+
+El contrato v1 contiene ocho campos, sin `simulated`; tampoco existen esas columnas en bridges, measurements, inspections, rules o alerts. Modelo final: 13 tablas, 99 campos, 27 FK, 9 CHECK, 9 UNIQUE, 13 PK; PostgreSQL conserva cinco índices explícitos, 13 tablas con RLS y 13 políticas. No hay un indicador sustituto. [Inventario verificable](evidence/EV3_CHRISTIAN_SCHEMA.json).
+
+`receive` y `evaluate` ya no reciben ni propagan clasificación de simulación. Push y pull conservan validación, Bearer/configuración del proveedor, deduplicación, savepoints y auditoría. Los proveedores emiten PM y los ocho campos oficiales. La carga inicial se identifica mediante firma de infraestructura y sensores/relaciones esperados; códigos por sí solos no autorizan modificaciones.
+
+El código nuevo rechaza esquemas aún provistos de las columnas antiguas. D7 precede al retiro explícito y transaccional de `schema_revision.py`; no hay migración destructiva al arrancar. Se verifican hashes de filas conservadas e índices/restricciones/políticas. [Procedimiento](MIGRACION_REFERENCIAS_D7.md). Las mediciones provienen del proveedor de referencia; el alcance no incluye sensores físicos (SC-01). El token pull es opcional/global y el cliente permite HTTP local: no se afirma autenticación independiente por proveedor, HTTPS obligatorio ni conformidad externa.
 
 ## Navegación, paginación y avisos EV3
 
@@ -40,7 +48,7 @@ En local se mantienen Flask/Jinja, SQLite, archivos fotográficos privados, prov
 
 ```mermaid
 flowchart LR
-    Proveedor[API IoT simulada independiente] --> Cliente[Cliente HTTP con reintentos]
+    Proveedor[API del proveedor de referencia] --> Cliente[Cliente HTTP con reintentos]
     Cliente --> Recepcion[Identidad, unidad, valor, estado y fecha]
     Recepcion --> Referencia[Lectura y referencia guardadas por medición]
     Referencia --> Variacion[Inclinación: abs lectura menos referencia]
@@ -58,7 +66,7 @@ flowchart LR
 
 ## Migraciones e históricos
 
-`schema.sql` conserva el bootstrap original; `migrations.py` agrega campos previos y llama a `ev2_migration.py`. EV2 agrega reference_value/previous_unit a sensores, reference_value/variation/specification a mediciones, standard/severity/unit a reglas, standard/severity a alertas y standard a inspecciones.
+`schema.sql` crea el bootstrap local sin las cinco columnas retiradas; `migrations.py` agrega campos previos y llama a `ev2_migration.py`. EV2 agrega reference_value/previous_unit a sensores, reference_value/variation/specification a mediciones, standard/severity/unit a reglas, standard/severity a alertas y standard a inspecciones.
 
 La ampliación del CHECK de inspecciones utiliza una nueva tabla con columnas originales, copia por nombre de columnas, conserva IDs, sustituye la tabla y comprueba foreign_key_check dentro de una transacción. La desactivación temporal de FK se limita a la migración y se restaura al finalizar. No se eliminan registros ni archivos, ni se cambia el valor/unidad de mediciones anteriores. Su specification queda historica; no se calcula retroactivamente la variación. Las categorías visuales anteriores se conservan sin equivalencia automática. Las reglas históricas no evalúan registros EV2; alertas pasadas conservan relaciones y no reciben una severidad inventada.
 

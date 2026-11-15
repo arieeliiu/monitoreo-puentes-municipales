@@ -1,3 +1,9 @@
+## Revisión Christian: compatibilidad del esquema
+
+Las mediciones provienen del proveedor de referencia; el alcance no incluye sensores físicos (SC-01). Los nombres de scripts `*-demo.ps1` se conservan por compatibilidad, sin renombrar procesos o estados privados existentes. Este documento describe el túnel ya existente; no se inició ni desplegó en esta revisión.
+
+Una base anterior requiere primero D7 y retiro explícito de cinco columnas conforme al [procedimiento vigente](MIGRACION_REFERENCIAS_D7.md). El código nuevo no migra esas columnas al iniciar y rechaza el esquema antiguo. No usar los scripts de publicación para aplicar migraciones. Para B-14 revisar el [plan autorizado de publicación](PLAN_PUBLICACION_EV3.md); la configuración histórica del túnel sigue mostrando corte EV2 y no habilita B-14 por sí sola.
+
 La publicación vigente e independiente del ordenador está en [Vercel con Supabase](SUPABASE_VERCEL.md). El túnel siguiente es una alternativa local temporal; su base SQLite no se sincroniza con la nube.
 
 # Publicación temporal con Cloudflare Quick Tunnel

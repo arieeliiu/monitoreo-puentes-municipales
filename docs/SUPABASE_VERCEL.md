@@ -6,7 +6,13 @@ No se publicó esta rama ni se cambió producción. La exclusión de despliegue 
 
 El corte candidato para B-14 es `cutoff_2026_11_28`; activarlo requiere aprobación y despliegue posterior. Antes de publicar proveedores con PM-001/PM-002, cotejar inventario del entorno y aprobar la [migración D7](MIGRACION_REFERENCIAS_D7.md) si conserva identificadores retirados. No ejecutar seed-demo/configuradores ni importadores para activar este corte. No se cambia automáticamente PROJECT_STAGE, Cron, secretos o históricos. Verificación PostgreSQL aislada aprobada; prueba funcional de la publicación nueva pendiente.
 
-## Preparación EV3 / B-11 — publicación pendiente
+## Revisión Christian: esquema y contrato
+
+Antes de activar el código candidato se requiere el [procedimiento D7 y retiro de columnas](MIGRACION_REFERENCIAS_D7.md). El modelo nuevo es 13/99; `sql/postgres.sql` crea ese modelo, pero no migra tablas existentes mediante CREATE IF NOT EXISTS. La migración se prepara con `tools/retire_legacy_columns.py`, nunca en un request web ni desde el arranque. RLS y permisos del backend se conservan. El proveedor de referencia emite solo los ocho campos SMPMRB v1; las mediciones no acreditan sensores físicos (SC-01).
+
+La sección B-11 y los recuentos siguientes son antecedentes de aquella versión. No se deben usar sus afirmaciones de ausencia de migración para publicar la revisión de Christian. El [plan vigente](PLAN_PUBLICACION_EV3.md) exige pausa, respaldos restaurables, D7, retiro, validación y publicación coordinada; nada de eso se ejecutó en producción.
+
+## Preparación histórica EV3 / B-11: publicación pendiente
 
 El 2026-11-08 se verificó `cutoff_2026_11_09` con SQLite temporal y PostgreSQL aislado: 98 pruebas Python y 10 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones. [Reportes y resultados vigentes](VERIFICACION.md). No se cambió el código desplegado, ninguna variable de Vercel, Cron, Storage ni la base productiva durante B-11.
 
@@ -39,7 +45,7 @@ La migración real verificada preservó 3 usuarios, 2 puentes, 6 componentes, 4 
 
 ## Captura periódica
 
-`cloud_provider.py` genera cuatro registros simulados por minuto UTC, uno por tipo y puente PM-001/PM-002, con identidad, unidad y fecha/hora. Los IDs externos reproducibles evitan duplicados entre Cron y consulta manual. La recepción conserva validación, auditoría y bloqueo transaccional compartido.
+`cloud_provider.py` genera cuatro registros de referencia por minuto UTC, uno por tipo y puente PM-001/PM-002, con identidad, unidad y fecha/hora. Los IDs externos reproducibles evitan duplicados entre Cron y consulta manual. La recepción conserva validación, auditoría y bloqueo transaccional compartido.
 
 En Vault se guardan `puentes_iot_url` (URL HTTPS seguida de `/internal/iot/pull`) y `puentes_cron_secret` (mismo valor privado que `CRON_SECRET`). `sql/schedule_iot.sql` habilita pg_cron/pg_net y configura `puentes-iot-60s` cada minuto. El endpoint solo acepta POST con Bearer correcto; cada ejecución es independiente y el ciclo siguiente vuelve a intentar después de un fallo. Revisar tanto `cron.job_run_details` como `net._http_response`: una tarea SQL exitosa no prueba por sí sola que HTTP respondió 200.
 

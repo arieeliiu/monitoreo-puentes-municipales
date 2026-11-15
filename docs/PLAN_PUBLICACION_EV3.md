@@ -21,7 +21,7 @@ Ejecutar con `psql "service=puentes_ev3" -X -v ON_ERROR_STOP=1` o SQL Editor en 
 ```sql
 BEGIN READ ONLY;
 SELECT current_database(), current_user;
-SELECT b.id,b.code,b.name,b.simulated,c.id AS component_id,c.name AS component,
+SELECT b.id,b.code,b.name,c.id AS component_id,c.name AS component,
        s.id AS sensor_id,s.code AS sensor_code,s.kind,s.unit
 FROM puentes.bridges b
 LEFT JOIN puentes.components c ON c.bridge_id=b.id
@@ -43,9 +43,9 @@ COMMIT;
 
 Conservar inventario y contadores privadamente. No listar secretos descifrados de Vault ni passwords de usuarios. Guardar también valores/configuración anteriores de etapa, proveedor, intervalo, job y despliegue en un registro de operación protegido.
 
-- Si existen `DEM-01`/`DEM-02` y sus cuatro sensores canónicos, marcados `simulated`, sin códigos PM de destino ocupados: **puede requerir D7**, sujeto al plan y respaldo.
+- Si existen `DEM-01`/`DEM-02` y sus cuatro sensores canónicos, con nombres/ubicaciones y relaciones esperados, sin códigos PM de destino ocupados: **puede requerir D7**, sujeto al plan y respaldo.
 - Si existen `PM-001`/`PM-002` y sus sensores correctos y el plan está vacío: **no aplicar una migración vacía**. Verificar también relaciones/tipos/unidades; un plan vacío por sí solo no certifica que el inventario esperado exista.
-- Inventario mixto, parcial, códigos personalizados, `simulated=0`, destinos ocupados o asociaciones inesperadas: detener y revisar. La herramienta rechaza colisiones/casos canónicos incompletos, no decide cambios manuales ni fusiona puentes. No ejecutar seed, configuradores o importadores para "arreglarlo".
+- Inventario mixto, parcial, códigos personalizados, firmas de inventario incompatibles, destinos ocupados o asociaciones inesperadas: detener y revisar. La herramienta rechaza colisiones/casos canónicos incompletos, no decide cambios manuales ni fusiona puentes. No ejecutar seed, configuradores o importadores para "arreglarlo".
 
 ## 3. Congelar escritores y captura antes del respaldo definitivo
 
@@ -114,6 +114,11 @@ La ausencia de `--apply` devuelve JSON `applied: false` y revierte su transacci�
 
 ## 6. Orden de migración y publicación autorizada
 
+La versión revisada retira cinco columnas. El orden obligatorio sobre el esquema anterior es **inventario → respaldo → D7 → validar PM → retirar columnas → verificar integridad → activar código**. Una instalación nueva ya usa el esquema de 99 columnas. El código actualizado no elimina columnas al iniciar y rechaza esquemas anteriores hasta completar el procedimiento explícito. No basta con cambiar PROJECT_STAGE.
+
+El DSN administrativo de la migración necesita además permisos ALTER sobre las cinco tablas. No ampliar permisos de `puentes_app` para conseguirlo: usar la sesión administrativa autorizada existente. El plan y aplicación se ensayan primero sobre una copia restaurada aislada.
+
+
 1. Mantener bloqueo de escritores y Cron detenido. Repetir plan contra el inventario definitivo y confirmar respaldo restaurable. Aprobar los seis cambios exactos o confirmar que no hacen falta.
 2. **Solo si hace falta D7 y está autorizado**, aplicar y repetir el plan (debe quedar vacío):
 
@@ -123,7 +128,19 @@ if ($LASTEXITCODE -ne 0) { throw 'Migración fallida; mantener captura y escrito
 python tools/rename_reference_identifiers.py --postgres --schema puentes
 ```
 
-3. Comparar inventario/contadores y relaciones con el respaldo: solo cambian los seis códigos aprobados. El proveedor nuevo usa PM, el anterior usa DEM: **no reanudar captura ni habilitar usuarios con versiones e inventario incompatibles**. No ejecutar reemplazos masivos en auditoría ni reescribir IDs externos históricos.
+3. Después de D7, guardar un respaldo PostgreSQL adicional (por ejemplo `puentes-pm-antes-retiro.dump`) y comprobar que es restaurable. Planificar el retiro de columnas y revisar que son exactamente cinco:
+
+```powershell
+python tools/retire_legacy_columns.py --postgres --schema puentes
+# Solo con autorización de aplicación y respaldo POSTERIOR a D7:
+python tools/retire_legacy_columns.py --postgres --schema puentes --apply --backup 'C:\respaldo\EV3\puentes-pm-antes-retiro.dump'
+if ($LASTEXITCODE -ne 0) { throw 'Retiro fallido; no activar código ni captura' }
+python tools/retire_legacy_columns.py --postgres --schema puentes
+```
+
+Comprobar en information_schema: 13 tablas y 99 columnas activas, ninguna `simulated` en bridges/measurements/inspections/rules/alerts. Confrontar conteos/hashes del informe de retiro, las 27 FK, 9 CHECK, 9 UNIQUE, 13 PK, cinco índices explícitos (27 contando índices de PK/UNIQUE), 13 tablas con RLS y sus políticas. Un índice/constraint/política dependiente provoca rollback y requiere revisión, sin CASCADE. Las cinco columnas retiradas solo se recuperan desde respaldo, no se inventan sus valores al revertir.
+
+Comparar inventario/contadores y relaciones con el respaldo: D7 cambia solo los seis códigos aprobados y el retiro elimina solo las cinco columnas autorizadas, preservando el resto. El proveedor nuevo usa PM, el anterior usa DEM: **no reanudar captura ni habilitar usuarios con versiones e inventario incompatibles**. No ejecutar reemplazos masivos en auditoría ni reescribir IDs externos históricos.
 4. Confirmar cuenta/proyecto Vercel desde su vinculación privada existente; si esta copia no está vinculada, hacerlo con el operador eligiendo **el proyecto existente**, sin crear otro. Registrar CLI 65.2.0. Cambiar solo `PROJECT_STAGE` de Production a `cutoff_2026_11_28` en Dashboard. Antes comprobar que la variable tiene alcance Production exclusivo: el CLI advierte que actualizar una entrada compartida afecta todos sus entornos. Para una entrada ya exclusiva, el equivalente verificado por `--help` es:
 
 ```powershell
@@ -139,7 +156,7 @@ npx.cmd --yes vercel@65.2.0 deploy --prod --skip-domain
 Registrar URL/ID real devuelto y SHA. `--skip-domain` no aísla la base de datos: usa configuración de producción; mantener la ventana y el bloqueo de versiones anteriores. No usar una Preview con credenciales de producción para ensayar. Las pruebas destructivas se ejecutan solo en entornos aislados.
 6. Comprobar carga del despliegue candidato y etapa, usando acceso de operador. Tras verificar lo posible sin escrituras y aprobar el paso, asignar el dominio con `npx.cmd --yes vercel@65.2.0 promote <URL_REAL_DEL_DESPLIEGUE>` (sustituir el marcador; no es una URL existente). Verificar el dominio estable y ejecutar los controles autorizados de la sección siguiente antes de reabrir a todos.
 
-No usar `tools/configure_vercel.py` para cambiar solo etapa: reenvía las doce variables privadas. No ejecutar `init-db`, `seed-demo`, `configure-ev2-demo`, `migrate-db`, `tools/migrate_to_supabase.py` ni `sql/postgres.sql`: este cierre no necesita reinicializar, importar ni cambiar el esquema. No tocar bucket, claves, unidades, reglas o umbrales.
+No usar `tools/configure_vercel.py` para cambiar solo etapa: reenvía las doce variables privadas. No ejecutar `init-db`, `seed-demo`, `configure-ev2-demo`, `migrate-db`, `tools/migrate_to_supabase.py` ni `sql/postgres.sql`: este cierre requiere únicamente el retiro explícito descrito, sin reinicializar ni importar datos. No tocar bucket, claves, unidades, reglas o umbrales.
 
 ## 7. Verificación posterior y reanudación
 
@@ -169,7 +186,7 @@ Observar al menos dos ciclos completos según el intervalo original: `cron.job_r
 ## 8. Fallos y recuperación sin perder información
 
 - **Falla el plan o apply:** no continuar a publicación ni activar captura. La transacción D7 revierte ante conflicto/error; confirmar inventario, no asumir el resultado por un timeout. Guardar error y volver a planificar en modo lectura. No reintentar con SQL manual sobre códigos personalizados.
-- **D7 aplicada y falla el build/publicación:** mantener congelación. Resolver el despliegue con el código aprobado o preparar un plan de reversión de esos seis códigos con comprobación de colisiones. No hay comando de reversión automática en este PR. El código anterior DEM es incompatible con inventario PM; revertir solo el alias de Vercel no basta.
+- **D7 aplicada y falla el retiro/build/publicación:** mantener congelación. Resolver el despliegue con el código aprobado o preparar un plan de reversión de esos seis códigos con comprobación de colisiones. No hay comando de reversión automática en este PR. El código anterior DEM es incompatible con inventario PM y el código anterior con columnas eliminadas; revertir solo el alias de Vercel no basta. Se necesita recuperación coordinada de esquema, inventario y versión, con preservación de todas las altas posteriores.
 - **Código nuevo activo y falla un control:** cerrar acceso y detener captura, guardar logs/cambios posteriores y evaluar corrección o reversión coordinada de versión/etapa/datos. La variable Vercel modificada no reconfigura despliegues antiguos; registrar y restaurar la configuración futura autorizada, sin cambiar secretos.
 - **Restauración:** es el último recurso y requiere autorización específica, respaldo íntegro y reconciliación de filas/fotos nuevas desde el punto de respaldo. No restaurar un dump antiguo encima de registros nuevos ni borrar Storage. Ensayar recuperación en aislado; conservar originales y copias previas. Reabrir solo cuando inventario, versión, etapa y captura sean compatibles.
 

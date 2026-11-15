@@ -1,0 +1,1191 @@
+{
+  "checked_at": "2026-11-15T16:06:40-03:00",
+  "tested_commit": "e71352105fd1f5a3d109f273150c22290b6cea1b",
+  "reports": [
+    {
+      "path": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "required_fields_present": true,
+      "sha256": "87a0ba7c91e323d0d805d35fde062addad8c3b4a10258b3fd608994dffe1403f"
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "required_fields_present": true,
+      "sha256": "3dd948426236c2e1e06475e148e9f8ca443834ef4c30b3d6640fb1acb35da401"
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "required_fields_present": true,
+      "sha256": "99041f33cdadde64e391f7cd0184931e13fb9c4ff2fb8c20fd7fa2b4d40bd25a"
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "required_fields_present": true,
+      "sha256": "142029870f85aa66f723ae9e17839ce61e869a691c20129d74d1c6cfdb815969"
+    }
+  ],
+  "historical_documents": [
+    {
+      "path": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "original_path": "docs/CIERRE_TECNICO_EV3.md",
+      "git_blob": "798e515fa9616c0cc525af170425cc24f75950d9",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "original_path": "docs/CUMPLIMIENTO.md",
+      "git_blob": "dbc65c8e60d1dc138c67182dfe66a3744845415b",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "original_path": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "git_blob": "b653feedc405b9d56f96c2842a59fbf0139030fc",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "original_path": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "git_blob": "ca55135202fb102bce2696fea8a217cf56be7771",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "original_path": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "git_blob": "8ad2d2948d7648d8e3138185877041d296c35803",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "original_path": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "git_blob": "cc33db187d1f2b88f1818abaf8bfd926772d40bf",
+      "content_preserved": true
+    },
+    {
+      "path": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "original_path": "docs/VERIFICACION.md",
+      "git_blob": "a8d803349da9bbd186ae130d26975c7cbbba3d50",
+      "content_preserved": true
+    }
+  ],
+  "local_links": [
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "evidence/EV3_CHRISTIAN_SCHEMA.json",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "REVISION_EV3_UI.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ARQUITECTURA.md",
+      "target": "SUPABASE_VERCEL.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "target": "../sql/postgres.sql",
+      "exists": true
+    },
+    {
+      "source": "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_SCHEMA.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "evidence/EV3_CHRISTIAN_SCHEMA.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO.md",
+      "target": "CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REVISION_EV3_UI.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "CRITERIOS_OFICIALES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "SUPABASE_VERCEL.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_SCHEMA.json",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/ENTREGA_ARIEL_EV3.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/MIGRACION_REFERENCIAS_D7.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/MIGRACION_REFERENCIAS_D7.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PLAN_PUBLICACION_EV3.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PLAN_PUBLICACION_EV3.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PLAN_PUBLICACION_EV3.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PUBLICACION.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PUBLICACION.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/PUBLICACION.md",
+      "target": "SUPABASE_VERCEL.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_REGLAS.png",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_ALERTA.png",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_NAVEGADOR.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "target": "REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_PANEL.png",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_BROWSER.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_BROWSER_SERVER.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "target": "REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_MANTENIMIENTO.png",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_BROWSER.json",
+      "exists": true
+    },
+    {
+      "source": "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_CIERRE_BROWSER_SERVER.log",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/SUPABASE_VERCEL.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_CHRISTIAN_SCHEMA.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_CHRISTIAN_PREFLIGHT_SQLITE.log",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION.md",
+      "target": "VERIFICACION_HISTORICO_ba0b74e.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_FINAL_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "ENTREGA_ARIEL_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_MEASUREMENTS_PAGINATION_TESTS.log",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_MEASUREMENTS_PAGINATION_BROWSER.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REVISION_FINAL_EV3_UI.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_UI_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_UI_FINAL_JS.tap",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_UI_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_UI_BROWSER_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REVISION_EV3_UI.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+      "exists": true
+    },
+    {
+      "source": "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+      "target": "REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_CHRISTIAN_TEST_RUN.log",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/CIERRE_TECNICO_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/MIGRACION_REFERENCIAS_D7.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/PLAN_PUBLICACION_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/VERIFICACION.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/ARQUITECTURA.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/ARQUITECTURA.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/SUPABASE_VERCEL.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/SUPABASE_VERCEL.md",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_CHILE_TIME_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_MEASUREMENTS_PAGINATION_TESTS.log",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_MEASUREMENTS_PAGINATION_BROWSER.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_UI_FINAL_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_UI_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/evidence/EV3_B11_TEST_RESULTS.json",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/mockups.html",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/mockups-full.html",
+      "exists": true
+    },
+    {
+      "source": "README.md",
+      "target": "docs/PUBLICACION.md",
+      "exists": true
+    },
+    {
+      "source": "docs/CIERRE_TECNICO_EV3.md",
+      "target": "evidence/EV3_CHRISTIAN_DOCUMENT_CHECKS.json",
+      "exists": true
+    }
+  ],
+  "broken_local_links": 0,
+  "images": [
+    {
+      "path": "docs/evidence/EV3_CIERRE_PANEL.png",
+      "format": "PNG",
+      "size": [
+        1265,
+        712
+      ],
+      "decodable": true,
+      "sha256": "56863f9278d3bce075e50f1ba53d4b783cba4cd7f6741dcf6404f3ce5a2a3682"
+    },
+    {
+      "path": "docs/evidence/EV3_CIERRE_MANTENIMIENTO.png",
+      "format": "PNG",
+      "size": [
+        1265,
+        712
+      ],
+      "decodable": true,
+      "sha256": "d69557ad42b9c4fa0e3b143ccc95244c25e650249ae7e4f8a0e0ff9483b98d2a"
+    },
+    {
+      "path": "docs/evidence/EV3_B11_REGLAS.png",
+      "format": "JPEG",
+      "size": [
+        1265,
+        712
+      ],
+      "decodable": true,
+      "sha256": "f5992651ff54f81623b67d287e6f53adb0c6370d2bcee153be8da7f1d91bd1cb"
+    },
+    {
+      "path": "docs/evidence/EV3_B11_ALERTA.png",
+      "format": "JPEG",
+      "size": [
+        1265,
+        712
+      ],
+      "decodable": true,
+      "sha256": "9324264ec2ef2a37a5762e741d5fc843adeb6367e0cb8ba8875d6273f0296248"
+    }
+  ],
+  "notes": "Las dos capturas B-11 históricas siguen en JPEG con extensión PNG, decodificables y sin alteración; no son capturas nuevas. Las dos capturas CIERRE son PNG reales.",
+  "source_files_checked": 73,
+  "sources_unchanged": true,
+  "existing_evidence_unchanged": true,
+  "changed_files": [
+    "README.md",
+    "app.py",
+    "cloud_provider.py",
+    "database.py",
+    "demo_locations.py",
+    "docs/ARQUITECTURA.md",
+    "docs/CAMBIOS_PENDIENTES_DRIVE_EV3.md",
+    "docs/CIERRE_TECNICO_EV3.md",
+    "docs/CIERRE_TECNICO_EV3_HISTORICO_ba0b74e.md",
+    "docs/CUMPLIMIENTO.md",
+    "docs/CUMPLIMIENTO_HISTORICO_ba0b74e.md",
+    "docs/ENTREGA_ARIEL_EV3.md",
+    "docs/MIGRACION_REFERENCIAS_D7.md",
+    "docs/PLAN_PUBLICACION_EV3.md",
+    "docs/PUBLICACION.md",
+    "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md",
+    "docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES_HISTORICO_ba0b74e.md",
+    "docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md",
+    "docs/REPORTE_1_5_2_3_REGLAS_ALERTA_HISTORICO_ba0b74e.md",
+    "docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md",
+    "docs/REPORTE_1_5_2_4_PANEL_MONITOREO_HISTORICO_ba0b74e.md",
+    "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md",
+    "docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO_HISTORICO_ba0b74e.md",
+    "docs/SUPABASE_VERCEL.md",
+    "docs/VERIFICACION.md",
+    "docs/VERIFICACION_HISTORICO_ba0b74e.md",
+    "docs/evidence/EV3_CHRISTIAN_DOCUMENT_CHECKS.json",
+    "docs/evidence/EV3_CHRISTIAN_PREFLIGHT_SQLITE.log",
+    "docs/evidence/EV3_CHRISTIAN_SCHEMA.json",
+    "docs/evidence/EV3_CHRISTIAN_TEST_RESULTS.json",
+    "docs/evidence/EV3_CHRISTIAN_TEST_RUN.log",
+    "docs/mockups-full.html",
+    "docs/mockups.html",
+    "ev2_migration.py",
+    "migrations.py",
+    "mock_provider.py",
+    "reference_data.py",
+    "reference_migration.py",
+    "schema.sql",
+    "schema_revision.py",
+    "simulate_iot.py",
+    "sql/postgres.sql",
+    "templates/bridge.html",
+    "templates/bridges.html",
+    "templates/dashboard.html",
+    "templates/inspections.html",
+    "templates/macros.html",
+    "templates/measurement.html",
+    "templates/measurements.html",
+    "tests/fixture_rules.py",
+    "tests/fixtures/postgres_pre_christian.sql",
+    "tests/fixtures/schema_pre_christian.sql",
+    "tests/test_app.py",
+    "tests/test_chile_time.py",
+    "tests/test_christian_review.py",
+    "tests/test_cloud.py",
+    "tests/test_corrections.py",
+    "tests/test_ev2.py",
+    "tests/test_ev3_closure.py",
+    "tests/test_ev3_stage.py",
+    "tests/test_final_fixes.py",
+    "tests/test_iot_update.py",
+    "tests/test_monitoring_ui.py",
+    "tests/test_project_stage.py",
+    "tools/build_mockups.py",
+    "tools/migrate_to_supabase.py",
+    "tools/preview_monitoring_ui.py",
+    "tools/retire_legacy_columns.py",
+    "tools/run_ev3_checks.py"
+  ],
+  "production_used": false
+}
