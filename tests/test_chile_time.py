@@ -65,8 +65,8 @@ class ChileTimeViewTests(unittest.TestCase):
             expected=[]
             for instant in stamps:
                 stamp=instant.isoformat(timespec='seconds')
-                mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,created_at) VALUES(1,9,'m/s²',?,'valido',1,?)",(stamp,stamp)).lastrowid
-                aid=self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,standard,severity,status) VALUES(1,?,?,?,1,'EV2','Atención','Activa')",(rid,mid,stamp)).lastrowid
+                mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,created_at) VALUES(1,9,'m/s²',?,'valido',?)",(stamp,stamp)).lastrowid
+                aid=self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,standard,severity,status) VALUES(1,?,?,?,'EV2','Atención','Activa')",(rid,mid,stamp)).lastrowid
                 if lower<=instant<upper:expected.append((instant,mid,aid))
             self.db.commit()
             before=[tuple(row) for row in self.db.execute('SELECT * FROM measurements ORDER BY id')]
@@ -90,12 +90,12 @@ class ChileTimeViewTests(unittest.TestCase):
         self.app.config['PROJECT_STAGE']=EV3_STAGE
         self.rule();rid=self.db.execute('SELECT id FROM rules ORDER BY id DESC').fetchone()[0]
         stamp='2026-01-01T02:30:00+00:00';text='31/12/2025 23:30:00 (UTC-03:00)'
-        mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,created_at) VALUES(1,9,'m/s²',?,'valido',1,?)",(stamp,stamp)).lastrowid
-        aid=self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,standard,severity,status) VALUES(1,?,?,?,1,'EV2','Atención','Activa')",(rid,mid,stamp)).lastrowid
+        mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,created_at) VALUES(1,9,'m/s²',?,'valido',?)",(stamp,stamp)).lastrowid
+        aid=self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,standard,severity,status) VALUES(1,?,?,?,'EV2','Atención','Activa')",(rid,mid,stamp)).lastrowid
         self.db.execute('UPDATE rules SET created_at=?',(stamp,))
         self.db.execute("INSERT INTO alert_notes(alert_id,author_id,created_at,note) VALUES(?,1,?,'Seguimiento histórico')",(aid,stamp))
         self.db.execute("INSERT INTO audit(author,action,entity,details,created_at) VALUES('DOM','Revisión','alerts','Detalle original',?)",(stamp,))
-        self.db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,simulated,standard) VALUES(1,1,?,2,'Alta','Hallazgo conservado',1,'EV2')",(stamp,))
+        self.db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,standard) VALUES(1,1,?,2,'Alta','Hallazgo conservado','EV2')",(stamp,))
         iid=self.db.execute('SELECT id FROM inspections ORDER BY id DESC').fetchone()[0]
         self.db.commit()
         tables=('measurements','alerts','rules','alert_notes','inspections','audit')

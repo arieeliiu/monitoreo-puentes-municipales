@@ -1,5 +1,5 @@
 """Ubicaciones iniciales del piloto; no modifica inventario ni datos manuales."""
-from reference_data import BRIDGE_REFERENCES
+from reference_data import BRIDGE_REFERENCES, reference_inventory
 
 LOCATIONS = {
     'Tablero': {
@@ -18,18 +18,19 @@ LOCATIONS = {
 
 
 def complete_demo_locations(connection):
-    """Solo los cuatro códigos originales en puentes marcados como simulados.
+    """Solo sensores canónicos asociados al inventario de referencia verificado.
 
     Un sensor sin ubicación se reconoce por vacío o por el marcador de migración.
     La ubicación deriva del componente actual; nunca se reasocia el sensor.
     Componentes desconocidos y códigos personalizados requieren criterio de DOM.
     La transacción y la auditoría pertenecen al llamador.
     """
+    reference_inventory(connection, BRIDGE_REFERENCES)
     sensors = connection.execute('''
         SELECT s.id, s.kind, s.location, c.name
         FROM sensors s JOIN components c ON c.id=s.component_id
         JOIN bridges b ON b.id=c.bridge_id
-        WHERE b.simulated=1 AND b.code IN (?,?)
+        WHERE b.code IN (?,?)
           AND s.code=b.code || '-' || upper(s.kind)
     ''',tuple(item[0] for item in BRIDGE_REFERENCES)).fetchall()
     changed = 0

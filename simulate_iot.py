@@ -2,9 +2,9 @@
 import argparse, json, os, urllib.request
 from datetime import datetime, timezone
 from uuid import uuid4
-p=argparse.ArgumentParser();p.add_argument('--sensor',required=True);p.add_argument('--value',type=float,required=True);p.add_argument('--unit',required=True);p.add_argument('--url',default='http://127.0.0.1:5000');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--sensor',required=True);p.add_argument('--bridge',required=True);p.add_argument('--kind',choices=['vibracion','inclinacion'],required=True);p.add_argument('--value',type=float,required=True);p.add_argument('--unit',required=True);p.add_argument('--url',default='http://127.0.0.1:5000');a=p.parse_args()
 key=os.environ.get('IOT_API_KEY')
 if not key: p.error('Configura IOT_API_KEY en el servidor y en esta terminal.')
-data=dict(external_id='sim-'+uuid4().hex,sensor_code=a.sensor,value=a.value,unit=a.unit,status='valido',measured_at=datetime.now(timezone.utc).isoformat(),simulated=True)
+data=dict(external_id='referencia-'+uuid4().hex,sensor_code=a.sensor,value=a.value,unit=a.unit,status='valido',measured_at=datetime.now(timezone.utc).isoformat(),bridge_code=a.bridge,kind=a.kind)
 r=urllib.request.Request(a.url+'/api/v1/measurements',data=json.dumps(data).encode(),headers={'Content-Type':'application/json','Authorization':'Bearer '+key})
-with urllib.request.urlopen(r) as response: print('PRUEBA SIMULADA:',response.read().decode())
+with urllib.request.urlopen(r) as response: print('Recepción:',response.read().decode())

@@ -12,8 +12,8 @@ class SystemTests(unittest.TestCase):
         self.db=sqlite3.connect(self.app.config['DATABASE']); self.db.row_factory=sqlite3.Row
         self.db.executescript(Path('schema.sql').read_text(encoding='utf-8'))
         for name,role in [('dom','DOM'),('inspector','Inspector'),('worker','Mantención'),('other','Mantención')]: self.db.execute('INSERT INTO users(username,password,role) VALUES (?,?,?)',(name,generate_password_hash('password-test'),role))
-        self.db.execute("INSERT INTO bridges VALUES(1,'P1','Puente de prueba','Biobío','Alta',1)")
-        self.db.execute("INSERT INTO bridges VALUES(2,'P2','Segundo puente','Biobío','Media',1)")
+        self.db.execute("INSERT INTO bridges VALUES(1,'P1','Puente de prueba','Biobío','Alta')")
+        self.db.execute("INSERT INTO bridges VALUES(2,'P2','Segundo puente','Biobío','Media')")
         self.db.execute("INSERT INTO components VALUES(1,1,'Tablero')")
         self.db.execute("INSERT INTO components VALUES(2,2,'Pila')")
         self.db.execute("INSERT INTO sensors VALUES(1,1,'S1','vibracion','m/s²')")
@@ -30,11 +30,14 @@ class SystemTests(unittest.TestCase):
         return self.client.post(url,data=payload,**kwargs)
     def count(self,table): return self.db.execute('SELECT count(*) FROM '+table).fetchone()[0]
     def measurement(self,**extra):
-        d=dict(sensor_code='S1',value='9',unit='m/s²',measured_at='2026-01-01T10:00:00-03:00',status='valido');d.update(extra);return d
+        d=dict(sensor_code='S1',value='9',unit='m/s²',measured_at='2026-01-01T10:00:00-03:00',status='valido');d.update(extra)
+        sensor=self.db.execute('SELECT s.kind,b.code FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE s.code=?',(d['sensor_code'],)).fetchone()
+        if sensor:d.setdefault('bridge_code',sensor['code']);d.setdefault('kind',sensor['kind'])
+        return d
     def rule(self,kind='vibracion',**extra):
-        d=dict(bridge_id='1',kind=kind,severity='Atención',threshold='5',condition='Alta',label='Umbral ficticio',simulated='1');d.update(extra);return self.post('/rules',d)
+        d=dict(bridge_id='1',kind=kind,severity='Atención',threshold='5',condition='Alta',label='Umbral ficticio');d.update(extra);return self.post('/rules',d)
     def inspection(self,**extra):
-        d=dict(bridge_id='1',component_id='1',inspected_at='2026-01-01T10:00:00-03:00',condition='Alta',description='Hallazgo de prueba',simulated='1'); d.update(extra);return self.post('/inspections',d)
+        d=dict(bridge_id='1',component_id='1',inspected_at='2026-01-01T10:00:00-03:00',condition='Alta',description='Hallazgo de prueba'); d.update(extra);return self.post('/inspections',d)
     def task(self,**extra):
         d=dict(bridge_id='1',component_id='1',alert_id='1',description='Revisar tablero',assignee_id='3',planned_date='2026-11-26');d.update(extra);return self.post('/maintenance',d)
     def test_bridge_crud_and_duplicates(self):
@@ -73,19 +76,19 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(self.count('measurements'),3)
         page=self.client.get('/measurements?bridge_id=1&from=2026-01-01&to=2026-01-02')
         self.assertIn(b'S1',page.data);self.assertIn(b'no disponible',page.data)
-    def test_alert_threshold_and_simulation(self):
+    def test_alert_threshold_and_traceability(self):
         self.rule();self.post('/measurements',self.measurement(value='4.999'));self.assertEqual(self.count('alerts'),0)
         self.post('/measurements',self.measurement());self.assertEqual(self.count('alerts'),1)
         self.post('/measurements',self.measurement(status='invalido'));self.assertEqual(self.count('alerts'),1)
-        a=self.db.execute('SELECT * FROM alerts').fetchone();self.assertEqual(a['bridge_id'],1);self.assertEqual(a['simulated'],1);self.assertIsNotNone(a['measurement_id'])
+        a=self.db.execute('SELECT * FROM alerts').fetchone();self.assertEqual(a['bridge_id'],1);self.assertNotIn('simulated',a.keys());self.assertIsNotNone(a['measurement_id'])
         self.post('/rules',dict(disable='1'));self.post('/measurements',self.measurement());self.assertEqual(self.count('alerts'),1)
     def test_inclination_and_visual_alert(self):
         self.rule('inclinacion',threshold='2');self.rule('visual')
         self.post('/measurements',self.measurement(sensor_code='S2',value='3',unit='°'))
         self.inspection();self.assertEqual(self.count('alerts'),2)
     def test_academic_rule_without_real_reference(self):
-        self.rule(simulated='0');self.assertEqual(self.count('rules'),1)
-        self.assertEqual(self.db.execute('SELECT simulated FROM rules').fetchone()[0],1)
+        self.rule();self.assertEqual(self.count('rules'),1)
+        self.assertNotIn('simulated',self.db.execute('SELECT * FROM rules').fetchone().keys())
     def test_photo_upload_and_authorization(self):
         self.login('inspector'); buf=io.BytesIO();Image.new('RGB',(24,24),'blue').save(buf,'PNG');buf.seek(0)
         response=self.inspection(photos=(buf,'puente.png'))
@@ -103,7 +106,7 @@ class SystemTests(unittest.TestCase):
         self.inspection(description=' ');self.assertEqual(self.count('inspections'),0)
         self.assertEqual(list((self.path/'photos').iterdir()),[])
     def test_iot_auth_idempotency_and_unavailable_configuration(self):
-        data=self.measurement(external_id='x1',simulated=True)
+        data=self.measurement(external_id='x1')
         self.assertEqual(self.client.post('/api/v1/measurements',json=data).status_code,401)
         headers={'Authorization':'Bearer test-key'}
         self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,201)
@@ -113,8 +116,8 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,503)
     def test_malformed_api_fields(self):
         headers={'Authorization':'Bearer test-key'}
-        for override in [dict(value={}),dict(value=True),dict(sensor_code=None),dict(unit=[]),dict(external_id=['x']),dict(simulated='false')]:
-            data=self.measurement(external_id='bad',simulated=True);data.update(override)
+        for override in [dict(value={}),dict(value=True),dict(sensor_code=None),dict(unit=[]),dict(external_id=['x'])]:
+            data=self.measurement(external_id='bad');data.update(override)
             self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,400)
         self.assertEqual(self.count('measurements'),0)
     def test_dom_task_edit_and_inspector_followup(self):

@@ -14,7 +14,7 @@ from pilot_time import form_timestamp
 from display_time import chile_datetime, calendar_date, local_date_bounds
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
-from reference_data import BRIDGE_REFERENCES
+from reference_data import BRIDGE_REFERENCES, reference_inventory
 from provider_client import fetch_measurements
 from polling import run_polling, interval_seconds, single_worker
 from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory, send_file
@@ -241,13 +241,13 @@ def create_app(config=None):
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El nombre o código está duplicado.','error')
         return render_template('bridge.html',b=b,components=rows('SELECT * FROM components WHERE bridge_id=?',(bid,)),sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
 
-    def evaluate(kind,bridge_id,record_id,value,simulated):
+    def evaluate(kind,bridge_id,record_id,value):
         if not feature_enabled('alerts'): return False
         applicable=rows("SELECT * FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(bridge_id,kind))
         matches=[r for r in applicable if (kind=='visual' and value==r['condition']) or (kind!='visual' and r['unit']==KINDS[kind] and value>=r['threshold'])]
         if matches:
             r=max(matches,key=lambda rule:(SEVERITIES.index(rule['severity']),rule['id']))
-            aid=insert('alerts',bridge_id=bridge_id,rule_id=r['id'],measurement_id=record_id if kind!='visual' else None,inspection_id=record_id if kind=='visual' else None,created_at=now(),simulated=int(bool(simulated or r['simulated'])),severity=r['severity'],standard='EV2')
+            aid=insert('alerts',bridge_id=bridge_id,rule_id=r['id'],measurement_id=record_id if kind!='visual' else None,inspection_id=record_id if kind=='visual' else None,created_at=now(),severity=r['severity'],standard='EV2')
             audit('Generar alerta','alerts',aid,r['severity'])
         return bool(applicable)
 
@@ -260,7 +260,7 @@ def create_app(config=None):
             if data['bridge_code']!=sensor['bridge_code']: raise ValueError('El identificador del puente no coincide con el sensor registrado.')
             if data['kind']!=sensor['kind']: raise ValueError('El tipo de medición no coincide con la variable del sensor registrado.')
 
-    def receive(data,simulated=False):
+    def receive(data):
         validate_identity(data)
         required(data,'sensor_code','unit','measured_at','status')
         if data.get('external_id') is not None and (not isinstance(data['external_id'],str) or len(data['external_id'])>200): raise ValueError('external_id debe ser texto de hasta 200 caracteres.')
@@ -283,17 +283,17 @@ def create_app(config=None):
         reference=s['reference_value'] if s['kind']=='inclinacion' else None
         variation=float(abs(Decimal(str(value))-Decimal(str(reference)))) if value is not None and reference is not None else None
         if variation is not None and not math.isfinite(variation): raise ValueError('La variación calculada debe ser finita.')
-        mid=insert('measurements',specification='EV2',reference_value=reference,variation=variation,sensor_id=s['id'],value=value,unit=KINDS[s['kind']],measured_at=measured_at,status=status,simulated=int(simulated),external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
+        mid=insert('measurements',specification='EV2',reference_value=reference,variation=variation,sensor_id=s['id'],value=value,unit=KINDS[s['kind']],measured_at=measured_at,status=status,external_id=data.get('external_id') or None,author_id=g.user['id'] if g.get('user') else None,created_at=now())
         if not feature_enabled('alerts'):
             evaluation=PENDING_EVALUATION
         else:
             applicable=bool(one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND active=1 AND standard='EV2'",(s['bridge_id'],s['kind'])))
-            if status=='valido' and (s['kind']!='inclinacion' or reference is not None): evaluate(s['kind'],s['bridge_id'],mid,variation if s['kind']=='inclinacion' else value,simulated)
+            if status=='valido' and (s['kind']!='inclinacion' or reference is not None): evaluate(s['kind'],s['bridge_id'],mid,variation if s['kind']=='inclinacion' else value)
             evaluation=('Evaluada' if status=='valido' else 'No evaluada: dato '+status) if applicable else 'Sin regla aplicable'
             if s['kind']=='inclinacion' and reference is None: evaluation='Falta referencia del sensor: medición no evaluable'
             if not applicable: audit('Sin regla aplicable','measurements',mid,s['kind'])
         db().execute('UPDATE measurements SET evaluation=? WHERE id=?',(evaluation,mid))
-        audit('Recibir medición simulada' if simulated else 'Recibir medición','measurements',mid)
+        audit('Recibir medición','measurements',mid)
         return mid
 
     def local_date_filters(column, filters, args):
@@ -323,7 +323,7 @@ def create_app(config=None):
                     if not sensor or sensor['component_id']!=component['id']:
                         raise ValueError('El sensor no pertenece al componente estructural seleccionado.')
                 data['measured_at']=form_timestamp(data,'measured',timestamp)
-                mid=receive(data,True); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
+                mid=receive(data); db().commit(); flash(f'Medición {mid} guardada. '+one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation'],'success')
                 return redirect(url_for('measurements'))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El identificador externo ya se recibió.','error')
@@ -346,8 +346,8 @@ def create_app(config=None):
         if not isinstance(data,dict): return jsonify(error='Se requiere un objeto JSON.'),400
         try:
             required(data,'external_id')
-            if not isinstance(data.get('simulated',False),bool): raise ValueError('simulated debe ser booleano.')
-            mid=receive(data,data.get('simulated',False)); db().commit(); return jsonify(id=mid,evaluation=one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation']),201
+            validate_identity(data,provider=True)
+            mid=receive(data); db().commit(); return jsonify(id=mid,evaluation=one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation']),201
         except (ValueError,sqlite3.IntegrityError) as e:
             db().rollback(); return jsonify(error=str(e) if isinstance(e,ValueError) else 'external_id duplicado.'),400
 
@@ -390,7 +390,7 @@ def create_app(config=None):
                         if image.format not in ['JPEG','PNG'] or image.width*image.height>20_000_000: raise ValueError('Usa fotografías JPEG o PNG de hasta 20 megapíxeles.')
                         image.load(); images.append(image.convert('RGB'))
                     except (UnidentifiedImageError,OSError,Image.DecompressionBombError): raise ValueError('El archivo no es una fotografía JPEG o PNG válida.')
-                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=inspected_at,inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip(),simulated=int(request.form.get('simulated')=='1'))
+                iid=insert('inspections',bridge_id=request.form['bridge_id'],component_id=request.form['component_id'],inspected_at=inspected_at,inspector_id=g.user['id'],condition=request.form['condition'],standard='EV2',description=request.form['description'].strip())
                 if feature_enabled('inspection_plans') and request.form.get('plan_id'):
                     plan=get_id('inspection_plans',request.form['plan_id'])
                     if g.user['role']!='Inspector' or plan['inspector_id']!=g.user['id']: abort(403)
@@ -402,7 +402,7 @@ def create_app(config=None):
                     image_bytes=io.BytesIO(); image.save(image_bytes,'JPEG',quality=88)
                     photo_store.put(filename,image_bytes.getvalue()); saved.append(filename)
                     insert('photos',inspection_id=iid,filename=filename)
-                if feature_enabled('alerts'): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'],request.form.get('simulated')=='1')
+                if feature_enabled('alerts'): evaluate('visual',int(request.form['bridge_id']),iid,request.form['condition'])
                 audit('Registrar inspección','inspections',iid); db().commit()
                 return redirect(url_for('inspection',iid=iid))
             except (ValueError,sqlite3.IntegrityError) as e:
@@ -475,7 +475,7 @@ def create_app(config=None):
                             if (SEVERITIES.index(other['severity'])<SEVERITIES.index(severity) and threshold<=other['threshold']) or (SEVERITIES.index(other['severity'])>SEVERITIES.index(severity) and threshold>=other['threshold']): raise ValueError('Los umbrales deben aumentar de Atención a Alerta y Crítico.')
                     # Version rules instead of changing the rule attached to past alerts.
                     db().execute("UPDATE rules SET active=0 WHERE bridge_id=? AND kind=? AND standard='EV2' AND active=1 AND "+('condition=?' if kind=='visual' else 'severity=?'),(request.form['bridge_id'],kind,condition if kind=='visual' else severity))
-                    rid=insert('rules',bridge_id=request.form['bridge_id'],kind=kind,threshold=threshold,condition=condition,label=request.form['label'].strip(),simulated=1,comparison='gte',severity=severity,standard='EV2',unit=KINDS.get(kind),author_id=g.user['id'],created_at=now()); audit('Configurar regla','rules',rid)
+                    rid=insert('rules',bridge_id=request.form['bridge_id'],kind=kind,threshold=threshold,condition=condition,label=request.form['label'].strip(),comparison='gte',severity=severity,standard='EV2',unit=KINDS.get(kind),author_id=g.user['id'],created_at=now()); audit('Configurar regla','rules',rid)
                 db().commit(); flash('Regla guardada. Se aplica a nuevos registros.','success'); return redirect(url_for('rules'))
             except (ValueError,sqlite3.IntegrityError) as e: db().rollback(); flash(str(e),'error')
         return render_template('rules.html',rules=rows('SELECT r.*,b.name FROM rules r JOIN bridges b ON b.id=r.bridge_id ORDER BY r.id DESC'),bridges=rows('SELECT * FROM bridges'))
@@ -619,16 +619,45 @@ def create_app(config=None):
         click.echo('Usuario creado.')
     @app.cli.command('seed-demo')
     def seed_demo():
-        if one('SELECT id FROM bridges LIMIT 1') or one('SELECT id FROM users LIMIT 1'): raise click.ClickException('La demostración requiere una base vacía para no mezclar datos.')
+        if os.environ.get('VERCEL') or (app.config.get('DATABASE_URL') and app.config['DATABASE_SCHEMA']!='puentes_test'):
+            raise click.ClickException('La carga inicial no se ejecuta sobre el entorno publicado.')
+        if one('SELECT id FROM bridges LIMIT 1') or one('SELECT id FROM users LIMIT 1'): raise click.ClickException('La carga inicial requiere una base vacía para no mezclar datos.')
         for username,role in [('dom','DOM'),('inspector','Inspector'),('mantencion','Mantención')]:
             password=secrets.token_urlsafe(14)
             insert('users',username=username,password=generate_password_hash(password),role=role)
             click.echo(f'{username}: {password}')
         for code,name,location in BRIDGE_REFERENCES:
-            bid=insert('bridges',code=code,name=name,location=location,criticality='Alta',simulated=1)
+            bid=insert('bridges',code=code,name=name,location=location,criticality='Alta')
             cid=insert('components',bridge_id=bid,name='Tablero')
             for kind in KINDS: insert('sensors',component_id=cid,code=code+'-'+kind.upper(),kind=kind,unit=KINDS[kind])
-        configure_ev2_demo(); db().commit(); click.echo('Dos puentes de demostración configurados con EV2.')
+        configure_ev2_demo(); db().commit(); click.echo('Dos puentes de referencia configurados con EV2.')
+
+    @app.cli.command('seed-reference-data')
+    @click.option('--confirm-isolated',is_flag=True,required=True,help='Confirma una base nueva de pruebas; nunca producción.')
+    @click.pass_context
+    def seed_reference_data(ctx,confirm_isolated):
+        if app.config.get('VERCEL') or os.environ.get('VERCEL') or (app.config.get('DATABASE_URL') and app.config['DATABASE_SCHEMA']!='puentes_test'):
+            raise click.ClickException('La carga de referencia solo admite SQLite aislado o el esquema puentes_test.')
+        if not feature_enabled('maintenance'):raise click.ClickException('Selecciona cutoff_2026_11_28 o full para la carga de pruebas.')
+        ctx.invoke(app.cli.commands['seed-demo'])
+        g.user=one("SELECT * FROM users WHERE role='DOM' ORDER BY id LIMIT 1")
+        worker=one("SELECT id FROM users WHERE role='Mantención' ORDER BY id LIMIT 1")
+        inspector=one("SELECT id FROM users WHERE role='Inspector' ORDER BY id LIMIT 1")
+        for bridge in reference_inventory(db()):
+            for sensor in rows('SELECT s.* FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bridge['id'],)):
+                for label,value in [('normal',0.01),('alta',3 if sensor['kind']=='vibracion' else 0.5)]:
+                    receive(dict(external_id='referencia-'+sensor['code']+'-'+label,bridge_code=bridge['code'],sensor_code=sensor['code'],kind=sensor['kind'],unit=sensor['unit'],value=value,measured_at=now(),status='valido'))
+            component=one("SELECT id FROM components WHERE bridge_id=? AND name='Tablero'",(bridge['id'],))
+            iid=insert('inspections',bridge_id=bridge['id'],component_id=component['id'],inspected_at=now(),inspector_id=inspector['id'],condition='Alta',description='Observación de referencia del tablero',standard='EV2')
+            evaluate('visual',bridge['id'],iid,'Alta')
+            alert=one('SELECT id FROM alerts WHERE bridge_id=? ORDER BY id LIMIT 1',(bridge['id'],))
+            first=bridge['code']==BRIDGE_REFERENCES[0][0]
+            if first:
+                db().execute("UPDATE alerts SET status='En atención' WHERE id=?",(alert['id'],))
+                insert('alert_notes',alert_id=alert['id'],author_id=g.user['id'],created_at=now(),note='Seguimiento de referencia; sin actuación municipal acreditada.')
+            insert('tasks',bridge_id=bridge['id'],component_id=component['id'],alert_id=alert['id'],description='Revisión de referencia del tablero',assignee_id=worker['id'],planned_date='2026-11-24',status='Completada' if first else 'Pendiente',author_id=g.user['id'],created_at=now())
+        audit('Carga inicial de referencia','bridges',None,'Datos de pruebas; no representan actuaciones municipales realizadas.');db().commit()
+        click.echo('Lecturas, alertas, inspecciones y actividades de referencia creadas.')
 
     def _pull_provider():
         items=cloud_records() if app.config['CLOUD_PROVIDER'] else fetch_measurements(app.config['PROVIDER_URL'],app.config['PROVIDER_TOKEN'])
@@ -637,19 +666,19 @@ def create_app(config=None):
         for index,item in enumerate(items):
             db().execute('SAVEPOINT provider_item')
             try:
-                if not isinstance(item,dict) or item.get('simulated') is not True: raise ValueError('El proveedor no confirmó la procedencia simulada del registro.')
+                if not isinstance(item,dict): raise ValueError('Cada medición del proveedor debe ser un objeto JSON.')
                 required(item,'external_id')
                 validate_identity(item,provider=True)
                 if one('SELECT id FROM measurements WHERE external_id=?',(item['external_id'],)):
                     result['duplicates']+=1
-                else: receive(item,True); result['received']+=1
+                else: receive(item); result['received']+=1
                 db().execute('RELEASE provider_item')
             except (ValueError,sqlite3.IntegrityError) as error:
                 db().execute('ROLLBACK TO provider_item');db().execute('RELEASE provider_item')
                 identity={key:item.get(key) for key in ['external_id','sensor_code','bridge_code','kind']} if isinstance(item,dict) else {'registro':'no es objeto'}
                 result['errors'].append(f'Registro {index+1} {identity}: {error}')
         audit('Consultar proveedor IoT','measurements',None,
-              f"Origen: proveedor simulado. Recibidas: {result['received']}; duplicadas: {result['duplicates']}; incidencias: {len(result['errors'])}. "+'; '.join(result['errors'])); db().commit()
+              f"Origen: proveedor de referencia. Recibidas: {result['received']}; duplicadas: {result['duplicates']}; incidencias: {len(result['errors'])}. "+'; '.join(result['errors'])); db().commit()
         return result
 
     def pull_provider():
@@ -658,7 +687,7 @@ def create_app(config=None):
             db().rollback()
             message=str(error) if isinstance(error,ValueError) else 'Error de persistencia IoT: '+type(error).__name__
             try:
-                audit('Error al consultar proveedor IoT','measurements',None,'Origen: proveedor simulado. '+message);db().commit()
+                audit('Error al consultar proveedor IoT','measurements',None,'Origen: proveedor de referencia. '+message);db().commit()
             except sqlite3.Error:
                 db().rollback();app.logger.exception('No se pudo persistir el error IoT')
             raise ValueError(message) from error
@@ -672,9 +701,9 @@ def create_app(config=None):
                 # Cierra conexión/transacción en cada ciclo; no comparte g ni conexiones con la web.
                 with app.app_context():
                     result=pull_provider()
-                    app.logger.info('Consulta IoT simulada: %s',result)
+                    app.logger.info('Consulta IoT: %s',result)
             with (nullcontext() if app.config.get('DATABASE_URL') else single_worker(app.config['DATABASE'])):
-                click.echo(f'Captura IoT automática simulada: intervalo {seconds:g}s. Ctrl+C para detener.')
+                click.echo(f'Captura IoT automática: intervalo {seconds:g}s. Ctrl+C para detener.')
                 run_polling(cycle,seconds,on_error=lambda error: app.logger.error('Ciclo IoT fallido; se reintentará: %s',error))
         except ValueError as error: raise click.ClickException(str(error))
 
@@ -736,38 +765,39 @@ def create_app(config=None):
         for kind in KINDS:
             values=[float(config['thresholds'][kind][level]) for level in SEVERITIES]
             if any(not math.isfinite(value) or value<0 for value in values) or not values[0]<values[1]<values[2]: raise ValueError('Configuración EV2: umbrales no negativos, finitos y crecientes.')
-        if not math.isfinite(float(config['inclination_reference'])): raise ValueError('La referencia de demostración debe ser finita.')
+        if not math.isfinite(float(config['inclination_reference'])): raise ValueError('La referencia inicial debe ser finita.')
         author=one("SELECT id FROM users WHERE role='DOM' ORDER BY id LIMIT 1")
         if not author: raise ValueError('Crea primero un usuario DOM.')
-        for b in rows('SELECT * FROM bridges WHERE simulated=1'):
+        for b in reference_inventory(db(), BRIDGE_REFERENCES):
             for name in ['Tablero','Viga','Estribo']:
                 if not one('SELECT id FROM components WHERE bridge_id=? AND name=?',(b['id'],name)):
                     old=one('SELECT id FROM components WHERE bridge_id=? AND name=?',(b['id'],name+' · prueba'))
                     if old: db().execute('UPDATE components SET name=? WHERE id=?',(name,old['id']))
                     else: insert('components',bridge_id=b['id'],name=name)
-            # Seed only missing references on demonstration sensors. Real sensors are untouched.
+            # Completa solo referencias ausentes del inventario previamente verificado.
             db().execute("UPDATE sensors SET reference_value=? WHERE kind='inclinacion' AND reference_value IS NULL AND component_id IN (SELECT id FROM components WHERE bridge_id=?)",(config['inclination_reference'],b['id']))
             for kind,levels in config['thresholds'].items():
                 for severity,threshold in levels.items():
                     if not one("SELECT id FROM rules WHERE bridge_id=? AND kind=? AND severity=? AND standard='EV2'",(b['id'],kind,severity)):
-                        insert('rules',bridge_id=b['id'],kind=kind,threshold=threshold,label=LABELS[kind],simulated=1,comparison='gte',severity=severity,standard='EV2',unit=KINDS[kind],author_id=author['id'],created_at=now())
+                        insert('rules',bridge_id=b['id'],kind=kind,threshold=threshold,label=LABELS[kind],comparison='gte',severity=severity,standard='EV2',unit=KINDS[kind],author_id=author['id'],created_at=now())
             for condition,severity in config['visual'].items():
                 if not one("SELECT id FROM rules WHERE bridge_id=? AND kind='visual' AND condition=? AND standard='EV2'",(b['id'],condition)):
-                    insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,simulated=1,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
+                    insert('rules',bridge_id=b['id'],kind='visual',condition=condition,label='Condición visual '+condition,comparison='gte',severity=severity,standard='EV2',author_id=author['id'],created_at=now())
         complete_demo_locations(db())
-        audit('Actualizar configuración de monitoreo','bridges',None,'Configuración de origen simulado; se conservan las versiones y los registros anteriores.');db().commit()
+        audit('Actualizar configuración de monitoreo','bridges',None,'Configuración inicial de monitoreo; se conservan las versiones y los registros anteriores.');db().commit()
 
     @app.cli.command('configure-demo-locations')
     def demo_locations_command():
-        changed=complete_demo_locations(db())
+        try:changed=complete_demo_locations(db())
+        except ValueError as error:raise click.ClickException(str(error))
         if changed:
             audit('Completar ubicaciones del piloto','sensors',None,f'{changed} ubicaciones completadas')
         db().commit()
-        click.echo(f'Ubicaciones de demostración completadas: {changed}.')
+        click.echo(f'Ubicaciones iniciales completadas: {changed}.')
 
     @app.cli.command('configure-ev2-demo')
     def demo_ev2_command():
-        try: configure_ev2_demo();click.echo('Demostración EV2 actualizada sin duplicar infraestructura ni reglas activas.')
+        try: configure_ev2_demo();click.echo('Configuración EV2 actualizada sin duplicar infraestructura ni reglas activas.')
         except ValueError as error: raise click.ClickException(str(error))
 
     return app

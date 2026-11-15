@@ -31,7 +31,7 @@ class CorrectionsTests(SystemTests):
         migrate(self.db);migrate(self.db)
         after={table:[tuple(r) for r in self.db.execute('SELECT * FROM '+table)] for table in tables}
         self.assertEqual(before,after)
-        legacy=sqlite3.connect(':memory:');legacy.executescript(Path('schema.sql').read_text(encoding='utf-8'))
+        legacy=sqlite3.connect(':memory:');legacy.executescript(Path('tests/fixtures/schema_pre_christian.sql').read_text(encoding='utf-8'))
         legacy.execute("INSERT INTO bridges VALUES(99,'OLD','Conservado','Sur','Alta',0)")
         legacy.execute("INSERT INTO components VALUES(99,99,'Viejo')")
         legacy.execute("INSERT INTO sensors VALUES(99,99,'OLD-S','inclinacion','°')")
@@ -57,7 +57,7 @@ class CorrectionsTests(SystemTests):
         self.db.execute("INSERT INTO sensors(component_id,code,kind,unit) VALUES(2,'S3','inclinacion','°')");self.db.commit()
         self.db.execute("UPDATE sensors SET reference_value=0 WHERE code='S3'");self.db.commit()
         self.rule();self.rule('inclinacion',bridge_id='2',comparison='abs_gt',threshold='2')
-        records=[self.measurement(external_id='provider-a',bridge_code='P1',kind='vibracion',simulated=True),self.measurement(external_id='provider-b',bridge_code='P2',kind='inclinacion',sensor_code='S3',unit='°',value='-3',simulated=True),self.measurement(external_id='provider-bad',bridge_code='P1',kind='vibracion',unit='wrong',simulated=True)]
+        records=[self.measurement(external_id='provider-a',bridge_code='P1',kind='vibracion'),self.measurement(external_id='provider-b',bridge_code='P2',kind='inclinacion',sensor_code='S3',unit='°',value='-3'),self.measurement(external_id='provider-bad',bridge_code='P1',kind='vibracion',unit='wrong')]
         server=make_server(port=0,records=records);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         try:
             self.app.config['PROVIDER_URL']=f'http://127.0.0.1:{server.server_port}/measurements'

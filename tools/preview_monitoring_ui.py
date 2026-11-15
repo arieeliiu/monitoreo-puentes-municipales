@@ -27,13 +27,13 @@ def main():
                 db.execute("INSERT INTO bridges VALUES(?,?,?,'Biobío','Alta',1)",(bid,code,name))
                 db.execute("INSERT INTO components VALUES(?,?,'Tablero')",(bid,bid))
                 db.execute("INSERT INTO sensors(id,component_id,code,kind,unit) VALUES(?,?,?,'vibracion','m/s²')",(bid,bid,'S'+str(bid)))
-                db.execute("INSERT INTO rules(id,bridge_id,kind,threshold,label,simulated,author_id,created_at,severity,standard,unit) VALUES(?,?,'vibracion',1,'Aceleración vertical',1,1,'2026-01-01T13:00:00+00:00','Alerta','EV2','m/s²')",(bid,bid))
-            db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,active,author_id,created_at,severity,standard,unit) VALUES(1,'vibracion',0.8,'Límite anterior',1,0,1,'2025-12-01T13:00:00+00:00','Alerta','EV2','m/s²')")
+                db.execute("INSERT INTO rules(id,bridge_id,kind,threshold,label,author_id,created_at,severity,standard,unit) VALUES(?,?,'vibracion',1,'Aceleración vertical',1,'2026-01-01T13:00:00+00:00','Alerta','EV2','m/s²')",(bid,bid))
+            db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,active,author_id,created_at,severity,standard,unit) VALUES(1,'vibracion',0.8,'Límite anterior',0,1,'2025-12-01T13:00:00+00:00','Alerta','EV2','m/s²')")
             for n in range(1,46):
                 bid=1 if n%2 else 2
                 stamp=f'2026-01-{1+n//20:02d}T13:00:00+00:00'
-                db.execute("INSERT INTO measurements(id,sensor_id,value,unit,measured_at,status,simulated,created_at,evaluation,specification) VALUES(?,?,2,'m/s²',?,'valido',1,?,'Evaluada','EV2')",(n,bid,stamp,stamp))
-                db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,severity,standard,status) VALUES(?,?,?,?,1,'Alerta','EV2',?)",(bid,bid,n,stamp,'En atención' if n%5==0 else 'Activa'))
+                db.execute("INSERT INTO measurements(id,sensor_id,value,unit,measured_at,status,created_at,evaluation,specification) VALUES(?,?,2,'m/s²',?,'valido',?,'Evaluada','EV2')",(n,bid,stamp,stamp))
+                db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,severity,standard,status) VALUES(?,?,?,?,'Alerta','EV2',?)",(bid,bid,n,stamp,'En atención' if n%5==0 else 'Activa'))
                 db.execute("INSERT INTO audit(author,action,entity,entity_id,details,created_at) VALUES('DOM','Revisión de registro','measurements',?,'Registro de laboratorio',?)",(n,stamp))
             db.commit()
         db.close()

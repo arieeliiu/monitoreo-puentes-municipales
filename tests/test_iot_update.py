@@ -22,7 +22,7 @@ class IotUpdateTests(SystemTests):
         self.assertEqual(self.rule('inclinacion',threshold='-2').status_code,200)
 
     def contract(self,external_id='x',**overrides):
-        data=self.measurement(external_id=external_id,bridge_code='P1',kind='vibracion',simulated=True)
+        data=self.measurement(external_id=external_id,bridge_code='P1',kind='vibracion')
         data.update(overrides);return data
 
     def test_provider_rejects_inconsistent_and_missing_identity_with_evidence(self):
@@ -41,19 +41,22 @@ class IotUpdateTests(SystemTests):
             self.login('dom');self.assertIn('wrong-bridge',self.client.get('/audit').get_data(as_text=True))
         finally:server.shutdown();server.server_close();t.join()
 
-    def test_optional_api_identity_is_validated_without_breaking_legacy(self):
+    def test_api_identity_required_and_validated(self):
         headers={'Authorization':'Bearer test-key'}
         data=self.contract('api',bridge_code='P2')
         self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,400)
         data['bridge_code']='P1';self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,201)
-        self.assertEqual(self.client.post('/api/v1/measurements',json=self.measurement(external_id='legacy'),headers=headers).status_code,201)
+        self.assertEqual(self.client.post('/api/v1/measurements',json=self.measurement(external_id='conforme'),headers=headers).status_code,201)
+        for field in ('bridge_code','kind'):
+            missing=self.measurement(external_id='missing-'+field);missing.pop(field)
+            self.assertEqual(self.client.post('/api/v1/measurements',json=missing,headers=headers).status_code,400)
 
     def test_provider_default_json_includes_two_bridges_and_types(self):
         records=demo_records();self.assertEqual(len(records),4)
         self.assertEqual({item['bridge_code'] for item in records},{'PM-001','PM-002'})
         self.assertEqual({item['kind'] for item in records},{'vibracion','inclinacion'})
         for item in records:
-            self.assertTrue(item['simulated']);self.assertIn('sensor_code',item);self.assertIn('measured_at',item)
+            self.assertNotIn('simulated',item);self.assertIn('sensor_code',item);self.assertIn('measured_at',item)
 
     def test_automatic_worker_recovers_and_deduplicates_real_http(self):
         records=[self.contract('auto')]

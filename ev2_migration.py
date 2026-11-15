@@ -1,4 +1,8 @@
-"""EV2: columnas nuevas y ampliación de categorías, sin reinterpretar históricos."""
+"""EV2: preparación compatible con esquemas anteriores y nuevos.
+
+No reinterpreta históricos ni retira las cinco columnas del esquema anterior;
+el procedimiento de revisión se ejecuta explícitamente después de D7.
+"""
 def migrate_ev2(db):
     if 'specification' in {r[1] for r in db.execute('PRAGMA table_info(measurements)')}: return
     db.commit()

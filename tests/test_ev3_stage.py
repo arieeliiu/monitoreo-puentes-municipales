@@ -95,7 +95,7 @@ class Ev3StageTests(Ev2Tests):
     def test_capture_invalid_missing_no_rule_and_api_dedup_traceability(self):
         self.rule(threshold='5')
         headers={'Authorization':'Bearer test-key'}
-        data=self.measurement(value='5',external_id='ev3-api',simulated=True)
+        data=self.measurement(value='5',external_id='ev3-api')
         result=self.client.post('/api/v1/measurements',json=data,headers=headers)
         self.assertEqual(result.status_code,201)
         self.assertEqual(self.client.post('/api/v1/measurements',json=data,headers=headers).status_code,400)
@@ -167,7 +167,7 @@ class Ev3StageTests(Ev2Tests):
     def test_cron_ev3_evaluates_both_bridges_and_deduplicates(self):
         self.db.execute("INSERT INTO sensors(component_id,code,kind,unit) VALUES(2,'S3','vibracion','m/s²')");self.db.commit()
         self.rule(bridge_id='1',threshold='5');self.rule(bridge_id='2',threshold='5')
-        records=[dict(self.measurement(sensor_code=code,value='6',external_id='cron-'+code),bridge_code=bridge,kind='vibracion',simulated=True) for code,bridge in [('S1','P1'),('S3','P2')]]
+        records=[dict(self.measurement(sensor_code=code,value='6',external_id='cron-'+code),bridge_code=bridge,kind='vibracion') for code,bridge in [('S1','P1'),('S3','P2')]]
         self.app.config.update(CLOUD_PROVIDER=True,CRON_SECRET='only-for-tests')
         client=self.app.test_client()
         self.assertEqual(client.post('/internal/iot/pull').status_code,401)

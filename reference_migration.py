@@ -1,9 +1,9 @@
 """Migración D7 explícita, transaccional y ajena al arranque de la aplicación.
 
 Los identificadores retirados solo se admiten aquí como origen de migración.
-No cambia IDs, relaciones, lecturas, umbrales, simulated ni históricos de auditoría.
+No cambia IDs, relaciones, lecturas, umbrales ni históricos de auditoría.
 """
-from reference_data import BRIDGE_REFERENCES
+from reference_data import BRIDGE_REFERENCES, reference_inventory
 
 LEGACY_CODES = ('DEM-01', 'DEM-02')
 
@@ -17,11 +17,14 @@ def rename_reference_identifiers(connection, apply=False):
     try:
         connection.execute('BEGIN IMMEDIATE' if apply else 'BEGIN')
         changes=[]
+        legacy=[(old,name,location) for old,(_,name,location) in zip(LEGACY_CODES,BRIDGE_REFERENCES)]
+        present=connection.execute('SELECT id FROM bridges WHERE code IN (?,?)',LEGACY_CODES).fetchall()
+        if present: reference_inventory(connection,legacy)
+        elif connection.execute('SELECT id FROM bridges WHERE code IN (?,?)',tuple(r[0] for r in BRIDGE_REFERENCES)).fetchall():
+            reference_inventory(connection)
         for old,(new,_,_) in zip(LEGACY_CODES,BRIDGE_REFERENCES):
-            bridge=connection.execute('SELECT id,simulated FROM bridges WHERE code=?',(old,)).fetchone()
+            bridge=connection.execute('SELECT id FROM bridges WHERE code=?',(old,)).fetchone()
             if not bridge: continue
-            if not bridge['simulated']:
-                raise ValueError('El puente de origen no está marcado como dato de prueba; requiere revisión manual.')
             if connection.execute('SELECT id FROM bridges WHERE code=?',(new,)).fetchone():
                 raise ValueError('Identificador de destino ocupado; no se fusionan puentes.')
             changes.append(dict(table='bridges',id=bridge['id'],old=old,new=new))

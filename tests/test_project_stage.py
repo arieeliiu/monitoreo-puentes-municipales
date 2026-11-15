@@ -31,8 +31,8 @@ class ProjectStageTests(FinalFixTests):
         self.app.config['PROJECT_STAGE'] = CUTOFF_STAGE
 
     def configure_demo(self):
-        result = self.app.test_cli_runner().invoke(args=['configure-ev2-demo'])
-        self.assertEqual(result.exit_code, 0, result.output)
+        from tests.fixture_rules import install_rules
+        install_rules(self)
 
     def snapshot(self):
         names = [r[0] for r in self.db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]
@@ -97,7 +97,7 @@ class ProjectStageTests(FinalFixTests):
                 self.assertEqual(self.post('/measurements', self.measurement(value=value)).status_code, 302)
             self.assertEqual(self.post('/measurements', self.measurement(sensor_code='S2', unit='°', value='-0.458')).status_code, 302)
             self.post('/measurements', self.measurement(value='', status='no_disponible'))
-            result = self.client.post('/api/v1/measurements', json=self.measurement(external_id='cutoff-api', value='9', simulated=True), headers={'Authorization': 'Bearer test-key'})
+            result = self.client.post('/api/v1/measurements', json=self.measurement(external_id='cutoff-api', value='9'), headers={'Authorization': 'Bearer test-key'})
             self.assertEqual(result.status_code, 201)
             self.assertEqual(result.json['evaluation'], PENDING_EVALUATION)
         self.assertFalse(any(re.search(r'SELECT\b.*\bFROM\s+rules\b', sql, re.I) for sql in statements))

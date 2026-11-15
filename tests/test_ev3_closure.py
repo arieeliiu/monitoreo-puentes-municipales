@@ -28,7 +28,8 @@ def snapshot(test):
 
 def legacy_inventory(test):
     for bid,old in enumerate(LEGACY_CODES,1):
-        test.db.execute('UPDATE bridges SET code=? WHERE id=?',(old,bid))
+        test.db.execute('UPDATE bridges SET code=?,name=?,location=? WHERE id=?',(old,BRIDGE_REFERENCES[bid-1][1],BRIDGE_REFERENCES[bid-1][2],bid))
+    test.db.execute("UPDATE components SET name='Tablero' WHERE id=2")
     for sid,kind in [(1,'vibracion'),(2,'inclinacion')]:
         test.db.execute('UPDATE sensors SET code=? WHERE id=?',(LEGACY_CODES[0]+'-'+kind.upper(),sid))
     for kind,unit in [('vibracion','m/s²'),('inclinacion','°')]:
@@ -188,7 +189,7 @@ class ClosureStageTests(SystemTests):
             self.assertEqual(client.get('/inspection-plans').status_code,200 if stage=='full' else 404)
             self.assertEqual(before,snapshot(self))
 
-    def test_reference_seed_providers_identity_dedup_and_internal_simulated(self):
+    def test_reference_seed_providers_identity_and_dedup(self):
         fresh=create_app(dict(self.app.config,DATABASE=str(self.path/'reference.sqlite'),UPLOAD_FOLDER=str(self.path/'reference-photos')))
         runner=fresh.test_cli_runner()
         self.assertEqual(runner.invoke(args=['init-db']).exit_code,0)
@@ -200,7 +201,7 @@ class ClosureStageTests(SystemTests):
         self.assertEqual({row['bridge_code'] for row in batch},expected)
         self.assertEqual({row['bridge_code'] for row in cloud},expected)
         for row in batch+cloud:
-            self.assertIs(row['simulated'],True)
+            self.assertNotIn('simulated',row)
             self.assertEqual(row['sensor_code'],row['bridge_code']+'-'+row['kind'].upper())
         server=make_server(port=0,records=batch);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         try:
@@ -219,7 +220,7 @@ class ClosureStageTests(SystemTests):
                 self.assertEqual(connection.execute('SELECT code FROM bridges ORDER BY id').fetchall(),[(item[0],) for item in BRIDGE_REFERENCES])
                 counts={table:connection.execute('SELECT count(*) FROM '+table).fetchone()[0] for table in ('bridges','components','sensors','rules','measurements','alerts')}
                 self.assertEqual(counts,dict(bridges=2,components=6,sensors=4,rules=18,measurements=8,alerts=8))
-                self.assertEqual(connection.execute('SELECT count(*) FROM measurements WHERE simulated!=1').fetchone()[0],0)
+                self.assertNotIn('simulated',{r[1] for r in connection.execute('PRAGMA table_info(measurements)')})
                 self.assertEqual(connection.execute('PRAGMA foreign_key_check').fetchall(),[])
                 self.evidence={'reference_fixture':counts,'provider_first':first.json,'provider_repeat':second.json}
         finally:server.shutdown();server.server_close();thread.join()
@@ -256,7 +257,7 @@ class ClosureStageTests(SystemTests):
         legacy_inventory(self)
         mutations=[("UPDATE bridges SET code='PM-001' WHERE id=2","UPDATE bridges SET code='DEM-02' WHERE id=2"),
                    ("UPDATE sensors SET code='PM-001-VIBRACION' WHERE id=3","UPDATE sensors SET code='DEM-02-VIBRACION' WHERE id=3"),
-                   ('UPDATE bridges SET simulated=0 WHERE id=1','UPDATE bridges SET simulated=1 WHERE id=1'),
+                   ("UPDATE bridges SET name='Personalizado' WHERE id=1","UPDATE bridges SET name='Puente Estero Norte' WHERE id=1"),
                    ("UPDATE sensors SET code='PERSONALIZADO' WHERE id=2","UPDATE sensors SET code='DEM-01-INCLINACION' WHERE id=2")]
         for mutate,restore in mutations:
             self.db.execute(mutate);self.db.commit();before=snapshot(self)

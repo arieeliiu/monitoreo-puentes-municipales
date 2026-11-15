@@ -1,4 +1,8 @@
-"""Migración aditiva e idempotente. No elimina tablas ni registros."""
+"""Preparación aditiva e idempotente. El retiro de columnas es explícito y separado.
+
+Las bases anteriores conservan sus campos hasta ejecutar D7 y
+tools/retire_legacy_columns.py; esta función no inicia ese retiro.
+"""
 def migrate(connection):
     if not connection.execute("SELECT 1 FROM sqlite_master WHERE name='sensors'").fetchone():
         return

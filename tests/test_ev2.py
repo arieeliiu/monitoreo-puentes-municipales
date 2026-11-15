@@ -6,8 +6,8 @@ from migrations import migrate
 
 class Ev2Tests(SystemTests):
     def config(self):
-        result=self.app.test_cli_runner().invoke(args=['configure-ev2-demo'])
-        self.assertEqual(result.exit_code,0,result.output)
+        from tests.fixture_rules import install_rules
+        install_rules(self)
 
     def test_numeric_levels_positive_negative_and_exact_limits(self):
         self.config()
@@ -36,7 +36,7 @@ class Ev2Tests(SystemTests):
         self.assertIsNone(self.db.execute('SELECT reference_value FROM sensors WHERE id=2').fetchone()[0])
 
     def test_old_units_are_never_relabelled(self):
-        legacy=sqlite3.connect(':memory:');legacy.executescript(Path('schema.sql').read_text(encoding='utf-8'))
+        legacy=sqlite3.connect(':memory:');legacy.executescript(Path('tests/fixtures/schema_pre_christian.sql').read_text(encoding='utf-8'))
         legacy.execute("INSERT INTO users VALUES(1,'old','hash','DOM')")
         legacy.execute("INSERT INTO bridges VALUES(1,'OLD','Viejo','Lugar','Alta',1)")
         legacy.execute("INSERT INTO components VALUES(1,1,'Tablero')")
@@ -74,16 +74,20 @@ class Ev2Tests(SystemTests):
         count=self.count('rules');self.rule(threshold='5',severity='Atención');self.assertEqual(self.count('rules'),count)
         self.login('inspector');self.assertEqual(self.rule().status_code,403)
 
-    def test_demo_setup_is_idempotent_and_customizable(self):
-        self.config();counts={table:self.count(table) for table in ['bridges','components','sensors','rules']}
-        self.config();self.assertEqual(counts,{table:self.count(table) for table in counts})
-        for bid in [1,2]:
-            self.assertTrue({'Tablero','Viga','Estribo'}.issubset({r[0] for r in self.db.execute('SELECT name FROM components WHERE bridge_id=?',(bid,))}))
-        self.assertEqual(self.count('sensors'),2)  # No invented physical sensors.
-        self.db.execute('UPDATE rules SET active=0 WHERE id=1');self.db.commit();self.config()
-        self.assertEqual(self.db.execute('SELECT active FROM rules WHERE id=1').fetchone()[0],0)
-        self.db.execute('UPDATE sensors SET reference_value=2.5 WHERE id=2');self.db.commit();self.config()
-        self.assertEqual(self.db.execute('SELECT reference_value FROM sensors WHERE id=2').fetchone()[0],2.5)
+    def test_reference_setup_is_idempotent_and_customizable(self):
+        from app import create_app
+        fresh=create_app(dict(self.app.config,DATABASE=str(self.path/'reference.sqlite')))
+        cli=fresh.test_cli_runner()
+        self.assertEqual(cli.invoke(args=['init-db']).exit_code,0)
+        self.assertEqual(cli.invoke(args=['seed-demo']).exit_code,0)
+        with closing(sqlite3.connect(fresh.config['DATABASE'])) as db:
+            counts=[db.execute('SELECT count(*) FROM '+t).fetchone()[0] for t in ('bridges','components','sensors','rules')]
+            db.execute('UPDATE rules SET active=0 WHERE id=1')
+            db.execute('UPDATE sensors SET reference_value=2.5 WHERE id=2');db.commit()
+            self.assertEqual(cli.invoke(args=['configure-ev2-demo']).exit_code,0)
+            self.assertEqual(counts,[db.execute('SELECT count(*) FROM '+t).fetchone()[0] for t in ('bridges','components','sensors','rules')])
+            self.assertEqual(db.execute('SELECT active FROM rules WHERE id=1').fetchone()[0],0)
+            self.assertEqual(db.execute('SELECT reference_value FROM sensors WHERE id=2').fetchone()[0],2.5)
 
     def test_professional_ui_and_severity_styles_all_roles(self):
         self.config();self.post('/measurements',self.measurement(value='2.5'))
@@ -102,7 +106,7 @@ class Ev2Tests(SystemTests):
         import threading
         from mock_provider import make_server
         self.db.execute("INSERT INTO sensors(component_id,code,kind,unit,reference_value) VALUES(2,'S3','inclinacion','°',10)");self.db.commit();self.config()
-        records=[self.measurement(external_id='ev2-a',bridge_code='P1',kind='vibracion',value=0.5,simulated=True),self.measurement(external_id='ev2-b',sensor_code='S3',unit='°',bridge_code='P2',kind='inclinacion',value=9.771,simulated=True)]
+        records=[self.measurement(external_id='ev2-a',bridge_code='P1',kind='vibracion',value=0.5),self.measurement(external_id='ev2-b',sensor_code='S3',unit='°',bridge_code='P2',kind='inclinacion',value=9.771)]
         server=make_server(port=0,records=records);t=threading.Thread(target=server.serve_forever,daemon=True);t.start()
         try:
             self.app.config['PROVIDER_URL']=f'http://127.0.0.1:{server.server_port}/measurements'

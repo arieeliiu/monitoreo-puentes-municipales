@@ -22,11 +22,11 @@ def build(stage=CUTOFF_STAGE):
             for kind,unit in [('vibracion','m/s²'),('inclinacion','°')]:
                 db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'PM-00{bid}-{kind.upper()}',kind,unit,'Pendiente de precisar',0 if kind=='inclinacion' else None))
         stamp='2026-10-22T13:00:00+00:00'
-        db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,author_id,created_at,comparison,severity,standard,unit) VALUES(1,'vibracion',1.0,'Aceleración vertical pico',1,1,?,'gte','Alerta','EV2','m/s²')",(stamp,))
-        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification) VALUES(1,1.0,'m/s²',?,'valido',1,'mockup-1',?,?,'EV2')",(stamp,stamp,evaluation))
-        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification,reference_value,variation) VALUES(2,0.229,'°',?,'valido',1,'mockup-2',?,?,'EV2',0,0.229)",(stamp,stamp,evaluation))
-        db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,severity,standard) VALUES(1,1,1,?,1,'Alerta','EV2')",(stamp,))
-        db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,simulated,standard) VALUES(1,1,?,2,'Media','Revisar apoyo del tablero.',1,'EV2')",(stamp,))
+        db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,author_id,created_at,comparison,severity,standard,unit) VALUES(1,'vibracion',1.0,'Aceleración vertical pico',1,?,'gte','Alerta','EV2','m/s²')",(stamp,))
+        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,external_id,created_at,evaluation,specification) VALUES(1,1.0,'m/s²',?,'valido','mockup-1',?,?,'EV2')",(stamp,stamp,evaluation))
+        db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,external_id,created_at,evaluation,specification,reference_value,variation) VALUES(2,0.229,'°',?,'valido','mockup-2',?,?,'EV2',0,0.229)",(stamp,stamp,evaluation))
+        db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,severity,standard) VALUES(1,1,1,?,'Alerta','EV2')",(stamp,))
+        db.execute("INSERT INTO inspections(bridge_id,component_id,inspected_at,inspector_id,condition,description,standard) VALUES(1,1,?,2,'Media','Revisar apoyo del tablero.','EV2')",(stamp,))
         db.execute("INSERT INTO tasks(bridge_id,component_id,alert_id,description,assignee_id,planned_date,author_id,created_at) VALUES(1,1,1,'Revisión preventiva',3,'2026-11-20',1,?)",(stamp,))
         db.execute("INSERT INTO inspection_plans(bridge_id,component_id,inspector_id,planned_date,description,author_id,created_at) VALUES(2,2,2,'2026-11-23','Inspección preventiva',1,?)",(stamp,))
         for bid in (1,2):

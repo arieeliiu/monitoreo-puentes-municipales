@@ -23,9 +23,9 @@ class MonitoringUiTests(SystemTests):
         rid=self.db.execute('SELECT id FROM rules ORDER BY id DESC').fetchone()[0]
         for n in range(count):
             # Registros nuevos exclusivamente en la base temporal del caso.
-            mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,created_at) VALUES(1,9,'m/s²',?,'valido',1,?)",
+            mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,created_at) VALUES(1,9,'m/s²',?,'valido',?)",
                                 (f'2026-01-{1+n//20:02d}T10:00:00+00:00',)*2).lastrowid
-            self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,simulated,standard,severity,status) VALUES(1,?,?,?,1,'EV2','Atención','Activa')",
+            self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,standard,severity,status) VALUES(1,?,?,?,'EV2','Atención','Activa')",
                             (rid,mid,f'2026-01-{1+n//20:02d}T10:00:00+00:00'))
         self.db.commit()
 
@@ -154,7 +154,7 @@ class MonitoringUiTests(SystemTests):
             self.assertEqual(self.post('/provider/pull').status_code,302)
         self.assertEqual(tuple(self.db.execute('SELECT * FROM audit WHERE id=?',(old[0],)).fetchone()),old)
         current=self.db.execute("SELECT details FROM audit WHERE action='Consultar proveedor IoT' ORDER BY id DESC").fetchone()
-        self.assertIsNotNone(current);self.assertIn('Origen: proveedor simulado.',current[0])
+        self.assertIsNotNone(current);self.assertIn('Origen: proveedor de referencia.',current[0])
         html=self.client.get('/audit').text
         self.assertIn('Consultar proveedor ficticio',html);self.assertIn('Descripción histórica original',html)
         for path in ('/','/measurements','/alerts','/rules','/audit'):

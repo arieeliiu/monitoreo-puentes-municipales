@@ -69,10 +69,17 @@ class Postgres:
 
 def connect(config):
     if config.get('DATABASE_URL'):
-        return Postgres(config['DATABASE_URL'], config.get('DATABASE_SCHEMA', 'puentes'))
+        connection=Postgres(config['DATABASE_URL'], config.get('DATABASE_SCHEMA', 'puentes'))
+        from schema_revision import require_current_schema
+        try:require_current_schema(connection)
+        except Exception:connection.close();raise
+        return connection
     from migrations import migrate
     connection = sqlite3.connect(config['DATABASE'])
     connection.row_factory = sqlite3.Row
     connection.execute('PRAGMA foreign_keys=ON')
     migrate(connection)
+    from schema_revision import require_current_schema
+    try:require_current_schema(connection)
+    except Exception:connection.close();raise
     return connection

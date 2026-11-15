@@ -113,6 +113,9 @@ class FinalFixTests(SystemTests):
             self.assertEqual([tuple(r) for r in self.db.execute('SELECT * FROM sensors ORDER BY id')], before)
 
     def setup_pilot(self):
+        from reference_data import BRIDGE_REFERENCES
+        for bid,(_,name,location) in enumerate(BRIDGE_REFERENCES,1):
+            self.db.execute('UPDATE bridges SET name=?,location=? WHERE id=?',(name,location,bid))
         self.db.execute("UPDATE bridges SET code='PM-001' WHERE id=1")
         self.db.execute("UPDATE bridges SET code='PM-002' WHERE id=2")
         self.db.execute("UPDATE components SET name='Tablero' WHERE id=2")
@@ -148,16 +151,15 @@ class FinalFixTests(SystemTests):
         self.assertEqual(rules, [tuple(r) for r in self.db.execute('SELECT * FROM rules ORDER BY id')])
         self.assertIn('0.', runner.invoke(args=['configure-demo-locations']).output)
 
-    def test_locations_skip_nonpilot_and_unknown_components(self):
+    def test_locations_reject_custom_inventory_without_changes(self):
         self.setup_pilot()
         self.db.execute("UPDATE sensors SET location='' ")
-        self.db.execute("UPDATE bridges SET simulated=0 WHERE id=2")
+        self.db.execute("UPDATE bridges SET name='Personalizado' WHERE id=2")
         self.db.execute("UPDATE sensors SET code='MANUAL-SENSOR' WHERE id=1")
         self.db.execute("UPDATE components SET name='Otro componente' WHERE id=1")
         self.db.commit()
         result = self.app.test_cli_runner().invoke(args=['configure-demo-locations'])
-        self.assertEqual(result.exit_code, 0, result.output)
-        self.assertIn('0.', result.output)
+        self.assertNotEqual(result.exit_code, 0, result.output)
         self.assertTrue(all(r[0] == '' for r in self.db.execute('SELECT location FROM sensors')))
 
     def test_real_provider_and_periodic_worker_restart_recovery(self):

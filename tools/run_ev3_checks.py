@@ -62,7 +62,7 @@ class Results(unittest.TextTestResult):
         self.records.append(dict(self.current));super().stopTest(test)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=ROOT/'docs/evidence/EV3_PR1_FINAL_TEST_RESULTS.json');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=ROOT/'docs/evidence/EV3_CHRISTIAN_TEST_RESULTS.json');args=parser.parse_args()
     if args.output.exists():parser.error('La evidencia ya existe; usa --output con un archivo nuevo para conservar el histórico.')
     os.chdir(ROOT)
     # La suite solo puede usar SQLite temporal y el usuario PostgreSQL de pruebas.
@@ -73,7 +73,7 @@ def main():
     for key in ('DATABASE_URL','DATABASE_SCHEMA','VERCEL','PROJECT_STAGE','PHOTO_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_STORAGE_BUCKET','CLOUD_PROVIDER','CRON_SECRET','SECRET_KEY','COOKIE_SECURE','IOT_API_KEY','PROVIDER_URL','PROVIDER_TOKEN','IOT_POLL_INTERVAL','PUENTES_MIGRATION_DATABASE_URL'):
         os.environ.pop(key,None)
     started=stamp()
-    files=[*sorted(ROOT.glob('*.py')),*sorted(ROOT.glob('*.sql')),ROOT/'vercel.json',ROOT/'config/ev2_pilot.json',*sorted((ROOT/'sql').glob('*.sql')),*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('test_*.py')),*sorted((ROOT/'tests').glob('*.cjs')),*sorted((ROOT/'static').glob('*.js')),ROOT/'static/app.css',ROOT/'tools/rename_reference_identifiers.py',ROOT/'tools/build_mockups.py',Path(__file__)]
+    files=[*sorted(ROOT.glob('*.py')),*sorted(ROOT.glob('*.sql')),ROOT/'vercel.json',ROOT/'config/ev2_pilot.json',*sorted((ROOT/'sql').glob('*.sql')),*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('*.py')),*sorted((ROOT/'tests/fixtures').glob('*.sql')),*sorted((ROOT/'tests').glob('*.cjs')),*sorted((ROOT/'static').glob('*.js')),ROOT/'static/app.css',*sorted((ROOT/'tools').glob('*.py'))]
     hashes=source_hashes(ROOT,files)
     revision=code_revision(ROOT,files)
     suite=unittest.defaultTestLoader.discover(str(ROOT/'tests'),top_level_dir=str(ROOT))

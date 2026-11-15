@@ -115,6 +115,8 @@ class PostgresTests(SystemTests):
                     if not statement or statement.startswith(('CREATE SCHEMA','SET search_path','GRANT','REVOKE')):continue
                     raw.execute(statement)
             from tools.migrate_to_supabase import TABLES
+            for table in ('bridges','measurements','inspections','rules','alerts'):
+                raw.execute('ALTER TABLE '+table+' DROP COLUMN IF EXISTS simulated')
             raw.execute('TRUNCATE '+','.join(TABLES)+' RESTART IDENTITY CASCADE')
             for table in TABLES:
                 for row in source.execute('SELECT * FROM '+table):
@@ -136,7 +138,7 @@ class PostgresTests(SystemTests):
 
     def test_postgres_measurements_and_alerts_full(self):
         SystemTests.test_measurement_validation_and_history(self)
-        SystemTests.test_alert_threshold_and_simulation(self)
+        SystemTests.test_alert_threshold_and_traceability(self)
 
     def test_postgres_private_photos_and_permissions(self):
         SystemTests.test_photo_upload_and_authorization(self)
@@ -172,7 +174,7 @@ class PostgresTests(SystemTests):
             self.db.commit();self.assertEqual(self.count('users'),4)
             again=migrate(self.path/'test.sqlite',self.path/'photos',self.path/'migration-report.json')
             self.assertEqual(report['counts'],again['counts'])
-            new_id=self.db.execute("INSERT INTO bridges(code,name,location,criticality,simulated) VALUES('NEXT','Next','Lugar','Alta',1)").lastrowid
+            new_id=self.db.execute("INSERT INTO bridges(code,name,location,criticality) VALUES('NEXT','Next','Lugar','Alta')").lastrowid
             self.db.commit();self.assertEqual(new_id,3)
             with self.assertRaisesRegex(ValueError,'datos distintos'):migrate(self.path/'test.sqlite',self.path/'photos',self.path/'migration-report.json')
 
@@ -288,6 +290,60 @@ class PostgresTests(SystemTests):
             next(row for row in expected[change['table']] if row['id']==change['id'])['code']=change['new']
         self.assertEqual(expected,snapshot(self))
         self.assertEqual(rename_reference_identifiers(self.db,apply=True),[])
+
+    def test_postgres_fresh_schema_thirteen_tables_ninety_nine_columns(self):
+        from schema_revision import TABLES,columns
+        self.assertEqual(self.db.schema,'puentes_test')
+        self.db.commit()
+        raw=self.db.connection
+        raw.execute('SET LOCAL search_path TO puentes_test')
+        raw.execute('DROP TABLE '+','.join(TABLES)+' CASCADE')
+        for statement in Path('sql/postgres.sql').read_text(encoding='utf-8').split(';'):
+            statement=statement.strip()
+            if not statement or statement.startswith(('CREATE SCHEMA','SET search_path','GRANT','REVOKE')):continue
+            raw.execute(statement)
+        raw.commit()
+        counts={t:len(columns(self.db,t)) for t in TABLES}
+        self.assertEqual(len(counts),13);self.assertEqual(sum(counts.values()),99)
+        policies=self.db.execute("SELECT count(*) AS n FROM pg_policies WHERE schemaname='puentes_test'").fetchone()['n']
+        self.assertEqual(policies,13)
+        constraints={r['contype']:r['n'] for r in self.db.execute("SELECT contype,count(*) AS n FROM pg_constraint WHERE connamespace='puentes_test'::regnamespace GROUP BY contype")}
+        indexes=self.db.execute("SELECT count(*) AS n FROM pg_indexes WHERE schemaname='puentes_test'").fetchone()['n']
+        self.evidence={'tables':13,'columns':99,'columns_by_table':counts,'policies':policies,'constraints':constraints,'indexes':indexes}
+
+    def test_postgres_old_d7_then_retire_preserves_data_rls_constraints(self):
+        from schema_revision import TABLES,RETIRED,columns,retire_columns,require_current_schema
+        from tests.test_ev3_closure import legacy_inventory,snapshot
+        from reference_migration import rename_reference_identifiers
+        self.rule();self.post('/measurements',self.measurement());self.inspection();self.task()
+        legacy_inventory(self)
+        for table in RETIRED:self.db.execute('ALTER TABLE '+table+' ADD COLUMN simulated BIGINT NOT NULL DEFAULT 1')
+        self.db.commit()
+        with self.assertRaisesRegex(ValueError,'D7'):retire_columns(self.db,apply=True)
+        with self.assertRaisesRegex(ValueError,'Esquema anterior'):require_current_schema(self.db)
+        self.db.rollback()
+        signature=lambda: [dict(r) for r in self.db.execute("SELECT tablename,policyname,roles,qual,with_check FROM pg_policies WHERE schemaname='puentes_test' ORDER BY tablename,policyname")]
+        policies=signature()
+        constraints=[dict(r) for r in self.db.execute("SELECT conname,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='puentes_test'::regnamespace ORDER BY conname")]
+        before=snapshot(self)
+        plan=rename_reference_identifiers(self.db,apply=True)
+        self.assertEqual(len(plan),6)
+        for change in plan:next(r for r in before[change['table']] if r['id']==change['id'])['code']=change['new']
+        for table in RETIRED:
+            for row in before[table]:row.pop('simulated')
+        self.db.execute('CREATE INDEX legacy_dependency ON alerts(simulated)');self.db.commit()
+        with_index=snapshot(self)
+        with self.assertRaisesRegex(ValueError,'índices'):retire_columns(self.db,apply=True)
+        self.assertEqual(with_index,snapshot(self))
+        self.assertTrue(all('simulated' in columns(self.db,t) for t in RETIRED))
+        self.db.execute('DROP INDEX legacy_dependency');self.db.commit()
+        result=retire_columns(self.db,apply=True)
+        self.assertEqual(result['columns_before'],104);self.assertEqual(result['columns_after'],99)
+        self.assertEqual(before,snapshot(self));self.assertEqual(policies,signature())
+        self.assertEqual(constraints,[dict(r) for r in self.db.execute("SELECT conname,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='puentes_test'::regnamespace ORDER BY conname")])
+        self.assertTrue(all('simulated' not in columns(self.db,t) for t in TABLES))
+        self.assertEqual(retire_columns(self.db,apply=True)['columns_to_remove'],[])
+        self.evidence=result|{'rls_policies_preserved':True,'constraints_preserved':True}
 
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

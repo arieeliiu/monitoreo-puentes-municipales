@@ -28,6 +28,8 @@ def migrate(source, photos, report):
     backup=source.with_name(source.stem+'-antes-supabase-'+stamp+'.sqlite')
     with closing(sqlite3.connect(source)) as origin, closing(sqlite3.connect(backup)) as snapshot:
         origin.backup(snapshot)
+        from schema_revision import require_current_schema
+        require_current_schema(snapshot)
         if snapshot.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or snapshot.execute('PRAGMA foreign_key_check').fetchall():
             raise ValueError('El origen no superó la verificación de integridad.')
         snapshot.row_factory=sqlite3.Row
@@ -39,6 +41,7 @@ def migrate(source, photos, report):
     target=Postgres(os.environ['DATABASE_URL'],os.environ.get('DATABASE_SCHEMA','puentes'))
     uploaded=[];hashes={}
     try:
+        require_current_schema(target)
         target.execute('SELECT pg_advisory_xact_lock(26102026)')
         for table in TABLES:
             existing=[dict(row) for row in target.execute(f'SELECT * FROM {table} ORDER BY id').fetchall()]
