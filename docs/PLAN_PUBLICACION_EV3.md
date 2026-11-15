@@ -1,10 +1,10 @@
 # Procedimiento de publicación EV3 / B-14 y D7
 
-Estado: **preparado para revisión; no ejecutado**. No autoriza despliegue, migración ni integración del PR #1. Ejecutar solo después de aprobar un SHA concreto y una ventana del entorno. B-11: recuperación técnica para entrega formal antes del 15/11/2026; B-14: término planificado 24/11, corte de estado 28/11, entrega EV3 30/11. Este procedimiento no acredita esos hitos.
+Estado: **publicación y migración preparadas; no ejecutadas**. El 15/11/2026 el usuario autorizó subir los cambios a `main`; esa integración no ejecuta este procedimiento ni autoriza una migración productiva. Ejecutar la publicación solo después de aprobar un SHA concreto y una ventana del entorno. B-11: recuperación técnica para entrega formal antes del 15/11/2026; B-14: término planificado 24/11, corte de estado 28/11, entrega EV3 30/11. Este procedimiento no acredita esos hitos.
 
 ## 1. Identificar versión, entorno y responsables
 
-Trabajar desde una copia limpia del SHA revisado de `feature/ev3-cierre-tecnico`; registrar `git rev-parse HEAD`, `git status --short` y la versión/despliegue anterior para recuperación. El PR sigue en borrador hasta la revisión. `main` tiene despliegue automático habilitado y esta rama lo tiene deshabilitado en `vercel.json`: **no fusionar/pushear a main como paso implícito de este procedimiento**. Publicación e integración requieren autorización aparte.
+Trabajar desde una copia limpia del SHA revisado; registrar `git rev-parse HEAD`, `git status --short` y la versión/despliegue anterior para recuperación. La integración de `feature/ev3-cierre-tecnico` a `main` fue autorizada por separado. `main` y esta rama tienen el despliegue automático deshabilitado en `vercel.json`: el código nuevo rechaza el esquema anterior y no debe activarse antes de completar la preparación explícita de la base. La integración conserva el despliegue existente; publicación y migración siguen pendientes de autorización y ejecución. Este ajuste de configuración es posterior a la ejecución de 147 pruebas Python y 20 JavaScript del código `e713521`; no modifica ese código funcional ni sus evidencias.
 
 Confirmar el proyecto Vercel y el proyecto Supabase reales en sus paneles; no crear otros recursos. El repositorio documenta esquema `puentes`, buckets privados `puentes-fotos` y `puentes-fotos-staging`, y trabajo Supabase Cron `puentes-iot-60s`; cotejarlos, no asumir que siguen iguales. No confundirlos con `puentes_test`, reservado a pruebas destructivas de fixtures.
 
