@@ -4,6 +4,8 @@
 
 `cutoff_2026_11_28` añade únicamente advanced_dashboard y maintenance al corte B-11. El panel consulta/renderiza programaciones solo si inspection_plans está habilitada (full). Se reutilizan consultas, motor, estados y permisos sin cambio de esquema. `reference_data.py` comparte códigos neutrales entre seed y proveedores; [migración D7](MIGRACION_REFERENCIAS_D7.md) explícita y separada del arranque. [Informes y límites](CIERRE_TECNICO_EV3.md). Las fechas anteriores del documento son referencias históricas; los hitos vigentes son los del resumen de esta tarea.
 
+La [verificación final del PR #1](CIERRE_TECNICO_EV3.md) diferencia el commit base del código probado mediante blobs Git, hashes SHA-256 y estado del worktree. [Plan operativo de publicación](PLAN_PUBLICACION_EV3.md); sin despliegue ni migración productiva ejecutados.
+
 ## Navegación, paginación y avisos EV3
 
 Se conservan los feature flags y todos los contratos de recepción/evaluación. `/measurements` y `/alerts` siguen siendo vistas separadas. El detalle de medición consulta sus alertas solo si la etapa las habilita. Reglas no cambia su motor: la separación se realiza en Jinja a partir de active y standard.
@@ -27,7 +29,9 @@ Cliente sin dependencias externas: consulta normal cada 30 s; si `has_more` indi
 
 El `before_request stage_access` bloquea por función las rutas futuras antes de sesión/CSRF/base de datos. EV2 conserva recepción sin consulta de reglas ni evaluación. EV3 usa la misma recepción y motor de full, sin duplicar validaciones ni cambiar esquema, reglas o unidades: mediciones válidas evaluables e inspecciones nuevas generan alertas con la versión activa correspondiente. La ausencia de regla/referencia y las lecturas inválidas/no disponibles mantienen sus resultados existentes sin alertas.
 
-En ambos cortes las inspecciones rechazan `plan_id` antes de escrituras/fotos y omiten la consulta de programaciones. El detalle de alerta EV3 no consulta tareas ni muestra mantenimiento; sus notas y estados funcionan independientemente. El inicio EV3 usa solo el resumen básico, sin consultas del panel avanzado. No existe dependencia indispensable con EDT 1.4.5/1.4.6 o inspecciones programadas.
+En los tres cortes (`cutoff_2026_10_26`, `cutoff_2026_11_09` y `cutoff_2026_11_28`) las inspecciones rechazan `plan_id` antes de escrituras/fotos y omiten la consulta de programaciones. Solo `full` habilita inspecciones programadas.
+
+En `cutoff_2026_11_09`, el detalle de alerta no consulta tareas ni muestra mantenimiento y el inicio usa el resumen básico, sin consultas del panel avanzado. B-11 funciona sin depender de EDT 1.4.5/1.4.6. En `cutoff_2026_11_28`, el inicio sí muestra el panel avanzado, sus últimas mediciones, alertas y actividades pendientes; el detalle de alerta puede consultar y enlazar mantenimiento. DOM administra actividades, Mantención actualiza solo las asignadas e Inspector consulta. Completar una actividad no resuelve la alerta. Las notas y estados de alerta conservan sus permisos en ambos cortes EV3.
 
 Web, CLI y worker comparten `create_app` y deben arrancar con la misma etapa. Cambiar de modo no escribe datos ni reevalúa históricos. No hay migración ni cambio automático de configuración productiva para B-11. Los apartados siguientes describen las capacidades conservadas de full; [reportes B-11](REPORTE_1_5_2_3_REGLAS_ALERTA.md) documentan el alcance intermedio.
 

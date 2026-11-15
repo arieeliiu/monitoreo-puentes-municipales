@@ -12,6 +12,8 @@ Los códigos activos nuevos son PM-001/PM-002 y sus sufijos VIBRACION/INCLINACIO
 - Rechaza destinos ocupados, puentes no marcados como prueba, sensores con tipo/puente incorrecto o inventario canónico parcial/personalizado. No fusiona ni inventa registros. Ante conflicto, nada se aplica. Repetir sobre un inventario ya renombrado devuelve un plan vacío.
 - Los textos históricos de auditoría y los ID externos no se sustituyen. La migración no interpreta sus prefijos ni reclasifica lecturas.
 
+El procedimiento operativo completo, con inventario SQL, pausa de Cron, respaldos y orden de publicación, está en [PLAN_PUBLICACION_EV3.md](PLAN_PUBLICACION_EV3.md). Este documento describe las garantías de la herramienta; no acredita ejecución en el entorno publicado.
+
 ## Secuencia posterior a revisión y autorización
 
 1. Revisar inventario, DSN/esquema y plan sobre una copia restaurada. Detener web/escritores y captura Cron/worker del entorno autorizado para impedir cambios concurrentes.

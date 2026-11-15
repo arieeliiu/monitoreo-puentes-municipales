@@ -12,7 +12,7 @@ El 2026-11-08 se verificó `cutoff_2026_11_09` con SQLite temporal y PostgreSQL 
 
 Con aprobación del usuario, el paso posterior es enviar el commit, establecer `PROJECT_STAGE=cutoff_2026_11_09` únicamente en el entorno autorizado y desplegar. No necesita migración ni recarga de datos/umbrales. No ejecutar el importador o configurador demo para activarlo. Después comprobar login/roles, reglas/alertas y siguiente captura Cron, conservando fotos, históricos, secretos e intervalo existentes. La recepción nueva usará reglas activas de ese entorno; los registros pendientes anteriores no se reevalúan automáticamente.
 
-El Cron remoto usa la etapa de la aplicación: EV2 conserva evaluación pendiente, EV3 evalúa sin panel avanzado/mantenimiento/programación, full conserva todo. La configuración EV2 documentada debajo continúa siendo la referencia de la publicación actual; no se actualizó automáticamente. Los recuentos de pruebas de la sección histórica de nube corresponden a su entrega original.
+El Cron remoto usa la etapa de la aplicación: `cutoff_2026_10_26` conserva evaluación pendiente; `cutoff_2026_11_09` evalúa con reglas/alertas y mantiene inicio básico sin mantenimiento; `cutoff_2026_11_28` añade panel avanzado y mantenimiento, sin programación; `full` conserva todo. La configuración EV2 documentada debajo es el antecedente de aquella publicación, no una comprobación actual del entorno. Los recuentos de pruebas de la sección histórica de nube corresponden a su entrega original. El [plan de publicación EV3](PLAN_PUBLICACION_EV3.md) exige inventariar el entorno antes de cambiarlo.
 
 URL estable: https://monitoreo-puentes-municipales.vercel.app
 
@@ -43,7 +43,7 @@ La migración real verificada preservó 3 usuarios, 2 puentes, 6 componentes, 4 
 
 En Vault se guardan `puentes_iot_url` (URL HTTPS seguida de `/internal/iot/pull`) y `puentes_cron_secret` (mismo valor privado que `CRON_SECRET`). `sql/schedule_iot.sql` habilita pg_cron/pg_net y configura `puentes-iot-60s` cada minuto. El endpoint solo acepta POST con Bearer correcto; cada ejecución es independiente y el ciclo siguiente vuelve a intentar después de un fallo. Revisar tanto `cron.job_run_details` como `net._http_response`: una tarea SQL exitosa no prueba por sí sola que HTTP respondió 200.
 
-Para cambiar intervalo, modificar la expresión de `cron.schedule` conservando URL y secreto de Vault; por ejemplo `*/5 * * * *` consulta cada cinco minutos. Para detenerlo, usar `cron.unschedule('puentes-iot-60s')` como administrador. Cambiar etapa requiere actualizar `PROJECT_STAGE` y desplegar; Cron usa esa misma aplicación. En el corte se guarda evaluación pendiente y no se generan alertas. `full` conserva la evaluación EV2 y módulos completos. El proveedor HTTP y worker originales siguen disponibles en modo local.
+Para cambiar intervalo, modificar la expresión de `cron.schedule` conservando URL y secreto de Vault; por ejemplo `*/5 * * * *` consulta cada cinco minutos. Para una pausa temporal de publicación, el [plan EV3](PLAN_PUBLICACION_EV3.md) conserva el trabajo existente mediante `cron.alter_job`; `cron.unschedule('puentes-iot-60s')` lo elimina y no es la pausa preferida. Cambiar etapa requiere actualizar `PROJECT_STAGE` y desplegar; Cron usa esa misma aplicación. Solo `cutoff_2026_10_26` guarda evaluación pendiente sin generar alertas; ambos cortes EV3 evalúan reglas/alertas y `full` conserva los módulos completos. El proveedor HTTP y worker originales siguen disponibles en modo local.
 
 ## Verificación
 

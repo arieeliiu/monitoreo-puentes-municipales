@@ -1,5 +1,19 @@
 # Cierre técnico EV3 — D7, B-11 y B-14
 
+## Verificación final del PR #1
+
+Ejecución real de `2026-11-14T22:04:07-03:00` a `2026-11-14T22:16:51-03:00`, zona America/Santiago. **135 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. Entorno: Windows, Python 3.12.14, SQLite 3.53.1, Node.js mediante las tres suites `node --test`; PostgreSQL con rol/esquema aislado `puentes_test`. No se usó producción. [JSON de la ejecución final](evidence/EV3_PR1_FINAL_TEST_RESULTS.json); [log completo](evidence/EV3_PR1_FINAL_TEST_RUN.log).
+
+Versión probada: **`f17bb26a9b911b95c732a1fa1e9038cb7ccdd0d8`**, rama `feature/ev3-cierre-tecnico`, worktree limpio al inicio. Base de comparación: `origin/main` / `e191aed818b8ee94296594f633ed2afe8111ec3d`; la base no es la versión ejecutada. Los 62 archivos del manifiesto corresponden a los blobs Git de HEAD y sus SHA-256 permanecieron iguales hasta finalizar. Durante la ejecución solo se redactó documentación fuera de ese manifiesto; `finished_revision` deja constancia del estado final. Los commits documentales posteriores no se presentan como ejecuciones adicionales.
+
+La evidencia anterior `EV3_CIERRE_TECNICO_TEST_RESULTS.json` se conserva sin cambios como histórica (132 Python + 20 JS). Sus **61/61 SHA-256** coincidieron con el worktree limpio del PR en `229e224` antes de estas correcciones: [cotejo fechado, por archivo](evidence/EV3_PR1_HISTORICAL_SOURCE_AUDIT.json). La ejecución anterior ocurrió sobre cambios locales con HEAD/base `e191aed`; no se atribuye retrospectivamente a `229e224`, creado después. Las capturas y seis comprobaciones de navegador `EV3_CIERRE_BROWSER.json` también son históricas; no se repitieron en esta revisión documental/de trazabilidad.
+
+Etapas: `cutoff_2026_10_26`: funciones básicas y captura sin evaluación de alertas; `cutoff_2026_11_09`: captura/reglas/alertas con inicio básico y sin mantenimiento; `cutoff_2026_11_28`: añade panel avanzado y mantenimiento, sin programación; `full`: todas las funciones existentes, incluidas inspecciones programadas.
+
+Repetición desde la raíz: `python tools/run_ev3_checks.py --output docs/evidence/EV3_PR1_FINAL_TEST_RESULTS.json`, solo si esa salida no existe. Para otra ejecución usar un nombre nuevo. El runner se niega a sobrescribir evidencia; PostgreSQL requiere `PUENTES_TEST_DATABASE_URL` del rol restringido de pruebas. Sin DSN se registran omisiones, no el resultado completo aquí acreditado.
+
+[Plan de publicación EV3](PLAN_PUBLICACION_EV3.md) y [entrega individual de Ariel](ENTREGA_ARIEL_EV3.md) preparados, sin ejecutarlos ni atribuir aprobaciones. No se modificó el sistema funcional para esta revisión: solo generador/regresiones de evidencia y documentación. No se cambió main, producción, credenciales, esquema ni B-01/B-02/B-03. Los resultados que siguen son antecedentes de sus propias ejecuciones.
+
 ## Origen y preservación del trabajo
 
 Se partió de origin/main `e191aed818b8ee94296594f633ed2afe8111ec3d` en un worktree separado, rama feature/ev3-cierre-tecnico. La copia original mantiene la carpeta B-03 sin seguimiento; no se editó, descartó ni incorporó a commits. Antes de recibir la corrección del Plan v3.0 solo se había creado la rama y leído fuentes; git diff estaba vacío y no había commits nuevos. No existía implementación del prompt anterior que revertir.

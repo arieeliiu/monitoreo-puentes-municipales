@@ -2,13 +2,19 @@
 
 Aplicación municipal con Flask/Jinja para registrar infraestructura, consultar mediciones, documentar inspecciones visuales y gestionar alertas. Usa SQLite en instalaciones locales o PostgreSQL y Storage privado de Supabase en la instalación Vercel.
 
-EV3 está integrada en `main`. Mediciones incluye paginación de 20 registros: [aplicación](https://monitoreo-puentes-municipales.vercel.app). El proveedor del repositorio es **simulado**; no se declara integración con sensores físicos ni aceptación municipal del piloto.
+La versión previa integrada en `main` incluye paginación de Mediciones de 20 registros: [aplicación](https://monitoreo-puentes-municipales.vercel.app). El proveedor del repositorio es **simulado**; no se declara integración con sensores físicos ni aceptación municipal del piloto.
 
 ## Cierre técnico EV3 preparado para revisión
 
 Rama `feature/ev3-cierre-tecnico`, basada en origin/main; sin integración a main ni despliegue en este trabajo. D7 usa identificadores PM-001/PM-002, conservando proveedores de referencia y `simulated`. No se modificaron datos productivos; [plan opcional de migración D7](docs/MIGRACION_REFERENCIAS_D7.md).
 
-**132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones** (2026-11-14). [Alcance, hitos y pendientes](docs/CIERRE_TECNICO_EV3.md), informes [1.5.2.2](docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [1.5.2.3](docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md), [1.5.2.4](docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md), [1.5.2.5](docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md). B-11: recuperación formal antes del 15/11; módulos B-14: término planificado 24/11; publicación/pruebas antes del corte 28/11; EV3: entrega 30/11. Estas fechas no se declaran cumplidas por esta verificación técnica.
+Ejecución histórica: **132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones** (2026-11-14). [Alcance, hitos y pendientes](docs/CIERRE_TECNICO_EV3.md), informes [1.5.2.2](docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [1.5.2.3](docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md), [1.5.2.4](docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md), [1.5.2.5](docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md). B-11: recuperación formal antes del 15/11; módulos B-14: término planificado 24/11; publicación/pruebas antes del corte 28/11; EV3: entrega 30/11. Estas fechas no se declaran cumplidas por esta verificación técnica.
+
+## Verificación final del PR #1
+
+**135 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones** (2026-11-14T22:04:07-03:00 a 2026-11-14T22:16:51-03:00, America/Santiago). Código probado: `f17bb26a9b911b95c732a1fa1e9038cb7ccdd0d8`; base de comparación `e191aed`, diferenciada del código ejecutado. Los 62 archivos fuente registrados coinciden con HEAD y no cambiaron durante la ejecución. [Evidencia final](docs/evidence/EV3_PR1_FINAL_TEST_RESULTS.json), [trazabilidad e históricos](docs/CIERRE_TECNICO_EV3.md). El resultado de 132 Python indicado arriba corresponde a la ejecución anterior, conservada como histórica; las tres pruebas adicionales verifican la trazabilidad.
+
+[Plan de publicación](docs/PLAN_PUBLICACION_EV3.md) y [entrega Ariel](docs/ENTREGA_ARIEL_EV3.md): preparados para revisión; publicación, eventual migración y aprobaciones formales pendientes.
 
 ## Funcionalidades y etapas
 
