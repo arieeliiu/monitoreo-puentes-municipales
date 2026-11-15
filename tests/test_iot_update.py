@@ -50,7 +50,7 @@ class IotUpdateTests(SystemTests):
 
     def test_provider_default_json_includes_two_bridges_and_types(self):
         records=demo_records();self.assertEqual(len(records),4)
-        self.assertEqual({item['bridge_code'] for item in records},{'DEM-01','DEM-02'})
+        self.assertEqual({item['bridge_code'] for item in records},{'PM-001','PM-002'})
         self.assertEqual({item['kind'] for item in records},{'vibracion','inclinacion'})
         for item in records:
             self.assertTrue(item['simulated']);self.assertIn('sensor_code',item);self.assertIn('measured_at',item)

@@ -16,11 +16,11 @@ def build(stage=CUTOFF_STAGE):
         database=Path(temp)/'mockups.sqlite'
         db=sqlite3.connect(database);db.executescript((ROOT/'schema.sql').read_text(encoding='utf-8'));migrate(db)
         db.executemany('INSERT INTO users(id,username,password,role) VALUES(?,?,?,?)',[(1,'dom','sin acceso','DOM'),(2,'inspector','sin acceso','Inspector'),(3,'mantencion','sin acceso','Mantención')])
-        db.executemany('INSERT INTO bridges VALUES(?,?,?,?,?,1)',[(1,'DEM-01','Puente Estero Norte','Sector municipal · Biobío','Alta'),(2,'DEM-02','Puente Ribera Sur','Sector municipal · Biobío','Alta')])
+        db.executemany('INSERT INTO bridges VALUES(?,?,?,?,?,1)',[(1,'PM-001','Puente Estero Norte','Sector municipal · Biobío','Alta'),(2,'PM-002','Puente Ribera Sur','Sector municipal · Biobío','Alta')])
         db.executemany('INSERT INTO components VALUES(?,?,?)',[(1,1,'Tablero'),(2,2,'Tablero')])
         for bid in (1,2):
             for kind,unit in [('vibracion','m/s²'),('inclinacion','°')]:
-                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'DEM-0{bid}-{kind.upper()}',kind,unit,'Pendiente de precisar',0 if kind=='inclinacion' else None))
+                db.execute('INSERT INTO sensors(component_id,code,kind,unit,location,reference_value) VALUES(?,?,?,?,?,?)',(bid,f'PM-00{bid}-{kind.upper()}',kind,unit,'Pendiente de precisar',0 if kind=='inclinacion' else None))
         stamp='2026-10-22T13:00:00+00:00'
         db.execute("INSERT INTO rules(bridge_id,kind,threshold,label,simulated,author_id,created_at,comparison,severity,standard,unit) VALUES(1,'vibracion',1.0,'Aceleración vertical pico',1,1,?,'gte','Alerta','EV2','m/s²')",(stamp,))
         db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,simulated,external_id,created_at,evaluation,specification) VALUES(1,1.0,'m/s²',?,'valido',1,'mockup-1',?,?,'EV2')",(stamp,stamp,evaluation))

@@ -1,4 +1,4 @@
-"""Ejecuta suites y conserva evidencia real de B-11; nunca provisiona/despliega."""
+"""Ejecuta suites y conserva evidencia EV3; nunca provisiona/despliega."""
 import argparse
 from datetime import datetime
 import hashlib
@@ -35,18 +35,18 @@ class Results(unittest.TextTestResult):
         self.records.append(dict(self.current));super().stopTest(test)
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=ROOT/'docs/evidence/EV3_B11_TEST_RESULTS.json');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=ROOT/'docs/evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json');args=parser.parse_args()
     os.chdir(ROOT)
     # La suite solo puede usar SQLite temporal y el usuario PostgreSQL de pruebas.
     from urllib.parse import urlsplit
     url=os.environ.get('PUENTES_TEST_DATABASE_URL','')
     if url and not (urlsplit(url).username or '').startswith('puentes_test.'):
         raise ValueError('Se requiere el rol PostgreSQL restringido puentes_test.')
-    for key in ('DATABASE_URL','DATABASE_SCHEMA','VERCEL','PROJECT_STAGE','PHOTO_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_STORAGE_BUCKET','CLOUD_PROVIDER','CRON_SECRET','SECRET_KEY','COOKIE_SECURE','IOT_API_KEY','PROVIDER_URL','PROVIDER_TOKEN','IOT_POLL_INTERVAL'):
+    for key in ('DATABASE_URL','DATABASE_SCHEMA','VERCEL','PROJECT_STAGE','PHOTO_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_STORAGE_BUCKET','CLOUD_PROVIDER','CRON_SECRET','SECRET_KEY','COOKIE_SECURE','IOT_API_KEY','PROVIDER_URL','PROVIDER_TOKEN','IOT_POLL_INTERVAL','PUENTES_MIGRATION_DATABASE_URL'):
         os.environ.pop(key,None)
     started=stamp()
     base=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    files=[ROOT/'app.py',ROOT/'display_time.py',ROOT/'pilot_time.py',*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('test_*.py')),*sorted((ROOT/'tests').glob('*.cjs')),ROOT/'static/app.js',ROOT/'static/notifications.js',ROOT/'static/app.css',Path(__file__)]
+    files=[*sorted(ROOT.glob('*.py')),*sorted(ROOT.glob('*.sql')),ROOT/'vercel.json',ROOT/'config/ev2_pilot.json',*sorted((ROOT/'sql').glob('*.sql')),*sorted((ROOT/'templates').glob('*.html')),*sorted((ROOT/'tests').glob('test_*.py')),*sorted((ROOT/'tests').glob('*.cjs')),*sorted((ROOT/'static').glob('*.js')),ROOT/'static/app.css',ROOT/'tools/rename_reference_identifiers.py',ROOT/'tools/build_mockups.py',Path(__file__)]
     hashes={str(p.relative_to(ROOT)).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     suite=unittest.defaultTestLoader.discover(str(ROOT/'tests'),top_level_dir=str(ROOT))
     result=unittest.TextTestRunner(verbosity=2,resultclass=Results).run(suite)

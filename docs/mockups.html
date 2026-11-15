@@ -24,7 +24,7 @@
 <article>
 <h3>Resumen de infraestructura</h3>
 <small>Vista real: / · Rol DOM en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>
@@ -43,14 +43,14 @@
 </section>
 <div class="bridge-grid">
 <article class="panel">
-<div class="eyebrow">DEM-01</div>
+<div class="eyebrow">PM-001</div>
 <h2>
 <a href="#infraestructura">Puente Estero Norte →</a>
 </h2>
 <p>Sector municipal · Biobío</p>
 </article>
 <article class="panel">
-<div class="eyebrow">DEM-02</div>
+<div class="eyebrow">PM-002</div>
 <h2>
 <a href="#infraestructura">Puente Ribera Sur →</a>
 </h2>
@@ -64,7 +64,7 @@
 <article>
 <h3>Inventario</h3>
 <small>Vista real: /bridges · Rol DOM en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>
@@ -74,7 +74,7 @@
 </header>
 <div class="bridge-grid">
 <article class="panel">
-<div class="eyebrow">DEM-01</div>
+<div class="eyebrow">PM-001</div>
 <h2>
 <a href="#infraestructura">Puente Estero Norte →</a>
 </h2>
@@ -82,7 +82,7 @@
 <span class="badge">Alta</span>
 </article>
 <article class="panel">
-<div class="eyebrow">DEM-02</div>
+<div class="eyebrow">PM-002</div>
 <h2>
 <a href="#infraestructura">Puente Ribera Sur →</a>
 </h2>
@@ -112,11 +112,11 @@
 <article>
 <h3>Ficha, edición, componentes y sensores</h3>
 <small>Vista real: /bridges/1 · Rol DOM en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>
-<div class="eyebrow">Infraestructura / DEM-01</div>
+<div class="eyebrow">Infraestructura / PM-001</div>
 <h1>Puente Estero Norte</h1>
 <p>Sector municipal · Biobío · Criticidad Alta</p>
 <span class="badge">Ficha del puente</span>
@@ -130,7 +130,7 @@
 <summary>Editar datos del puente</summary>
 <form>
 <input type="hidden" name="id" value="1">
-<label>Identificador<input name="code" type="text" value="DEM-01" required >
+<label>Identificador<input name="code" type="text" value="PM-001" required >
 </label>
 <label>Nombre<input name="name" type="text" value="Puente Estero Norte" required >
 </label>
@@ -191,14 +191,14 @@
 <section class="panel">
 <h2>Sensores asociados</h2>
 <div class="row-link">
-<strong>DEM-01-VIBRACION</strong>
+<strong>PM-001-VIBRACION</strong>
 <small>Variable: Aceleración vertical pico · m/s² · Tablero · Ubicación específica: Tablero: cara inferior, centro del vano, eje longitudinal</small>
 <details>
 <summary>Editar</summary>
 <form>
 <input type="hidden" name="entity" value="sensor">
 <input type="hidden" name="id" value="1">
-<label>Código<input name="code" type="text" value="DEM-01-VIBRACION" required >
+<label>Código<input name="code" type="text" value="PM-001-VIBRACION" required >
 </label>
 <label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Tablero: cara inferior, centro del vano, eje longitudinal" required >
 </label>
@@ -220,7 +220,7 @@
 </details>
 </div>
 <div class="row-link">
-<strong>DEM-01-INCLINACION</strong>
+<strong>PM-001-INCLINACION</strong>
 <small>Variable: Inclinación · ° · Tablero · Ubicación específica: Tablero: borde lateral, extremo junto al estribo de acceso</small>
 <small>Referencia: 0.0 °</small>
 <details>
@@ -228,7 +228,7 @@
 <form>
 <input type="hidden" name="entity" value="sensor">
 <input type="hidden" name="id" value="2">
-<label>Código<input name="code" type="text" value="DEM-01-INCLINACION" required >
+<label>Código<input name="code" type="text" value="PM-001-INCLINACION" required >
 </label>
 <label>Ubicación específica dentro del puente/componente<input name="location" type="text" value="Tablero: borde lateral, extremo junto al estribo de acceso" required >
 </label>
@@ -280,7 +280,7 @@
 <article>
 <h3>Historial, recepción automática IoT y consulta manual</h3>
 <small>Vista real: /measurements · Rol DOM en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>
@@ -291,16 +291,16 @@
 <form>
 <label>Puente<select name="bridge_id"  data-bridge>
 <option value="">Selecciona un puente</option>
-<option value="1">DEM-01 · Puente Estero Norte</option>
-<option value="2">DEM-02 · Puente Ribera Sur</option>
+<option value="1">PM-001 · Puente Estero Norte</option>
+<option value="2">PM-002 · Puente Ribera Sur</option>
 </select>
 </label>
 <label>Sensor<select name="sensor_id">
 <option value="">Todos</option>
-<option value="1">DEM-01-VIBRACION</option>
-<option value="2">DEM-01-INCLINACION</option>
-<option value="3">DEM-02-VIBRACION</option>
-<option value="4">DEM-02-INCLINACION</option>
+<option value="1">PM-001-VIBRACION</option>
+<option value="2">PM-001-INCLINACION</option>
+<option value="3">PM-002-VIBRACION</option>
+<option value="4">PM-002-INCLINACION</option>
 </select>
 </label>
 <label>Desde<input name="from" type="date" value=""  >
@@ -323,7 +323,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Puente Estero Norte<small>DEM-01-INCLINACION · Inclinación</small>
+<td>Puente Estero Norte<small>PM-001-INCLINACION · Inclinación</small>
 </td>
 <td>0.229 °<small>Lectura: 0.229 °</small>
 <small>Referencia: 0.0 ° · Cambio absoluto: 0.229 °</small>
@@ -335,7 +335,7 @@
 <td>2026-10-22T13:00:00+00:00</td>
 </tr>
 <tr>
-<td>Puente Estero Norte<small>DEM-01-VIBRACION · Aceleración vertical pico</small>
+<td>Puente Estero Norte<small>PM-001-VIBRACION · Aceleración vertical pico</small>
 </td>
 <td>1.0 m/s²</td>
 <td>
@@ -358,10 +358,10 @@
 <summary>Registrar lectura manual</summary>
 <form>
 <label>Sensor<select name="sensor_code" required>
-<option value="DEM-01-VIBRACION" data-unit="m/s²">Puente Estero Norte · DEM-01-VIBRACION (m/s²)</option>
-<option value="DEM-01-INCLINACION" data-unit="°">Puente Estero Norte · DEM-01-INCLINACION (°)</option>
-<option value="DEM-02-VIBRACION" data-unit="m/s²">Puente Ribera Sur · DEM-02-VIBRACION (m/s²)</option>
-<option value="DEM-02-INCLINACION" data-unit="°">Puente Ribera Sur · DEM-02-INCLINACION (°)</option>
+<option value="PM-001-VIBRACION" data-unit="m/s²">Puente Estero Norte · PM-001-VIBRACION (m/s²)</option>
+<option value="PM-001-INCLINACION" data-unit="°">Puente Estero Norte · PM-001-INCLINACION (°)</option>
+<option value="PM-002-VIBRACION" data-unit="m/s²">Puente Ribera Sur · PM-002-VIBRACION (m/s²)</option>
+<option value="PM-002-INCLINACION" data-unit="°">Puente Ribera Sur · PM-002-INCLINACION (°)</option>
 </select>
 </label>
 <label>Valor<input name="value" type="number" value=""  step=any>
@@ -391,7 +391,7 @@
 <article>
 <h3>Registro visual con fotografías opcionales</h3>
 <small>Vista real: /inspections · Rol Inspector en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>
@@ -404,8 +404,8 @@
 <form>
 <label>Puente<select name="bridge_id" required data-bridge>
 <option value="">Selecciona un puente</option>
-<option value="1">DEM-01 · Puente Estero Norte</option>
-<option value="2">DEM-02 · Puente Ribera Sur</option>
+<option value="1">PM-001 · Puente Estero Norte</option>
+<option value="2">PM-002 · Puente Ribera Sur</option>
 </select>
 </label>
 <label>Componente<select name="component_id" data-components required>
@@ -452,7 +452,7 @@
 <article>
 <h3>Hallazgos y fotografías</h3>
 <small>Vista real: /inspections/1 · Rol DOM en este boceto.</small>
-<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES <span>Entorno de demostración</span>
+<div class="topline">DIRECCIÓN DE OBRAS MUNICIPALES
 </div>
 <header>
 <div>

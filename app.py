@@ -14,6 +14,7 @@ from pilot_time import form_timestamp
 from display_time import chile_datetime, calendar_date, local_date_bounds
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
+from reference_data import BRIDGE_REFERENCES
 from provider_client import fetch_measurements
 from polling import run_polling, interval_seconds, single_worker
 from flask import Flask, g, session, request, redirect, url_for, render_template, flash, abort, jsonify, send_from_directory, send_file
@@ -25,9 +26,11 @@ CONDITIONS = ['Baja','Media','Alta','Crítica']
 SEVERITIES = ['Atención','Alerta','Crítico']
 CUTOFF_STAGE = 'cutoff_2026_10_26'
 EV3_STAGE = 'cutoff_2026_11_09'
+EV3_CLOSURE_STAGE = 'cutoff_2026_11_28'
 STAGE_FEATURES = {
     CUTOFF_STAGE: frozenset(),
     EV3_STAGE: frozenset({'alerts'}),
+    EV3_CLOSURE_STAGE: frozenset({'alerts','advanced_dashboard','maintenance'}),
     'full': frozenset({'alerts','advanced_dashboard','maintenance','inspection_plans'}),
 }
 PROJECT_STAGES = tuple(STAGE_FEATURES)
@@ -176,7 +179,7 @@ def create_app(config=None):
         active=rows('SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!=\'Resuelta\' ORDER BY a.id DESC LIMIT 10')
         rules=one("SELECT count(*) AS n FROM rules WHERE active=1 AND standard='EV2'")['n']
         pending=rows("SELECT t.*,b.name FROM tasks t JOIN bridges b ON b.id=t.bridge_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
-        plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date")
+        plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date") if feature_enabled('inspection_plans') else []
         visual=rows('SELECT i.*,b.name,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
         return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,rule_count=rules,pending=pending,plans=plans,visual=visual)
 
@@ -621,7 +624,7 @@ def create_app(config=None):
             password=secrets.token_urlsafe(14)
             insert('users',username=username,password=generate_password_hash(password),role=role)
             click.echo(f'{username}: {password}')
-        for code,name,location in [('DEM-01','Puente Estero Norte','Sector municipal · Biobío'),('DEM-02','Puente Ribera Sur','Sector municipal · Biobío')]:
+        for code,name,location in BRIDGE_REFERENCES:
             bid=insert('bridges',code=code,name=name,location=location,criticality='Alta',simulated=1)
             cid=insert('components',bridge_id=bid,name='Tablero')
             for kind in KINDS: insert('sensors',component_id=cid,code=code+'-'+kind.upper(),kind=kind,unit=KINDS[kind])

@@ -262,5 +262,32 @@ class PostgresTests(SystemTests):
         from tests.test_chile_time import ChileTimeViewTests
         ChileTimeViewTests.test_all_visible_timestamps_and_unknown_history_are_preserved(self)
 
+    def test_postgres_closure_panel(self):
+        from app import EV3_CLOSURE_STAGE
+        from tests.test_ev3_closure import ClosureStageTests
+        self.app.config['PROJECT_STAGE']=EV3_CLOSURE_STAGE
+        ClosureStageTests.test_dashboard_latest_readings_alert_states_and_visual_separation(self)
+        self.assertNotIn('Próximas inspecciones programadas',self.client.get('/').text)
+        self.assertEqual(self.client.get('/inspection-plans').status_code,404)
+
+    def test_postgres_closure_maintenance(self):
+        from app import EV3_CLOSURE_STAGE
+        from tests.test_ev3_closure import ClosureStageTests
+        self.app.config['PROJECT_STAGE']=EV3_CLOSURE_STAGE
+        ClosureStageTests.test_dom_forms_edit_reassignment_and_assigned_worker_followup(self)
+
+    def test_postgres_d7_migration_fixture(self):
+        from tests.test_ev3_closure import legacy_inventory,snapshot
+        from reference_migration import rename_reference_identifiers
+        legacy_inventory(self);before=snapshot(self)
+        plan=rename_reference_identifiers(self.db)
+        self.assertEqual(len(plan),6);self.assertEqual(before,snapshot(self))
+        self.assertEqual(rename_reference_identifiers(self.db,apply=True),plan)
+        expected=json.loads(json.dumps(before))
+        for change in plan:
+            next(row for row in expected[change['table']] if row['id']==change['id'])['code']=change['new']
+        self.assertEqual(expected,snapshot(self))
+        self.assertEqual(rename_reference_identifiers(self.db,apply=True),[])
+
 def load_tests(loader,standard_tests,pattern):
     return unittest.TestSuite(cls(name) for cls in [CloudTests,PostgresTests] for name in cls.__dict__ if name.startswith('test_'))

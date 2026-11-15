@@ -1,4 +1,5 @@
 """Ubicaciones iniciales del piloto; no modifica inventario ni datos manuales."""
+from reference_data import BRIDGE_REFERENCES
 
 LOCATIONS = {
     'Tablero': {
@@ -28,9 +29,9 @@ def complete_demo_locations(connection):
         SELECT s.id, s.kind, s.location, c.name
         FROM sensors s JOIN components c ON c.id=s.component_id
         JOIN bridges b ON b.id=c.bridge_id
-        WHERE b.simulated=1 AND b.code IN ('DEM-01','DEM-02')
+        WHERE b.simulated=1 AND b.code IN (?,?)
           AND s.code=b.code || '-' || upper(s.kind)
-    ''').fetchall()
+    ''',tuple(item[0] for item in BRIDGE_REFERENCES)).fetchall()
     changed = 0
     for sensor_id, kind, location, component in sensors:
         if (location or '').strip().casefold() not in ('', 'pendiente de precisar'):
