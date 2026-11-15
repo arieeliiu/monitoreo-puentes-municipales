@@ -4,6 +4,12 @@ Aplicación municipal con Flask/Jinja para registrar infraestructura, consultar 
 
 EV3 está integrada en `main`. Mediciones incluye paginación de 20 registros: [aplicación](https://monitoreo-puentes-municipales.vercel.app). El proveedor del repositorio es **simulado**; no se declara integración con sensores físicos ni aceptación municipal del piloto.
 
+## Cierre técnico EV3 preparado para revisión
+
+Rama `feature/ev3-cierre-tecnico`, basada en origin/main; sin integración a main ni despliegue en este trabajo. D7 usa identificadores PM-001/PM-002, conservando proveedores de referencia y `simulated`. No se modificaron datos productivos; [plan opcional de migración D7](docs/MIGRACION_REFERENCIAS_D7.md).
+
+**132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones** (2026-11-14). [Alcance, hitos y pendientes](docs/CIERRE_TECNICO_EV3.md), informes [1.5.2.2](docs/REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [1.5.2.3](docs/REPORTE_1_5_2_3_REGLAS_ALERTA.md), [1.5.2.4](docs/REPORTE_1_5_2_4_PANEL_MONITOREO.md), [1.5.2.5](docs/REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md). B-11: recuperación formal antes del 15/11; módulos B-14: término planificado 24/11; publicación/pruebas antes del corte 28/11; EV3: entrega 30/11. Estas fechas no se declaran cumplidas por esta verificación técnica.
+
 ## Funcionalidades y etapas
 
 - **Infraestructura:** puentes, componentes y sensores, con ubicación y referencia de inclinación.
@@ -21,9 +27,10 @@ EV3 está integrada en `main`. Mediciones incluye paginación de 20 registros: [
 |---|---|---|---|
 | `cutoff_2026_10_26` (predeterminada en código) | Básico | Deshabilitados; recepción con evaluación pendiente | Deshabilitados |
 | `cutoff_2026_11_09` (EV3) | Básico | Habilitados con permisos por rol | Deshabilitados |
+| `cutoff_2026_11_28` (cierre EV3) | Panel avanzado | Habilitados | Mantenimiento habilitado; programación bloqueada |
 | `full` | Panel avanzado | Habilitados | Disponibles con sus permisos originales |
 
-EV3 **no habilita panel avanzado, mantenimiento ni inspecciones programadas**. Sus rutas permanecen bloqueadas y las inspecciones rechazan un `plan_id` en estos cortes. Cambiar de etapa no migra ni reevalúa registros. Web y worker deben usar la misma etapa y reiniciarse al alternar.
+El corte `cutoff_2026_11_09` **no habilita panel avanzado, mantenimiento ni inspecciones programadas**. El corte `cutoff_2026_11_28` habilita panel y mantenimiento, sin programación. Las rutas de programación permanecen bloqueadas y las inspecciones rechazan un `plan_id` en ambos cortes EV3. Cambiar de etapa no migra ni reevalúa registros. Web y worker deben usar la misma etapa y reiniciarse al alternar.
 
 ## Permisos
 
@@ -39,7 +46,7 @@ EV3 **no habilita panel avanzado, mantenimiento ni inspecciones programadas**. S
 | Cambiar estado/cerrar alerta con nota | Sí | No | No |
 | Consultar Historial de operaciones | Sí | No | No |
 
-Solo en `full`, DOM planifica mantenimiento y programaciones; Inspector atiende programaciones que tiene asignadas; Mantención actualiza exclusivamente sus actividades asignadas. Completar una actividad no cierra automáticamente una alerta. Estas capacidades posteriores no están disponibles en EV3.
+En `cutoff_2026_11_28` y `full`, DOM crea, edita y asigna mantenimiento; Inspector consulta; Mantención actualiza exclusivamente sus actividades asignadas. Solo en `full`, DOM planifica inspecciones programadas e Inspector atiende las que tiene asignadas. Completar una actividad no cierra automáticamente una alerta. La programación permanece fuera del cierre EV3; el corte histórico 09/11 no cambia.
 
 ## Fechas y horas
 
@@ -81,7 +88,7 @@ La aplicación usa Flask/Jinja, sin framework frontend adicional. SQLite/fotos p
 
 | Variable | Uso |
 |---|---|
-| `PROJECT_STAGE` | Etapa de web y worker; EV3: `cutoff_2026_11_09`. |
+| `PROJECT_STAGE` | Etapa de web y worker; B-11: `cutoff_2026_11_09`; B-14 preparado: `cutoff_2026_11_28`. |
 | `SECRET_KEY` | Clave estable de sesión obligatoria en nube; local puede conservar `instance/session.key`. |
 | `COOKIE_SECURE=1` | Cookie solo HTTPS para uso institucional. |
 | `DATABASE_URL`, `DATABASE_SCHEMA` | PostgreSQL y esquema (`puentes` por defecto); sin URL, SQLite local. |
@@ -143,6 +150,6 @@ La primera corrida de esta revisión detectó una incompatibilidad SQL entre SQL
 
 ## Alcance pendiente
 
-El ciclo completo de mantenimiento y programaciones pertenece a etapas posteriores; RF-7/HU-07 conservan en EV3 el seguimiento y la trazabilidad de alertas e inspecciones. HU-09, aceptación municipal, piloto real, capacitación, hardware/proveedor real y validación externa no se declaran completados.
+El mantenimiento está habilitado y probado en el corte técnico 28/11; su publicación requiere autorización. La programación permanece fuera de ese corte; RF-7/HU-07 conservan en EV3 el seguimiento y la trazabilidad de alertas e inspecciones. HU-09, aceptación municipal, piloto real, capacitación, hardware/proveedor real y validación externa no se declaran completados.
 
 Los [mockups del corte](docs/mockups.html) y [del modo completo](docs/mockups-full.html) son bocetos históricos; no sustituyen las pantallas actuales. El [túnel temporal local](docs/PUBLICACION.md) requiere el computador encendido y es una alternativa distinta de la publicación Vercel.

@@ -1,5 +1,23 @@
 # Matriz individual de criterios oficiales y alcance EV2
 
+## Cierre técnico EV3 — revisión del 2026-11-14
+
+Esta rama prepara exclusivamente D7, recuperación B-11 y módulos B-14. No se declara completada una fecha de entrega, publicación o aceptación por disponer de código probado. **132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. [Resumen de alcance, revisión y pendientes](CIERRE_TECNICO_EV3.md), [captura](REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [reglas](REPORTE_1_5_2_3_REGLAS_ALERTA.md), [panel](REPORTE_1_5_2_4_PANEL_MONITOREO.md), [mantenimiento](REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md).
+
+El corte nuevo `cutoff_2026_11_28` habilita panel avanzado y mantenimiento sin programación de inspecciones. EV2, corte 09/11 y full conservan sus funciones. No hay cambios de esquema/umbrales ni reevaluación histórica. D7 utiliza PM-001/PM-002 en altas/proveedores; la [migración opcional](MIGRACION_REFERENCIAS_D7.md) quedó preparada y probada solo en fixtures.
+
+Las secciones siguientes son evidencia histórica de sus propias revisiones; fechas y recuentos previos no sustituyen los resultados de esta ejecución ni los hitos oficiales indicados en el resumen.
+
+
+| Entregable | Resultado técnico y evidencia actual | Revisión / entrega |
+|---|---|---|
+| D7 | Identificadores neutrales, aviso ausente, proveedores/conformidad/simulated conservados; plan transaccional con pruebas de no modificación histórica | Migración productiva no ejecutada; requiere autorización |
+| B-11 / 1.4.4 | Motor/configuración/versiones/roles y captura verificados en corte 09/11 | Ariel; revisión Christian y recuperación formal antes del 15/11 |
+| 1.5.2.2 / 1.5.2.3 | Informes históricos conservados y actualizados con ejecución nueva completa | Validación del equipo pendiente |
+| B-14 / 1.4.5 | Implementación existente habilitada y probada en corte 28/11; relaciones/estados/vacíos/roles | Ariel y Christian; revisión Alex |
+| B-14 / 1.4.6 | Creación, asignación, edición y seguimiento existentes probados; alerta no se cierra por tarea | Ariel y Christian; revisión Alex |
+| 1.5.2.4 / 1.5.2.5 | Informes nuevos con entradas, esperados/obtenidos, ambiente y evidencia | Publicación y revisión no realizadas |
+
 ## Revisión de interfaz EV3
 
 La reorganización corresponde a usabilidad de las funciones habilitadas de B-11. No implementa EDT 1.4.5, EDT 1.4.6 ni inspecciones programadas. El Inicio sigue básico en cutoff_2026_11_09; las rutas futuras continúan en 404, incluso con POST manipulado. DOM mantiene configuración/estado de alertas; Inspector conserva notas y registro visual; Mantención consulta alertas y no modifica seguimiento. EV2 continúa sin alertas y full conserva sus funciones.

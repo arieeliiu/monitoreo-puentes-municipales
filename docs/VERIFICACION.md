@@ -1,5 +1,13 @@
 # Verificación del corte y modo completo
 
+## Cierre técnico EV3 — revisión del 2026-11-14
+
+Esta rama prepara exclusivamente D7, recuperación B-11 y módulos B-14. No se declara completada una fecha de entrega, publicación o aceptación por disponer de código probado. **132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. [Resumen de alcance, revisión y pendientes](CIERRE_TECNICO_EV3.md), [captura](REPORTE_1_5_2_2_CAPTURA_MEDICIONES.md), [reglas](REPORTE_1_5_2_3_REGLAS_ALERTA.md), [panel](REPORTE_1_5_2_4_PANEL_MONITOREO.md), [mantenimiento](REPORTE_1_5_2_5_PLANIFICACION_MANTENIMIENTO.md).
+
+El corte nuevo `cutoff_2026_11_28` habilita panel avanzado y mantenimiento sin programación de inspecciones. EV2, corte 09/11 y full conservan sus funciones. No hay cambios de esquema/umbrales ni reevaluación histórica. D7 utiliza PM-001/PM-002 en altas/proveedores; la [migración opcional](MIGRACION_REFERENCIAS_D7.md) quedó preparada y probada solo en fixtures.
+
+Las secciones siguientes son evidencia histórica de sus propias revisiones; fechas y recuentos previos no sustituyen los resultados de esta ejecución ni los hitos oficiales indicados en el resumen.
+
 ## Corrección posterior: paginación de Mediciones
 
 Se sustituyó el límite de 500 filas por COUNT y LIMIT 20/OFFSET, utilizando el paginador existente. Conserva orden por fecha/ID descendente, puente, componente, sensor, fechas y permisos. No altera registros. **18 pruebas afectadas aprobadas, incluida paginación real sobre PostgreSQL aislado puentes_test; cero omisiones y fallos.** Chrome verificó 20/20/5 filas, filtros conservados y controles visibles a 390 px. [Log](evidence/EV3_MEASUREMENTS_PAGINATION_TESTS.log) y [navegador](evidence/EV3_MEASUREMENTS_PAGINATION_BROWSER.json). Los resultados anteriores corresponden a sus propias ejecuciones.

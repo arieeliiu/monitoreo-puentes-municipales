@@ -1,0 +1,84 @@
+{
+  "executed_at": "2026-11-15T00:22:00.673Z",
+  "environment": "Navegador IAB; Flask y SQLite temporal local; sin producción",
+  "stage": "cutoff_2026_11_28",
+  "checks": [
+    {
+      "case": "DOM consulta panel con PM-001/PM-002 y dos alertas; sin programación ni aviso",
+      "status": "passed"
+    },
+    {
+      "case": "DOM crea actividad para Tablero de PM-001, alerta 1, responsable Mantención y fecha 2026-11-24",
+      "status": "passed"
+    },
+    {
+      "case": "DOM edita descripción y estado En ejecución desde formulario",
+      "status": "passed"
+    },
+    {
+      "case": "Mantención consulta actividad asignada y solo muestra edición de estado",
+      "status": "passed"
+    },
+    {
+      "case": "Mantención completa actividad; alerta relacionada continúa Activa",
+      "status": "passed"
+    },
+    {
+      "case": "Inspector consulta actividad y no dispone de creación ni actualización de mantenimiento",
+      "status": "passed"
+    }
+  ],
+  "panel_observation": "Browser tab: 1, Title: \"Puentes · Monitoreo municipal\", URL: \"http://127.0.0.1:5291/\".\n1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/\n\t2 container\n\t\t3 link Description: ╫ PUENTES Monitoreo municipal / Biobío, Value: 127.0.0.1:5291/\n\t\t4 container Navegación principal\n\t\t\t5 link Description: Panel de monitoreo, Value: 127.0.0.1:5291/\n\t\t\t6 link Description: Infraestructura, Value: 127.0.0.1:5291/bridges\n\t\t\t7 link Description: Monitoreo, Value: 127.0.0.1:5291/measurements\n\t\t\t8 link Description: Inspecciones visuales, Value: 127.0.0.1:5291/inspections\n\t\t\t9 link Description: Mantenimiento, Value: 127.0.0.1:5291/maintenance\n\t\t\t10 link Description: Reglas de alerta, Value: 127.0.0.1:5291/rules\n\t\t\t11 link Description: Historial de operaciones, Value: 127.0.0.1:5291/audit\n\t\t12 text dom DOM\n\t\t13 button Cerrar sesión\n\t14 container\n\t\t15 text DIRECCIÓN DE OBRAS MUNICIPALES\n\t\t16 button (collapsed) Description: Notificaciones de alertas, Help: 2 abiertas, Secondary Actions: Expand\n\t\t\t17 text 2\n\t\t\t18 text  abiertas\n\t\t19 text RED MUNICIPAL / VISTA GENERAL\n\t\t20 heading Panel de monitoreo, Value: 1\n\t\t\t21 text Panel de monitoreo\n\t\t22 text El estado de la información, puente por puente.\n\t\t23 link Description: Registrar inspección ↗, Value: 127.0.0.1:5291/inspections\n\t\t24 text PM-001 Criticidad Alta\n\t\t25 heading Puente Estero Norte ↗, Value: 2\n\t\t\t26 link Description: Puente Estero Norte ↗, Value: 127.0.0.1:5291/bridges/1\n\t\t27 text Sector municipal · Biobío\n\t\t28 text 1 alerta(s) abierta(s)\n\t\t29 text Revisar disponibilidad de datos\n\t\t30 text Inclinación · PM-001-INCLINACION\n\t\t31 text Sin datos\n\t\t32 text Aceleración vertical pico · PM-001-VIBRACION\n\t\t33 container\n\t\t\t34 text 1.0  m/s²\n\t\t35 text 14/11/2026 09:00:00 (UTC-03:00)\n\t\t36 link Description: Historial de mediciones →, Value: 127.0.0.1:5291/measurements?bridge_id=1\n\t\t37 link Description: Inspecciones →, Value: 127.0.0.1:5291/inspections?bridge_id=1\n\t\t38 text PM-002 Criticidad Alta\n\t\t39 heading Puente Ribera Sur ↗, Value: 2\n\t\t\t40 link Description: Puente Ribera Sur ↗, Value: 127.0.0.1:5291/bridges/2\n\t\t41 text Sector municipal · Biobío\n\t\t42 text 1 alerta(s) abierta(s)\n\t\t43 text Revisar disponibilidad de datos\n\t\t44 text Inclinación · PM-002-INCLINACION\n\t\t45 text Sin datos\n\t\t46 text Aceleración vertical pico · PM-002-VIBRACION\n\t\t47 container\n\t\t\t48 text 2.5  m/s²\n\t\t49 text 14/11/2026 09:00:00 (UTC-03:00)\n\t\t50 link Description: Historial de mediciones →, Value: 127.0.0.1:5291/measurements?bridge_id=2\n\t\t51 link Description: Inspecciones →, Value: 127.0.0.1:5291/inspections?bridge_id=2\n\t\t52 heading Alertas activas y en atención, Value: 2\n\t\t\t53 text Alertas activas y en atención\n\t\t54 link Description: Ver historial →, Value: 127.0.0.1:5291/alerts\n\t\t55 link Description: Puente Ribera Sur · Aceleración vertical pico Crítico Activa 14/11/2026 21:20:00 (UTC-03:00), Value: 127.0.0.1:5291/alerts/2\n\t\t56 link Description: Puente Estero Norte · Aceleración vertical pico Alerta Activa 14/11/2026 21:20:00 (UTC-03:00), Value: 127.0.0.1:5291/alerts/1\n\t\t57 heading Actividades de mantenimiento pendientes, Value: 2\n\t\t\t58 text Actividades de mantenimiento pendientes\n\t\t59 text Sin actividades pendientes visibles para tu rol.\n\t\t60 heading Condiciones visuales · últimas inspecciones, Value: 2\n\t\t\t61 text Condiciones visuales · últimas inspecciones\n\t\t62 text Registros de inspectores; distintos de las mediciones de sensores.\n\t\t63 text Sin inspecciones visuales disponibles.\n\t\t64 text Monitoreo de puentes · Dirección de Obras Municipales\n\nThe focused UI element is 1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/",
+  "task_observation": "Browser tab: 1, Title: \"Puentes · Monitoreo municipal\", URL: \"http://127.0.0.1:5291/maintenance\".\n1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/maintenance\n\t2 container\n\t\t3 link Description: ╫ PUENTES Monitoreo municipal / Biobío, Value: 127.0.0.1:5291/\n\t\t4 container Navegación principal\n\t\t\t5 link Description: Panel de monitoreo, Value: 127.0.0.1:5291/\n\t\t\t6 link Description: Infraestructura, Value: 127.0.0.1:5291/bridges\n\t\t\t7 link Description: Monitoreo, Value: 127.0.0.1:5291/measurements\n\t\t\t8 link Description: Inspecciones visuales, Value: 127.0.0.1:5291/inspections\n\t\t\t9 link Description: Mantenimiento, Value: 127.0.0.1:5291/maintenance\n\t\t10 text mantencion Mantención\n\t\t11 button Cerrar sesión\n\t12 container\n\t\t13 text DIRECCIÓN DE OBRAS MUNICIPALES\n\t\t14 button (collapsed) Description: Notificaciones de alertas, Help: 2 abiertas, Secondary Actions: Expand\n\t\t\t15 text 2\n\t\t\t16 text  abiertas\n\t\t17 text Actividad guardada. La alerta conserva su estado.\n\t\t18 heading Mantenimiento, Value: 1\n\t\t\t19 text Mantenimiento\n\t\t20 text Actividades asignadas a ti.\n\t\t21 container\n\t\t\t22 text Filtrar por puente\n\t\t\t23 pop up button (collapsed, settable) Filtrar por puente, Value: Todos los puentes, Secondary Actions: Expand\n\t\t\t\t24 menu\n\t\t\t\t\t25 (selected) Todos los puentes\n\t\t\t\t\t26 Puente Estero Norte\n\t\t\t\t\t27 Puente Ribera Sur\n\t\t28 button Filtrar actividades\n\t\t29 text ACTIVIDAD #1 · 24/11/2026\n\t\t30 heading Puente Estero Norte, Value: 2\n\t\t\t31 text Puente Estero Norte\n\t\t32 text Tablero\n\t\t33 text Revisión de tablero — actualizada por DOM\n\t\t34 text Completada\n\t\t35 text Responsable: mantencion\n\t\t36 link Description: Seguimiento de alerta #1 →, Value: 127.0.0.1:5291/alerts/1\n\t\t37 button (collapsed) Actualizar actividad, Secondary Actions: Expand\n\t\t\t38 text Actualizar actividad\n\t\t39 text Monitoreo de puentes · Dirección de Obras Municipales\n\nThe focused UI element is 1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/maintenance",
+  "alert_observation": "Browser tab: 1, Title: \"Puentes · Monitoreo municipal\", URL: \"http://127.0.0.1:5291/alerts/1\".\n1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/alerts/1\n\t2 container\n\t\t3 link Description: ╫ PUENTES Monitoreo municipal / Biobío, Value: 127.0.0.1:5291/\n\t\t4 container Navegación principal\n\t\t\t5 link Description: Panel de monitoreo, Value: 127.0.0.1:5291/\n\t\t\t6 link Description: Infraestructura, Value: 127.0.0.1:5291/bridges\n\t\t\t7 link Description: Monitoreo, Value: 127.0.0.1:5291/measurements\n\t\t\t8 link Description: Inspecciones visuales, Value: 127.0.0.1:5291/inspections\n\t\t\t9 link Description: Mantenimiento, Value: 127.0.0.1:5291/maintenance\n\t\t10 text mantencion Mantención\n\t\t11 button Cerrar sesión\n\t12 container\n\t\t13 text DIRECCIÓN DE OBRAS MUNICIPALES\n\t\t14 button (collapsed) Description: Notificaciones de alertas, Help: 2 abiertas, Secondary Actions: Expand\n\t\t\t15 text 2\n\t\t\t16 text  abiertas\n\t\t17 container Monitoreo\n\t\t\t18 text MONITOREO\n\t\t\t19 link Description: Mediciones, Value: 127.0.0.1:5291/measurements\n\t\t\t20 link Description: Alertas, Value: 127.0.0.1:5291/alerts\n\t\t21 text SEGUIMIENTO / ALERTA #1\n\t\t22 heading Puente Estero Norte, Value: 1\n\t\t\t23 text Puente Estero Norte\n\t\t24 text Aceleración vertical pico · 14/11/2026 21:20:00 (UTC-03:00)\n\t\t25 text Alerta\n\t\t26 text Activa\n\t\t27 heading Registro de origen, Value: 2\n\t\t\t28 text Registro de origen\n\t\t29 link Description: Medición #1 · Consultar historial →, Value: 127.0.0.1:5291/measurements/1\n\t\t30 heading Seguimiento documentado, Value: 2\n\t\t\t31 text Seguimiento documentado\n\t\t32 text Sin inspección relacionada con esta alerta.\n\t\t33 text Sin notas de seguimiento.\n\t\t34 heading Mantenimiento relacionado, Value: 2\n\t\t\t35 text Mantenimiento relacionado\n\t\t36 text #1 · Revisión de tablero — actualizada por DOM\n\t\t37 text mantencion · 24/11/2026\n\t\t38 text Completada\n\t\t39 text Crear o completar una actividad no cierra automáticamente la alerta.\n\t\t40 text Monitoreo de puentes · Dirección de Obras Municipales\n\nThe focused UI element is 1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/alerts/1",
+  "inspector_observation": "Browser tab: 1, Title: \"Puentes · Monitoreo municipal\", URL: \"http://127.0.0.1:5291/maintenance\".\n1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/maintenance\n\t2 container\n\t\t3 link Description: ╫ PUENTES Monitoreo municipal / Biobío, Value: 127.0.0.1:5291/\n\t\t4 container Navegación principal\n\t\t\t5 link Description: Panel de monitoreo, Value: 127.0.0.1:5291/\n\t\t\t6 link Description: Infraestructura, Value: 127.0.0.1:5291/bridges\n\t\t\t7 link Description: Monitoreo, Value: 127.0.0.1:5291/measurements\n\t\t\t8 link Description: Inspecciones visuales, Value: 127.0.0.1:5291/inspections\n\t\t\t9 link Description: Mantenimiento, Value: 127.0.0.1:5291/maintenance\n\t\t10 text inspector Inspector\n\t\t11 button Cerrar sesión\n\t12 container\n\t\t13 text DIRECCIÓN DE OBRAS MUNICIPALES\n\t\t14 button (collapsed) Description: Notificaciones de alertas, Help: 2 abiertas, Secondary Actions: Expand\n\t\t\t15 text 2\n\t\t\t16 text  abiertas\n\t\t17 heading Mantenimiento, Value: 1\n\t\t\t18 text Mantenimiento\n\t\t19 text Planificación y seguimiento de actividades.\n\t\t20 container\n\t\t\t21 text Filtrar por puente\n\t\t\t22 pop up button (collapsed, settable) Filtrar por puente, Value: Todos los puentes, Secondary Actions: Expand\n\t\t\t\t23 menu\n\t\t\t\t\t24 (selected) Todos los puentes\n\t\t\t\t\t25 Puente Estero Norte\n\t\t\t\t\t26 Puente Ribera Sur\n\t\t27 button Filtrar actividades\n\t\t28 text ACTIVIDAD #1 · 24/11/2026\n\t\t29 heading Puente Estero Norte, Value: 2\n\t\t\t30 text Puente Estero Norte\n\t\t31 text Tablero\n\t\t32 text Revisión de tablero — actualizada por DOM\n\t\t33 text Completada\n\t\t34 text Responsable: mantencion\n\t\t35 link Description: Seguimiento de alerta #1 →, Value: 127.0.0.1:5291/alerts/1\n\t\t36 text Monitoreo de puentes · Dirección de Obras Municipales\n\nThe focused UI element is 1 AXWebArea Puentes · Monitoreo municipal, URL: 127.0.0.1:5291/maintenance",
+  "finished_at": "2026-11-15T00:22:24.769Z",
+  "persisted_tasks": [
+    {
+      "id": 1,
+      "bridge_id": 1,
+      "component_id": 1,
+      "alert_id": 1,
+      "assignee_id": 3,
+      "planned_date": "2026-11-24",
+      "status": "Completada",
+      "description": "Revisión de tablero — actualizada por DOM"
+    }
+  ],
+  "persisted_alerts": [
+    {
+      "id": 1,
+      "bridge_id": 1,
+      "rule_id": 2,
+      "measurement_id": 1,
+      "status": "Activa",
+      "severity": "Alerta"
+    },
+    {
+      "id": 2,
+      "bridge_id": 2,
+      "rule_id": 12,
+      "measurement_id": 2,
+      "status": "Activa",
+      "severity": "Crítico"
+    }
+  ],
+  "maintenance_audit_actions": [
+    {
+      "action": "Planificar mantenimiento",
+      "entity_id": 1,
+      "details": ""
+    },
+    {
+      "action": "Actualizar mantenimiento",
+      "entity_id": 1,
+      "details": "En ejecución"
+    },
+    {
+      "action": "Actualizar mantenimiento",
+      "entity_id": 1,
+      "details": "Completada"
+    }
+  ],
+  "console_errors_observed": []
+}

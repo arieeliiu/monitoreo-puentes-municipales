@@ -1,5 +1,29 @@
 # Reporte 1.5.2.2 — Pruebas de captura de mediciones
 
+## Cierre técnico EV3 — revisión del 2026-11-14
+
+Objetivo: recuperar la evidencia de captura de B-11 y verificar D7 sin reconstruir push/pull. Los resultados del 08/11 que siguen se conservan literalmente como antecedentes, no se reemplazan ni se cuentan como esta ejecución.
+
+Fecha real de ejecución: **2026-11-14**, America/Santiago; inicio `2026-11-14T21:35:53-03:00`, término `2026-11-14T21:48:52-03:00`. El nombre del corte 28/11/2026 describe alcance, no la fecha de estas pruebas ni un hito declarado cumplido.
+
+Ambiente: Windows, Python 3.12.14, SQLite 3.53.1, Node.js y PostgreSQL remoto con usuario y esquema restringidos `puentes_test`. Las fixtures y fotos son temporales. El runner elimina variables productivas y solo admite un DSN de pruebas restringido. No se conectó a datos productivos ni se modificó Vercel, Cron, Storage o credenciales.
+
+Suite final completa: **132 pruebas Python (incluidas 18 PostgreSQL aisladas) y 20 JavaScript aprobadas; 0 fallos, 0 errores y 0 omisiones**. Son 12 regresiones SQLite nuevas y 3 PostgreSQL nuevas, además de la suite previa; no se suman ensayos ni se duplican pruebas heredadas. [JSON de resultados por caso, fechas, duración, contadores y SHA256](evidence/EV3_CIERRE_TECNICO_TEST_RESULTS.json); [log íntegro](evidence/EV3_CIERRE_TECNICO_TEST_RUN.log).
+
+| Caso / ID en JSON | Datos utilizados | Resultado esperado | Resultado obtenido | Estado |
+|---|---|---|---|---|
+| `tests.test_ev3_closure.ClosureStageTests.test_reference_seed_providers_identity_dedup_and_internal_simulated` | Carga inicial vacía; PM-001/PM-002; cuatro sensores; HTTP real con lote estable y dos POST Cron con lote controlado. | Identidad compartida; conservar simulated; persistir válidos y deduplicar cada origen. | 2 puentes, 6 componentes, 4 sensores, 18 reglas, 8 mediciones y 8 alertas en fixture de referencia. Cron recibió 4 y luego detectó 4 duplicados; HTTP repetido no agregó filas. | Aprobado |
+| `tests.test_ev3_stage.Ev3StageTests.test_capture_invalid_missing_no_rule_and_api_dedup_traceability` | API: valor 5 e ID ev3-api repetido; inválido 500; no disponible; -1/NaN/unidad errónea/futuro/puente incompatible. | Guardar solo entradas admitidas; no alertar inválidos/no disponibles; identidad y deduplicación. | API 201 y duplicado 400; cuatro registros admitidos y una alerta. Los cinco datos incorrectos no agregan filas; sensor sin regla queda explícito. | Aprobado |
+| `tests.test_ev3_stage.Ev3StageTests.test_provider_inconsistent_records_and_savepoints` | HTTP: dos válidos y seis inconsistentes, repetición. | Rechazos por registro con auditoría sin perder válidos. | Dos lecturas persistidas y motivos/identificadores en auditoría; cero alertas en fixture sin reglas. | Aprobado |
+| `tests.test_final_fixes.FinalFixTests.test_real_provider_and_periodic_worker_restart_recovery` | Proveedor y worker como procesos; desconexión inicial, arranque, caída y reinicio del proveedor. | Recuperar sin reiniciar worker; web disponible; ambos puentes y consulta manual sin duplicar. | Cuatro capturas iniciales y ocho después del reinicio; ocho alertas en full; consulta manual mantiene contadores. | Aprobado |
+| `tests.test_cloud.PostgresTests.test_postgres_ev3_cutoff_rules_and_cron` | Cron autenticado en corte 09/11 sobre PostgreSQL aislado, dos puentes y repetición. | Misma recepción y reglas que SQLite; sin mantenimiento/panel avanzado. | Dos mediciones y dos alertas; repetición sin nuevas filas; mantenimiento/programación 404. | Aprobado |
+
+La evidencia del primer caso incluye `facts.reference_fixture`, `provider_first` y `provider_repeat`. Los IDs de origen y sus relaciones son los del registro de infraestructura, sin inferencia por prefijos. No se modificaron unidades, referencias, umbrales ni contratos IoT.
+
+La verificación es técnica con datos de referencia y proveedores simulados. No acredita hardware, interoperabilidad nueva, diagnóstico estructural, piloto operacional, marcha blanca, capacitación ni UAT municipal. No se publicaron estos cambios. Revisión del equipo, autorización de migración D7/entorno, publicación y prueba posterior quedan pendientes. Las etapas históricas y sus registros se conservan; no hay reevaluación retroactiva.
+
+Reproducción desde la raíz: ejecutar `python tools/run_ev3_checks.py` con el intérprete del entorno y, para PostgreSQL, solo `PUENTES_TEST_DATABASE_URL` del rol restringido. Sin el DSN se registran omisiones y no se puede atribuir el resultado completo de este reporte. El runner ejecuta unittest y las tres suites Node, y guarda un JSON nuevo sin sobrescribir los informes históricos B-11.
+
 ## Objetivo y alcance B-11
 
 Verificar que las entradas manuales, API y proveedor simulado mantengan validación, persistencia, identidad relacional, deduplicación y recuperación de errores al habilitar `cutoff_2026_11_09`. Se reutilizan recepción, proveedor y worker existentes; no se cambia su protocolo ni el esquema.

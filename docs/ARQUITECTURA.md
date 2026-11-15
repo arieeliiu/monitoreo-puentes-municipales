@@ -1,5 +1,9 @@
 # Arquitectura vigente — especificación EV2 y etapas EV3
 
+## Cierre técnico EV3 — revisión del 2026-11-14
+
+`cutoff_2026_11_28` añade únicamente advanced_dashboard y maintenance al corte B-11. El panel consulta/renderiza programaciones solo si inspection_plans está habilitada (full). Se reutilizan consultas, motor, estados y permisos sin cambio de esquema. `reference_data.py` comparte códigos neutrales entre seed y proveedores; [migración D7](MIGRACION_REFERENCIAS_D7.md) explícita y separada del arranque. [Informes y límites](CIERRE_TECNICO_EV3.md). Las fechas anteriores del documento son referencias históricas; los hitos vigentes son los del resumen de esta tarea.
+
 ## Navegación, paginación y avisos EV3
 
 Se conservan los feature flags y todos los contratos de recepción/evaluación. `/measurements` y `/alerts` siguen siendo vistas separadas. El detalle de medición consulta sus alertas solo si la etapa las habilita. Reglas no cambia su motor: la separación se realiza en Jinja a partir de active y standard.
@@ -12,12 +16,13 @@ Cliente sin dependencias externas: consulta normal cada 30 s; si `has_more` indi
 
 ## Etapa configurable de presentación
 
-`app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida tres valores: `cutoff_2026_10_26` (predeterminado), `cutoff_2026_11_09` y `full`. `STAGE_FEATURES` y `feature_enabled()` centralizan las funciones disponibles para rutas, inicio, recepción, inspecciones y contexto Jinja; `cutoff_mode()` conserva su significado original de EV2. No depende del reloj ni de archivos de gestión.
+`app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida cuatro valores: `cutoff_2026_10_26` (predeterminado), `cutoff_2026_11_09`, `cutoff_2026_11_28` y `full`. `STAGE_FEATURES` y `feature_enabled()` centralizan las funciones disponibles para rutas, inicio, recepción, inspecciones y contexto Jinja; `cutoff_mode()` conserva su significado original de EV2. No depende del reloj ni de archivos de gestión.
 
 | Etapa | alerts (reglas/evaluación/seguimiento) | advanced_dashboard | maintenance | inspection_plans |
 |---|---|---|---|---|
 | `cutoff_2026_10_26` | No | No | No | No |
 | `cutoff_2026_11_09` | Sí | No | No | No |
+| `cutoff_2026_11_28` | Sí | Sí | Sí | No |
 | `full` | Sí | Sí | Sí | Sí |
 
 El `before_request stage_access` bloquea por función las rutas futuras antes de sesión/CSRF/base de datos. EV2 conserva recepción sin consulta de reglas ni evaluación. EV3 usa la misma recepción y motor de full, sin duplicar validaciones ni cambiar esquema, reglas o unidades: mediciones válidas evaluables e inspecciones nuevas generan alertas con la versión activa correspondiente. La ausencia de regla/referencia y las lecturas inválidas/no disponibles mantienen sus resultados existentes sin alertas.
@@ -59,6 +64,6 @@ El cambio de unidad de configuración de sensores de vibración solo afecta a ca
 
 Manual y automática comparten validaciones y deduplicación. BEGIN IMMEDIATE serializa la recepción; savepoints evitan filas/alertas parciales por elemento. El worker es un proceso independiente con bloqueo de SO, configuración de intervalo, recuperación tras errores y conexiones cerradas por ciclo. Auditoría registra identidad/motivo de rechazos; fallos que impidan auditar se registran por logging.
 
-Se mantienen autenticación, permisos, CSRF, CSP, carga fotográfica validada, relaciones de programación y mantenimiento y trazabilidad. La UI usa los mismos registros y una única indicación de demostración. Los mockups se construyen desde estas plantillas y datos temporales.
+Se mantienen autenticación, permisos, CSRF, CSP, carga fotográfica validada, relaciones de programación y mantenimiento y trazabilidad. La UI conserva los registros y trazabilidad interna sin el aviso retirado por D7. Los mockups se construyen desde estas plantillas y datos temporales.
 
 Fechas documentales: 24/11/2026 término de EDT 1.4.5/1.4.6; 26/11/2026 presentación. El alcance cuantitativo EV2 prevalece sobre documentación histórica. No se declara proveedor real, validación externa ni aceptación HU-09.
