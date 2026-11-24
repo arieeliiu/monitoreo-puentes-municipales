@@ -1,5 +1,16 @@
 # Diseño funcional final
 
+## Refinamiento integral de interfaz (24/11/2026)
+
+Se conserva la identidad (azul estructura `#153848`, azul río `#146e83`, Bahnschrift/Segoe UI) y se formaliza como sistema de diseño en `static/app.css`: variables de color, superficies, radios, sombras y tipografía; componentes compartidos (encabezado de página, paneles, indicadores, insignias, tablas, listas de registros, línea de tiempo, estados vacíos, diálogos) y adaptación a escritorio, tablet (barra lateral de íconos) y móvil (navegación horizontal y tablas como tarjetas). Las insignias distinguen niveles (severidad, condición: fondo de color) de estados (punto de color) y siempre incluyen texto.
+
+- **Sin recursos externos.** La CSP solo admite archivos propios: íconos SVG en `static/icons/` aplicados como máscaras CSS (así el Inicio del corte 26/10 sigue sin `<svg>`), gráficos dibujados en el servidor o por `static/charts.js`.
+- **Panel avanzado.** Indicadores de alertas abiertas por severidad, sensores con lectura válida en 24 h, mantenimiento abierto/vencido y inspecciones de 30 días; estado por puente con la última lectura, la alerta que generó y una tendencia de 7 días; alertas por día (30 días) apiladas por severidad. El orden de los paneles prioriza la tarea de cada rol (Mantención: sus actividades). Todo se calcula con registros existentes.
+- **Tendencias.** `GET /api/v1/measurement-series` (solo lectura, cualquier rol autenticado) agrega en SQL el máximo por intervalo de lecturas válidas EV2; en inclinación usa el cambio absoluto evaluado. Muestra los umbrales vigentes cuando las alertas están habilitadas y no interpola intervalos sin datos.
+- **Mapa de sensores (ficha del puente).** Esquema 2D genérico, no a escala, generado por `bridge_schematic.py` con los datos existentes: cada sensor se ubica en su componente (Tablero, Viga, Estribo, Pila) con el color de su último estado, la última inspección visual se marca por componente y cada marcador enlaza a la tendencia del sensor. Los registros no tienen coordenadas, por lo que no se dibuja un punto medido; el detalle muestra la ubicación descrita por la DOM. Componentes sin zona equivalente se listan aparte. Precisión por zona o un modelo 3D requieren datos nuevos (posición relativa o planos/BIM) y una solicitud de cambio.
+- **Interacción.** Confirmación accesible para desactivar reglas, cancelar programaciones y resolver alertas; protección contra envíos duplicados; avisos descartables; `prefers-reduced-motion` respetado. Los permisos siguen controlándose en el servidor.
+
+
 ## Actualización de interfaz EV3 para revisión
 
 La identidad existente se conserva: azul estructura `#153848`, azul río `#146e83`, fondo `#f4f7f8`, línea `#cddde2`, texto `#19333e`, tipografía Bahnschrift para títulos y Segoe UI para controles. La franja de Monitoreo diferencia el contexto de navegación de los colores de severidad.

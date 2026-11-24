@@ -12,6 +12,8 @@ from photo_storage import PhotoStorage, PhotoStorageError
 from cloud_provider import cloud_records
 from pilot_time import form_timestamp
 from display_time import chile_datetime, calendar_date, local_date_bounds
+import dashboard_metrics as metrics
+import bridge_schematic
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from reference_data import BRIDGE_REFERENCES, reference_inventory
@@ -143,7 +145,7 @@ def create_app(config=None):
         response.headers['Cache-Control']='no-store'
         return response
     @app.context_processor
-    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), feature_enabled=feature_enabled, cloud_photos=photo_store.remote, notification_epoch=session.get('notification_epoch',''))
+    def context(): return dict(user=g.get('user'), csrf=session.get('csrf'), kinds=KINDS, conditions=CONDITIONS, severities=SEVERITIES, labels=LABELS, cutoff=cutoff_mode(), feature_enabled=feature_enabled, cloud_photos=photo_store.remote, notification_epoch=session.get('notification_epoch',''), today_iso=metrics.today_chile().isoformat())
     @app.errorhandler(403)
     @app.errorhandler(400)
     @app.errorhandler(404)
@@ -174,14 +176,17 @@ def create_app(config=None):
         if not feature_enabled('advanced_dashboard'):
             summary={table:one(f'SELECT count(*) AS n FROM {table}')["n"] for table in ('bridges','components','sensors','measurements')}
             return render_template('dashboard.html',summary=summary,bridges=rows('SELECT * FROM bridges ORDER BY code'))
-        bridges=rows('SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!=\'Resuelta\') AS active FROM bridges b ORDER BY b.code')
-        latest=rows('SELECT m.*, s.code,s.kind,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) ORDER BY s.code')
-        active=rows('SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!=\'Resuelta\' ORDER BY a.id DESC LIMIT 10')
+        moment=datetime.now(timezone.utc); today=metrics.today_chile(moment)
+        rank=metrics.SEVERITY_RANK.format(c='a.severity')
+        bridges=rows("SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!='Resuelta') AS active, (SELECT a.severity FROM alerts a WHERE a.bridge_id=b.id AND a.status!='Resuelta' AND a.standard='EV2' ORDER BY "+rank+" DESC LIMIT 1) AS top_severity FROM bridges b ORDER BY b.code")
+        latest=rows("SELECT m.*, s.id AS sid, s.code,s.kind,s.unit AS sensor_unit,c.bridge_id,c.name AS component, (SELECT a.severity FROM alerts a WHERE a.measurement_id=m.id AND a.standard='EV2' ORDER BY a.id DESC LIMIT 1) AS alert_severity FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) ORDER BY s.code")
+        active=rows("SELECT a.*,b.name,b.code AS bridge_code,r.label,r.kind FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!='Resuelta' ORDER BY CASE WHEN a.standard='EV2' THEN "+rank+" ELSE 0 END DESC,a.created_at DESC,a.id DESC LIMIT 10")
         rules=one("SELECT count(*) AS n FROM rules WHERE active=1 AND standard='EV2'")['n']
-        pending=rows("SELECT t.*,b.name FROM tasks t JOIN bridges b ON b.id=t.bridge_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
+        pending=rows("SELECT t.*,b.name,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id LEFT JOIN components c ON c.id=t.component_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
         plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date") if feature_enabled('inspection_plans') else []
         visual=rows('SELECT i.*,b.name,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
-        return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,rule_count=rules,pending=pending,plans=plans,visual=visual)
+        kpi=dict(alerts=metrics.alert_summary(rows),sensors=metrics.sensor_summary(one,moment),maintenance=metrics.maintenance_summary(rows,one,g.user,today) if feature_enabled('maintenance') else None,inspections=metrics.inspection_summary(one,moment))
+        return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,rule_count=rules,pending=pending,plans=plans,visual=visual,kpi=kpi,daily=metrics.alerts_by_day(rows,moment))
 
     @app.route('/bridges',methods=['GET','POST'])
     @access()
@@ -202,7 +207,7 @@ def create_app(config=None):
                 return redirect(url_for('bridge',bid=bid))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El identificador ya existe. Usa uno único.','error')
-        return render_template('bridges.html',bridges=rows('SELECT * FROM bridges ORDER BY code'))
+        return render_template('bridges.html',bridges=rows('SELECT b.*,(SELECT count(*) FROM components c WHERE c.bridge_id=b.id) AS component_count,(SELECT count(*) FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=b.id) AS sensor_count FROM bridges b ORDER BY b.code'))
 
     @app.route('/bridges/<int:bid>',methods=['GET','POST'])
     @access()
@@ -239,7 +244,13 @@ def create_app(config=None):
                 db().commit(); flash('Registro guardado.','success'); return redirect(url_for('bridge',bid=bid))
             except (ValueError,sqlite3.IntegrityError) as e:
                 db().rollback(); flash(str(e) if isinstance(e,ValueError) else 'El nombre o código está duplicado.','error')
-        return render_template('bridge.html',b=b,components=rows('SELECT * FROM components WHERE bridge_id=?',(bid,)),sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
+        last_inspection=one('SELECT inspected_at FROM inspections WHERE bridge_id=? ORDER BY inspected_at DESC,id DESC LIMIT 1',(bid,))
+        facts=dict(open_alerts=one("SELECT count(*) AS n FROM alerts WHERE bridge_id=? AND status!='Resuelta'",(bid,))['n'] if feature_enabled('alerts') else None,last_inspection=last_inspection['inspected_at'] if last_inspection else None,measurements=one('SELECT count(*) AS n FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,))['n'])
+        components=rows('SELECT * FROM components WHERE bridge_id=? ORDER BY id',(bid,))
+        severity="(SELECT a.severity FROM alerts a WHERE a.measurement_id=m.id AND a.standard='EV2' ORDER BY a.id DESC LIMIT 1)" if feature_enabled('alerts') else 'NULL'
+        states=rows('SELECT s.id,s.code,s.kind,s.unit,s.location,s.component_id,m.id AS mid,m.value,m.status,m.measured_at,m.variation,m.specification,m.evaluation,'+severity+' AS alert_severity FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) WHERE c.bridge_id=? ORDER BY s.kind DESC,s.code',(bid,))
+        schematic=bridge_schematic.build(components,states,rows('SELECT i.id,i.component_id,i.condition,i.standard,i.inspected_at FROM inspections i WHERE i.bridge_id=? AND i.id=(SELECT j.id FROM inspections j WHERE j.component_id=i.component_id ORDER BY j.inspected_at DESC,j.id DESC LIMIT 1)',(bid,)),LABELS,feature_enabled('alerts'))
+        return render_template('bridge.html',b=b,facts=facts,schematic=schematic,components=components,sensors=rows('SELECT s.*,c.name AS component FROM sensors s JOIN components c ON c.id=s.component_id WHERE c.bridge_id=?',(bid,)))
 
     def evaluate(kind,bridge_id,record_id,value):
         if not feature_enabled('alerts'): return False
@@ -350,6 +361,17 @@ def create_app(config=None):
             mid=receive(data); db().commit(); return jsonify(id=mid,evaluation=one('SELECT evaluation FROM measurements WHERE id=?',(mid,))['evaluation']),201
         except (ValueError,sqlite3.IntegrityError) as e:
             db().rollback(); return jsonify(error=str(e) if isinstance(e,ValueError) else 'external_id duplicado.'),400
+
+    @app.get('/api/v1/measurement-series')
+    def measurement_series():
+        # Lectura agregada para gráficos; no modifica registros.
+        if not g.user: return jsonify(error='Autenticación requerida.'),401
+        days=request.args.get('days','7')
+        if days not in metrics.SERIES_RANGES: return jsonify(error='Rango no válido. Usa 1, 7 o 30 días.'),400
+        scope={}
+        for field in ('bridge_id','sensor_id'):
+            if request.args.get(field): scope[field]=positive_integer(request.args[field],field)
+        return jsonify(days=int(days),generated_at=now(),series=metrics.measurement_series(rows,LABELS,KINDS,days_key=days,with_thresholds=feature_enabled('alerts'),**scope))
 
     @app.get('/measurements/<int:mid>')
     @access()

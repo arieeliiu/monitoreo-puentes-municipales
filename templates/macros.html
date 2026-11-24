@@ -1,15 +1,34 @@
+{# Componentes compartidos de la interfaz. Las firmas existentes se conservan. #}
 {% macro token() %}<input type="hidden" name="csrf" value="{{ csrf }}">{% endmacro %}
-{% macro input(name,label,type='text',value='',required=true) %}<label>{{ label }}<input name="{{ name }}" type="{{ type }}" value="{{ value }}" {{ 'required' if required else '' }} {{ 'step=any' if type=='number' else '' }}></label>{% endmacro %}
-{% macro bridge_select(bridges) %}<label>Puente<select name="bridge_id" {{ 'required' if request.method=='POST' or request.endpoint not in ['measurements','alerts'] else '' }} data-bridge><option value="">Selecciona un puente</option>{% for b in bridges %}<option value="{{ b.id }}">{{ b.code }} · {{ b.name }}</option>{% endfor %}</select></label>{% endmacro %}
-{% macro component_select(components,optional=false) %}<label>Componente<select name="component_id" data-components {{ '' if optional else 'required' }}><option value="">{{ 'Todo el puente' if optional else 'Selecciona un componente' }}</option>{% for c in components %}<option value="{{ c.id }}" data-bridge="{{ c.bridge_id }}">{{ c.name }}{% if c.bridge %} · {{ c.bridge }}{% endif %}</option>{% endfor %}</select></label>{% endmacro %}
-{% macro badge(text) %}<span class="badge">{{ text }}</span>{% endmacro %}
 
-{% macro level(a) %}{% if a.standard=='EV2' %}<span class="badge {{ {'Atención':'severity-attention','Alerta':'severity-alert','Crítico':'severity-critical'}[a.severity] }}">{{ a.severity }}</span>{% else %}<small>Alerta histórica · sin clasificación vigente</small>{% endif %}{% endmacro %}
+{% macro icon(name, extra='') %}<span class="i i-{{ name }}{{ ' '+extra if extra else '' }}" aria-hidden="true"></span>{% endmacro %}
+
+{% macro input(name,label,type='text',value='',required=true,hint='') %}<label>{{ label }}<input name="{{ name }}" type="{{ type }}" value="{{ value }}" {{ 'required' if required else '' }} {{ 'step=any' if type=='number' else '' }}>{% if hint %}<small>{{ hint }}</small>{% endif %}</label>{% endmacro %}
+
+{% macro bridge_select(bridges) %}<label>Puente<select name="bridge_id" {{ 'required' if request.method=='POST' or request.endpoint not in ['measurements','alerts'] else '' }} data-bridge><option value="">Selecciona un puente</option>{% for b in bridges %}<option value="{{ b.id }}">{{ b.code }} · {{ b.name }}</option>{% endfor %}</select></label>{% endmacro %}
+
+{% macro component_select(components,optional=false) %}<label>Componente<select name="component_id" data-components {{ '' if optional else 'required' }}><option value="">{{ 'Todo el puente' if optional else 'Selecciona un componente' }}</option>{% for c in components %}<option value="{{ c.id }}" data-bridge="{{ c.bridge_id }}">{{ c.name }}{% if c.bridge %} · {{ c.bridge }}{% endif %}</option>{% endfor %}</select></label>{% endmacro %}
+
+{# Estados con punto de color (el texto siempre acompaña al color). #}
+{% set STATUS_DOTS={'Activa':'dot-critical','En atención':'dot-attention','Resuelta':'dot-success','Pendiente':'dot-muted','En ejecución':'dot-info','Completada':'dot-success','Programada':'dot-info','Realizada':'dot-success','Cancelada':'dot-muted','valido':'dot-success','invalido':'dot-critical','no disponible':'dot-attention','Vigente':'dot-success','No vigente':'dot-muted','Vencida':'dot-critical'} %}
+{# Niveles con fondo: severidad de alertas, condición visual y criticidad. #}
+{% set LEVEL_TONES={'Atención':'severity-attention','Alerta':'severity-alert','Crítico':'severity-critical','Baja':'tone-info','Media':'tone-attention','Alta':'tone-alert','Crítica':'tone-critical','Criticidad Baja':'tone-muted','Criticidad Media':'tone-muted','Criticidad Alta':'tone-muted'} %}
+{% macro badge(text,tone='') %}{% set resolved=tone or STATUS_DOTS.get(text) or LEVEL_TONES.get(text,'') %}<span class="badge{{ ' '+resolved if resolved else '' }}">{{ text }}</span>{% endmacro %}
+
+{% macro level(a) %}{% if a.standard=='EV2' %}<span class="badge {{ {'Atención':'severity-attention','Alerta':'severity-alert','Crítico':'severity-critical'}[a.severity] }}">{{ a.severity }}</span>{% else %}<small class="level-legacy">Alerta histórica · sin clasificación vigente</small>{% endif %}{% endmacro %}
+
 {% macro metric(m) %}{% if m.id %}{% if m.specification!='EV2' %}<small class="missing">{{ 'Velocidad histórica (mm/s), incompatible con aceleración' if m.unit=='mm/s' else 'Registro histórico: no evaluado con criterios vigentes' }}</small>{% elif m.kind=='inclinacion' %}<small>Lectura: {{ m.value if m.value is not none else 'No disponible' }} °</small>{% if m.reference_value is none %}<small class="missing">Referencia no configurada — no evaluable</small>{% else %}<small>Referencia: {{ m.reference_value }} ° · Cambio absoluto: {{ m.variation if m.variation is not none else 'No disponible' }} °</small>{% endif %}{% endif %}{% endif %}{% endmacro %}
 
 {% macro pilot_datetime(prefix) %}<label>Fecha<input type="date" name="{{ prefix }}_date" value="{{ request.form.get(prefix+'_date','') }}" required></label><label>Hora<input type="time" name="{{ prefix }}_time" value="{{ request.form.get(prefix+'_time','') }}" required><small>24 horas · America/Santiago</small></label>{% endmacro %}
 
 {% macro pagination(pager) %}<div class="pagination" role="navigation" aria-label="Paginación">
-{% if pager.previous %}<a class="button secondary" rel="prev" href="{{ pager.previous }}">Anterior</a>{% else %}<span class="pagination-disabled" aria-disabled="true">Anterior</span>{% endif %}
+{% if pager.previous %}<a class="button secondary small" rel="prev" href="{{ pager.previous }}">{{ icon('chevron-left','i-sm') }}Anterior</a>{% else %}<span class="pagination-disabled" aria-disabled="true">{{ icon('chevron-left','i-sm') }}Anterior</span>{% endif %}
 <span aria-current="page">Página {{ pager.page }} de {{ pager.pages }}</span>
-{% if pager.next %}<a class="button secondary" rel="next" href="{{ pager.next }}">Siguiente</a>{% else %}<span class="pagination-disabled" aria-disabled="true">Siguiente</span>{% endif %}</div>{% endmacro %}
+{% if pager.next %}<a class="button secondary small" rel="next" href="{{ pager.next }}">Siguiente{{ icon('chevron-right','i-sm') }}</a>{% else %}<span class="pagination-disabled" aria-disabled="true">Siguiente{{ icon('chevron-right','i-sm') }}</span>{% endif %}</div>{% endmacro %}
+
+{# Encabezado de página: migas, título, descripción y acciones opcionales. #}
+{% macro page_header(title,lead='',crumbs=[]) %}<header class="page-header"><div>{% if crumbs %}<div class="eyebrow">{% for label,href in crumbs %}{% if not loop.first %}<span class="sep" aria-hidden="true">/</span>{% endif %}{% if href %}<a href="{{ href }}">{{ label }}</a>{% else %}<span>{{ label }}</span>{% endif %}{% endfor %}</div>{% endif %}<h1>{{ title }}</h1>{% if lead %}<p>{{ lead }}</p>{% endif %}</div>{% if caller is defined %}<div class="page-actions">{{ caller() }}</div>{% endif %}</header>{% endmacro %}
+
+{% macro empty(text,ok=false) %}<div class="empty{{ ' ok' if ok else '' }}"><p>{{ text }}</p>{{ caller() if caller is defined else '' }}</div>{% endmacro %}
+
+{% macro measurement_status(status) %}{{ badge({'valido':'Válido','invalido':'Inválido','no_disponible':'Dato no disponible'}.get(status,status),{'valido':'dot-success','invalido':'dot-critical','no_disponible':'dot-attention'}.get(status,'')) }}{% endmacro %}

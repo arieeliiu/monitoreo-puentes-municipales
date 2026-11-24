@@ -1,1 +1,14 @@
-{% extends 'base.html' %}{% from 'macros.html' import badge with context %}{% block content %}<header><div><div class="eyebrow">Inspección #{{ i.id }} / Evidencia visual</div><h1>{{ i.name }}</h1><p>{{ i.component }} · {{ i.inspected_at|chile_datetime }}</p>{{ badge(i.condition) }}{% if i.standard!='EV2' %}<small>Categoría histórica sin equivalencia asignada</small>{% endif %}</div></header><section class="panel"><h2>Hallazgo</h2><p class="preserve">{{ i.description }}</p><p>Registrado por {{ i.username }}.</p><div class="gallery">{% for p in photos %}<a href="/photos/{{ p.filename }}"><img src="/photos/{{ p.filename }}" alt="Fotografía {{ loop.index }} de la inspección {{ i.id }}"></a>{% else %}<p class="muted">Esta inspección no tiene fotografías adjuntas.</p>{% endfor %}</div></section>{% endblock %}
+{% extends 'base.html' %}{% from 'macros.html' import badge,icon,page_header,empty with context %}
+{% block title %}Inspección #{{ i.id }} · Puentes{% endblock %}
+{% block content %}
+{% call page_header(i.name,i.component+' · '+i.inspected_at|chile_datetime,[('Inspecciones visuales','/inspections'),('Inspección #'+i.id|string,None)]) %}<span class="badges">{{ badge(i.condition) }}</span>{% endcall %}
+{% if i.standard!='EV2' %}<p class="notice">{{ icon('info') }}<small class="notice-body">Categoría histórica sin equivalencia asignada</small></p>{% endif %}
+<dl class="facts">
+<div><dt>Puente</dt><dd><a href="/bridges/{{ i.bridge_id }}">{{ i.name }}</a></dd></div>
+<div><dt>Componente</dt><dd>{{ i.component }}</dd></div>
+<div><dt>Condición visual</dt><dd>{{ i.condition }}</dd></div>
+<div><dt>Fecha y hora</dt><dd class="num">{{ i.inspected_at|chile_datetime }}</dd></div>
+<div><dt>Inspector</dt><dd>{{ i.username }}</dd></div>
+</dl>
+<section class="panel"><div class="panel-header"><h2>{{ icon('note') }}Hallazgo</h2></div><p class="preserve">{{ i.description }}</p><p class="muted">Registrado por {{ i.username }}.</p></section>
+<section class="panel"><div class="panel-header"><h2>{{ icon('camera') }}Evidencia fotográfica</h2><span>{{ photos|length }} fotografía{{ '' if photos|length==1 else 's' }}</span></div><div class="gallery">{% for p in photos %}<a href="/photos/{{ p.filename }}"><img src="/photos/{{ p.filename }}" alt="Fotografía {{ loop.index }} de la inspección {{ i.id }}" loading="lazy"></a>{% else %}<p class="muted">Esta inspección no tiene fotografías adjuntas.</p>{% endfor %}</div></section>{% endblock %}
