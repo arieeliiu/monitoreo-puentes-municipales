@@ -232,7 +232,7 @@ class PostgresTests(SystemTests):
         from app import EV3_STAGE
         from tests.test_monitoring_ui import MonitoringUiTests
         self.app.config['PROJECT_STAGE']=EV3_STAGE
-        MonitoringUiTests.populated(self,45)
+        MonitoringUiTests.populated(self,45,distinct_sensors=True)
         for name in ('dom','inspector','worker'):
             self.login(name)
             baseline=self.client.get('/api/v1/alert-notifications').json

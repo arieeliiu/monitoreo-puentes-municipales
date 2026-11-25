@@ -14,6 +14,7 @@ from pilot_time import form_timestamp
 from display_time import chile_datetime, calendar_date, local_date_bounds
 import dashboard_metrics as metrics
 import bridge_schematic
+import alert_episodes as episodes
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from reference_data import BRIDGE_REFERENCES, reference_inventory
@@ -180,13 +181,14 @@ def create_app(config=None):
         rank=metrics.SEVERITY_RANK.format(c='a.severity')
         bridges=rows("SELECT b.*, (SELECT count(*) FROM alerts a WHERE a.bridge_id=b.id AND a.status!='Resuelta') AS active, (SELECT a.severity FROM alerts a WHERE a.bridge_id=b.id AND a.status!='Resuelta' AND a.standard='EV2' ORDER BY "+rank+" DESC LIMIT 1) AS top_severity FROM bridges b ORDER BY b.code")
         latest=rows("SELECT m.*, s.id AS sid, s.code,s.kind,s.unit AS sensor_unit,c.bridge_id,c.name AS component, (SELECT a.severity FROM alerts a WHERE a.measurement_id=m.id AND a.standard='EV2' ORDER BY a.id DESC LIMIT 1) AS alert_severity FROM sensors s JOIN components c ON c.id=s.component_id LEFT JOIN measurements m ON m.id=(SELECT id FROM measurements WHERE sensor_id=s.id ORDER BY measured_at DESC,id DESC LIMIT 1) ORDER BY s.code")
-        active=rows("SELECT a.*,b.name,b.code AS bridge_code,r.label,r.kind FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!='Resuelta' ORDER BY CASE WHEN a.standard='EV2' THEN "+rank+" ELSE 0 END DESC,a.created_at DESC,a.id DESC LIMIT 10")
+        # Un elemento por episodio de sensor: las lecturas repetidas no desplazan otros avisos.
+        active,episode_total=episodes.dashboard_queue(rows)
         rules=one("SELECT count(*) AS n FROM rules WHERE active=1 AND standard='EV2'")['n']
         pending=rows("SELECT t.*,b.name,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id LEFT JOIN components c ON c.id=t.component_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
         plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date") if feature_enabled('inspection_plans') else []
         visual=rows('SELECT i.*,b.name,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
         kpi=dict(alerts=metrics.alert_summary(rows),sensors=metrics.sensor_summary(one,moment),maintenance=metrics.maintenance_summary(rows,one,g.user,today) if feature_enabled('maintenance') else None,inspections=metrics.inspection_summary(one,moment))
-        return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,rule_count=rules,pending=pending,plans=plans,visual=visual,kpi=kpi,daily=metrics.alerts_by_day(rows,moment))
+        return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,episode_total=episode_total,rule_count=rules,pending=pending,plans=plans,visual=visual,kpi=kpi,daily=metrics.alerts_by_day(rows,moment))
 
     @app.route('/bridges',methods=['GET','POST'])
     @access()
@@ -527,9 +529,12 @@ def create_app(config=None):
         filters=[];args=[]
         if request.args.get('bridge_id'):
             filters.append('a.bridge_id=?');args.append(positive_integer(request.args['bridge_id'],'bridge_id'))
+        if request.args.get('sensor_id'):
+            filters.append('a.measurement_id IN (SELECT id FROM measurements WHERE sensor_id=?)');args.append(positive_integer(request.args['sensor_id'],'sensor_id'))
         if request.args.get('status'):
-            if request.args['status'] not in ('Activa','En atención','Resuelta'): abort(400,'Estado inválido.')
-            filters.append('a.status=?');args.append(request.args['status'])
+            if request.args['status']=='abiertas': filters.append("a.status!='Resuelta'")
+            elif request.args['status'] in ('Activa','En atención','Resuelta'): filters.append('a.status=?');args.append(request.args['status'])
+            else: abort(400,'Estado inválido.')
         if request.args.get('severity'):
             if request.args['severity']=='historica':
                 filters.append("a.standard!='EV2'")
@@ -541,7 +546,7 @@ def create_app(config=None):
         source=' FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id'
         pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
         data=rows('SELECT a.*,b.name,r.label'+source+where+' ORDER BY a.created_at DESC,a.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
-        return render_template('alerts.html',alerts=data,pager=pager,bridges=rows('SELECT * FROM bridges ORDER BY code'))
+        return render_template('alerts.html',alerts=data,pager=pager,bridges=rows('SELECT * FROM bridges ORDER BY code'),sensors=rows('SELECT s.id,s.code,b.code AS bridge_code FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id ORDER BY b.code,s.code'))
 
     @app.get('/api/v1/alert-notifications')
     def alert_notifications():
@@ -555,17 +560,44 @@ def create_app(config=None):
         # Primera consulta establece la línea base. No convierte históricos en avisos.
         reset=cursor is not None and cursor>maximum
         if cursor is not None and not reset and cursor<maximum:
-            fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.id>? AND a.id<=? ORDER BY a.id LIMIT 20',(cursor,maximum))
-        next_cursor=fresh[-1]['id'] if fresh else maximum
-        return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,has_more=bool(fresh and next_cursor<maximum),
-                       alerts=[dict(id=str(a['id']),title=a['name']+' · '+a['label'],
+            # Episodios: una lectura repetida del mismo sensor no genera aviso, salvo que suba el nivel abierto.
+            earlier="SELECT 1 FROM alerts p JOIN measurements pm ON pm.id=p.measurement_id WHERE p.bridge_id=a.bridge_id AND p.status!='Resuelta' AND p.id<a.id AND pm.sensor_id=m.sensor_id"
+            fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,r.label,CASE WHEN EXISTS('+earlier+') THEN 1 ELSE 0 END AS escalation FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id LEFT JOIN measurements m ON m.id=a.measurement_id'
+                       ' WHERE a.id>? AND a.id<=? AND NOT EXISTS('+earlier+' AND '+episodes.rank('p')+'>='+episodes.rank('a')+') ORDER BY a.id LIMIT 20',(cursor,maximum))
+        # Una página incompleta ya recorrió todo el intervalo, incluidas las repeticiones omitidas.
+        next_cursor=fresh[-1]['id'] if len(fresh)==20 else maximum
+        return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,has_more=next_cursor<maximum,
+                       alerts=[dict(id=str(a['id']),title=a['name']+' · '+a['label']+(' · sube de nivel' if a['escalation'] else ''),
                                     severity=a['severity'] if a['standard']=='EV2' else 'Histórica',
                                     status=a['status'],url=url_for('alert',aid=a['id'])) for a in fresh])
+
+    def follow_up_episode(a,note,status,inspection_id,until):
+        """Registra la misma nota (y estado) en cada alerta abierta del episodio, con su propia auditoría.
+
+        Operación por conjuntos (tres sentencias) para episodios de miles de lecturas; acotada al último
+        registro que el usuario vio en pantalla. No crea ni elimina alertas.
+        """
+        if not until.isascii() or not until.isdigit(): raise ValueError('El episodio mostrado no es válido. Vuelve a cargar la alerta.')
+        episode=episodes.episode_for(one,a)
+        if not episode: raise ValueError('La alerta ya no forma parte de un episodio abierto.')
+        scope,params=episodes.episode_scope(a['bridge_id'],episode['sensor_id'],int(until))
+        if a['id']>int(until): raise ValueError('El episodio mostrado no incluye esta alerta. Vuelve a cargarla.')
+        applied=one('SELECT count(*) AS n FROM alerts a WHERE '+scope,params)['n']
+        if not applied: raise ValueError('No quedan alertas abiertas en el episodio mostrado.')
+        stamp=now(); detail=status+': '+note+' (episodio del sensor '+episode['sensor_code']+', desde alerta #'+str(a['id'])+')'
+        # CAST explícito: PostgreSQL no infiere el tipo de un parámetro en la lista de un INSERT ... SELECT.
+        db().execute('INSERT INTO alert_notes(alert_id,author_id,created_at,note,inspection_id) SELECT a.id,CAST(? AS INTEGER),CAST(? AS TEXT),CAST(? AS TEXT),CAST(? AS INTEGER) FROM alerts a WHERE '+scope,(g.user['id'],stamp,note,inspection_id,*params))
+        db().execute("INSERT INTO audit(author,action,entity,entity_id,details,created_at) SELECT CAST(? AS TEXT),'Seguimiento de alerta','alerts',a.id,CAST(? AS TEXT),CAST(? AS TEXT) FROM alerts a WHERE "+scope,(g.user['username'],detail,stamp,*params))
+        db().execute('UPDATE alerts SET status=? WHERE id IN (SELECT a.id FROM alerts a WHERE '+scope+')',(status,*params))
+        return applied
 
     @app.route('/alerts/<int:aid>',methods=['GET','POST'])
     @access()
     def alert(aid):
-        a=one('SELECT a.*,b.name,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.id=?',(aid,))
+        # La regla se muestra como condición legible (variable, límite, nivel) junto al valor que la activó.
+        a=one('SELECT a.*,b.name,r.label,r.kind AS rule_kind,r.threshold,r.condition AS rule_condition,r.unit AS rule_unit,r.severity AS rule_severity,r.standard AS rule_standard,r.active AS rule_active,'
+              'm.value AS reading_value,m.variation AS reading_variation,m.unit AS reading_unit,i.condition AS finding_condition '
+              'FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id LEFT JOIN measurements m ON m.id=a.measurement_id LEFT JOIN inspections i ON i.id=a.inspection_id WHERE a.id=?',(aid,))
         if not a: abort(404)
         if request.method=='POST':
             if g.user['role'] not in ['DOM','Inspector']: abort(403)
@@ -575,11 +607,16 @@ def create_app(config=None):
                 status=request.form.get('status',a['status'])
                 if status!=a['status'] and g.user['role']!='DOM': abort(403)
                 if status not in ['Activa','En atención','Resuelta']: raise ValueError('Estado inválido.')
-                insert('alert_notes',alert_id=aid,author_id=g.user['id'],created_at=now(),note=request.form['note'].strip(),inspection_id=iid)
-                db().execute('UPDATE alerts SET status=? WHERE id=?',(status,aid)); audit('Seguimiento de alerta','alerts',aid,status+': '+request.form['note'].strip()); db().commit()
+                note=request.form['note'].strip()
+                if request.form.get('apply_episode')=='1':
+                    applied=follow_up_episode(a,note,status,iid,request.form.get('episode_until',''))
+                    db().commit(); flash(f'Seguimiento aplicado a {applied} alertas del episodio.','success')
+                    return redirect(url_for('alert',aid=aid))
+                insert('alert_notes',alert_id=aid,author_id=g.user['id'],created_at=now(),note=note,inspection_id=iid)
+                db().execute('UPDATE alerts SET status=? WHERE id=?',(status,aid)); audit('Seguimiento de alerta','alerts',aid,status+': '+note); db().commit()
                 return redirect(url_for('alert',aid=aid))
             except ValueError as e: db().rollback(); flash(str(e),'error')
-        return render_template('alert.html',a=a,notes=rows('SELECT n.*,u.username FROM alert_notes n JOIN users u ON u.id=n.author_id WHERE alert_id=? ORDER BY n.id',(aid,)),inspections=rows('SELECT * FROM inspections WHERE bridge_id=?',(a['bridge_id'],)),related_inspection=bool(a['inspection_id'] or one('SELECT id FROM alert_notes WHERE alert_id=? AND inspection_id IS NOT NULL',(aid,))),tasks=[] if not feature_enabled('maintenance') else rows('SELECT t.*,u.username FROM tasks t JOIN users u ON u.id=t.assignee_id WHERE alert_id=?',(aid,)))
+        return render_template('alert.html',a=a,episode=episodes.episode_for(one,a),notes=rows('SELECT n.*,u.username FROM alert_notes n JOIN users u ON u.id=n.author_id WHERE alert_id=? ORDER BY n.id',(aid,)),inspections=rows('SELECT * FROM inspections WHERE bridge_id=?',(a['bridge_id'],)),related_inspection=bool(a['inspection_id'] or one('SELECT id FROM alert_notes WHERE alert_id=? AND inspection_id IS NOT NULL',(aid,))),tasks=[] if not feature_enabled('maintenance') else rows('SELECT t.*,u.username FROM tasks t JOIN users u ON u.id=t.assignee_id WHERE alert_id=?',(aid,)))
 
     @app.route('/maintenance',methods=['GET','POST'])
     @access()

@@ -278,6 +278,11 @@ input:user-invalid,select:user-invalid,textarea:user-invalid{border-color:var(--
 input:user-invalid:focus,select:user-invalid:focus,textarea:user-invalid:focus{box-shadow:0 0 0 3px rgba(199,51,44,.2)}
 input[disabled],select[disabled]{background:var(--surface-3);color:var(--muted)}
 label small{font-weight:400;margin-top:6px}
+.notice.episode-notice{margin:0 0 20px}
+.episode-notice p{margin:0 0 6px}
+.episode-notice .episode-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+label.checkbox{display:flex;gap:10px;align-items:flex-start;font-weight:400;line-height:1.45}
+label.checkbox input{width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;flex:none;accent-color:var(--river)}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px;align-items:start}
 .form-grid>label{align-self:start}
 .form-grid>button,.form-grid>.form-actions{grid-column:1/-1}

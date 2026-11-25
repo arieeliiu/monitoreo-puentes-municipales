@@ -18,13 +18,17 @@ class MonitoringUiTests(SystemTests):
     def setUp(self):
         super().setUp(); self.app.config['PROJECT_STAGE']=EV3_STAGE
 
-    def populated(self, count=45):
+    def populated(self, count=45, distinct_sensors=False):
         self.rule(label='Límite operativo')
         rid=self.db.execute('SELECT id FROM rules ORDER BY id DESC').fetchone()[0]
         for n in range(count):
+            sensor=1
+            if distinct_sensors:
+                # Un sensor por alerta: cada una abre su propio episodio y genera su aviso.
+                sensor=self.db.execute("INSERT INTO sensors(component_id,code,kind,unit) VALUES(1,?,'vibracion','m/s²')",('SB-'+str(n),)).lastrowid
             # Registros nuevos exclusivamente en la base temporal del caso.
-            mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,created_at) VALUES(1,9,'m/s²',?,'valido',?)",
-                                (f'2026-01-{1+n//20:02d}T10:00:00+00:00',)*2).lastrowid
+            mid=self.db.execute("INSERT INTO measurements(sensor_id,value,unit,measured_at,status,created_at) VALUES(?,9,'m/s²',?,'valido',?)",
+                                (sensor,)+(f'2026-01-{1+n//20:02d}T10:00:00+00:00',)*2).lastrowid
             self.db.execute("INSERT INTO alerts(bridge_id,rule_id,measurement_id,created_at,standard,severity,status) VALUES(1,?,?,?,'EV2','Atención','Activa')",
                             (rid,mid,f'2026-01-{1+n//20:02d}T10:00:00+00:00'))
         self.db.commit()
@@ -84,7 +88,7 @@ class MonitoringUiTests(SystemTests):
         self.assertIn('No hay operaciones registradas',self.client.get('/audit').text)
 
     def test_notifications_baseline_batched_monotonic_and_no_writes(self):
-        self.populated(25);before=self.snapshot()
+        self.populated(25,distinct_sensors=True);before=self.snapshot()
         initial=self.api();self.assertEqual(initial.status_code,200)
         self.assertEqual(initial.json['alerts'],[]);self.assertEqual(initial.json['cursor'],'25')
         self.assertEqual(initial.json['open_count'],25);self.assertFalse(initial.json['has_more'])

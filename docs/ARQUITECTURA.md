@@ -26,6 +26,22 @@ GET `/api/v1/alert-notifications` exige sesión y rol DOM/Inspector/Mantención.
 
 Cliente sin dependencias externas: consulta normal cada 30 s; si `has_more` indica pendientes, continúa cada 1 s con descanso de 5 s tras cuatro lotes (20 por lote); timeout de 8 s, sin solapamiento, pausa de consultas en pestaña oculta, reintento de fallos transitorios y detención ante 401/403 o cambio de sesión. Usa textContent para contenido y enlaces locales por ID. No existe estado de lectura, nueva tabla ni escritura de históricos. Ver [regresiones y límites](REVISION_EV3_UI.md).
 
+## Episodios de alertas
+
+Problema: el worker consulta al proveedor periódicamente (60 s por omisión) y cada lectura que cumple una regla genera su alerta. Una condición sostenida en un sensor producía cientos de alertas equivalentes que desplazaban a las demás en el panel, generaban un aviso por lectura y debían cerrarse una a una.
+
+Decisión: se conserva el motor de evaluación (`evaluate`) y un registro por lectura, porque CA-04.4 exige generar el registro correspondiente y CA-04.5 asociarlo a la medición de origen. La agrupación es **derivada** ([alert_episodes.py](../alert_episodes.py)): un episodio son las alertas abiertas (Activa/En atención) de mediciones de un mismo sensor. No hay columnas, tablas ni migraciones nuevas; aplica igual a SQLite y PostgreSQL. Al quedar todas Resueltas, la siguiente superación abre un episodio nuevo. Las alertas de inspección visual no se agrupan, porque dos hallazgos del mismo componente pueden ser distintos.
+
+| Vista | Comportamiento |
+|---|---|
+| Panel | Un elemento por episodio de sensor, representado por su alerta abierta de mayor nivel (y más reciente), con número de lecturas y primera ocurrencia, más los hallazgos visuales abiertos. Se ordena por nivel y fecha y se limita a 10. Indica cuántas alertas abiertas se agrupan en cuántos episodios. |
+| Detalle de alerta | Resumen del episodio y enlace a `/alerts?sensor_id=…&status=abiertas`. DOM e Inspector pueden aplicar la nota al episodio; solo DOM cambia el estado, como en una alerta individual. |
+| Seguimiento por episodio | Tres sentencias por conjunto (notas, auditoría y estado) en una transacción, con nota y fila de auditoría **por alerta** («episodio del sensor X, desde alerta #N»). Se limita a las alertas con ID menor o igual al último mostrado (`episode_until`), para no afectar lecturas que llegaron después de cargar la página. |
+| Campana | Se avisa una alerta solo si no existe otra abierta anterior del mismo sensor con nivel mayor o igual; si existe una de nivel menor, el aviso se marca «sube de nivel». El cursor avanza sobre las repeticiones omitidas. `open_count` sigue contando alertas abiertas. |
+| Lista | Nuevos filtros `sensor_id` y `status=abiertas`; el listado sigue mostrando cada registro (CA-04.7). |
+
+Las subconsultas se acotan por `bridge_id` y estado abierto para usar el índice existente `alerts(bridge_id,status)`. Fuera de alcance: escalamiento por tiempo sin atención, avisos por correo/SMS, histéresis de cierre y validación de sensores defectuosos. Pruebas: [test_alert_episodes.py](../tests/test_alert_episodes.py).
+
 ## Etapa configurable de presentación
 
 `app.create_app` toma `PROJECT_STAGE` de la configuración explícita o del entorno y valida cuatro valores: `cutoff_2026_10_26` (predeterminado), `cutoff_2026_11_09`, `cutoff_2026_11_28` y `full`. `STAGE_FEATURES` y `feature_enabled()` centralizan las funciones disponibles para rutas, inicio, recepción, inspecciones y contexto Jinja; `cutoff_mode()` conserva su significado original de EV2. No depende del reloj ni de archivos de gestión.
