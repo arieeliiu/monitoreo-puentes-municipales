@@ -88,7 +88,7 @@ class ClosureStageTests(SystemTests):
         for role in ('dom','inspector','worker'):
             self.login(role);before=snapshot(self)
             page=self.client.get('/').text
-            for text in ('Panel de monitoreo','Puente de prueba','Segundo puente','6.25','7.5','No disponible','Condiciones visuales','Observación visual específica del tablero'):
+            for text in ('Panel de monitoreo','Puente de prueba','Segundo puente','6,25','7,5','No disponible','Condiciones visuales','Observación visual específica del tablero'):
                 self.assertIn(text,page)
             self.assertNotIn('1.25',page)
             for link in ('/bridges/1','/measurements?bridge_id=1','/inspections?bridge_id=1','/alerts/1','/alerts/2','/inspections/1'):

@@ -8,6 +8,7 @@ import unicodedata
 from datetime import datetime, timedelta, timezone
 
 from display_time import chile_datetime
+from number_format import decimal
 
 SEVERITY_STATE = {'Atención': 'attention', 'Alerta': 'alert', 'Crítico': 'critical'}
 STATE_LABELS = {
@@ -63,9 +64,9 @@ def reading_text(sensor):
     if sensor['specification'] != 'EV2':
         return 'Último dato: registro histórico, no evaluado con criterios vigentes'
     if sensor['kind'] == 'inclinacion':
-        change = f" · cambio absoluto {sensor['variation']} °" if sensor['variation'] is not None else ' · referencia no configurada'
-        return f"Lectura {sensor['value']} °{change}"
-    return f"Última lectura {sensor['value']} {sensor['unit']}"
+        change = f" · cambio absoluto {decimal(sensor['variation'])} °" if sensor['variation'] is not None else ' · referencia no configurada'
+        return f"Lectura {decimal(sensor['value'])} °{change}"
+    return f"Última lectura {decimal(sensor['value'])} {sensor['unit']}"
 
 
 def is_stale(value, now):

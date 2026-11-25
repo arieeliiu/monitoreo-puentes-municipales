@@ -65,7 +65,7 @@ class SchematicUnitTests(unittest.TestCase):
         old = sensor(1, 1, 'inclinacion', mid=1, status='valido', value=0.3, variation=0.3, location='Borde lateral, apoyo 2',
                      measured_at='2026-11-20T10:00:00+00:00', evaluation='Evaluada')
         title = bridge_schematic.build([dict(id=1, name='Tablero')], [old], [], LABELS, True, NOW)['zones'][-1]['markers'][0]['title']
-        for text in ('Ubicación descrita: Borde lateral, apoyo 2', 'cambio absoluto 0.3 °', 'sin lecturas en las últimas 24 horas', 'Componente: Tablero'):
+        for text in ('Ubicación descrita: Borde lateral, apoyo 2', 'cambio absoluto 0,3 °', 'sin lecturas en las últimas 24 horas', 'Componente: Tablero'):
             self.assertIn(text, title)
 
     def test_latest_inspection_marks_its_component(self):

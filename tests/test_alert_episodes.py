@@ -85,6 +85,24 @@ class AlertEpisodeTests(SystemTests):
         self.assertEqual(self.post('/alerts/1', dict(note='x', apply_episode='1', episode_until='2')).status_code, 403)
         self.assertNotIn('name="apply_episode"', self.client.get('/alerts/1').text)
 
+    def test_inspector_episode_note_keeps_each_alert_status(self):
+        # Regresión: el estado de la alerta de origen no debe propagarse a alertas con estado distinto.
+        self.readings(9, 9, 9)
+        self.post('/alerts/1', dict(note='Cuadrilla asignada', status='En atención'))
+        self.assertEqual(self.statuses(), ['En atención', 'Activa', 'Activa'])
+        self.login('inspector')
+        self.assertIn('name="apply_episode"', self.client.get('/alerts/2').text)
+        self.assertEqual(self.post('/alerts/2', dict(note='Observación en terreno', apply_episode='1', episode_until='3')).status_code, 302)
+        self.assertEqual(self.statuses(), ['En atención', 'Activa', 'Activa'])
+        notes = self.db.execute("SELECT alert_id FROM alert_notes WHERE note='Observación en terreno' ORDER BY alert_id").fetchall()
+        self.assertEqual([n['alert_id'] for n in notes], [1, 2, 3])
+        audit = self.db.execute("SELECT entity_id,details FROM audit WHERE author='inspector' AND action='Seguimiento de alerta' ORDER BY entity_id").fetchall()
+        self.assertEqual([a['details'].split(':')[0] for a in audit], ['En atención', 'Activa', 'Activa'])
+        # DOM sí puede aplicar un estado a todo el episodio, de forma explícita.
+        self.login('dom')
+        self.post('/alerts/2', dict(note='Revisión conjunta', status='En atención', apply_episode='1', episode_until='3'))
+        self.assertEqual(self.statuses(), ['En atención', 'En atención', 'En atención'])
+
     def test_notifications_skip_repeats_and_announce_escalations(self):
         cursor = self.api()['cursor']
         self.readings(9, 9, 25, 9, 30)

@@ -23,8 +23,8 @@ test('no interpola intervalos sin datos', () => {
 });
 
 test('formato de valores y búsqueda del intervalo más cercano', () => {
-  assert.equal(formatValue(0.2291), '0.229');
-  assert.equal(formatValue(2.5), '2.5');
+  assert.equal(formatValue(0.2291), '0,229');
+  assert.equal(formatValue(2.5), '2,5');
   assert.equal(formatValue(123.4), '123');
   const points = [[0], [10], [20], [30]];
   assert.equal(nearest(points, 14), 1);

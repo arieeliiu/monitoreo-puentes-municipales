@@ -15,6 +15,7 @@ from display_time import chile_datetime, calendar_date, local_date_bounds
 import dashboard_metrics as metrics
 import bridge_schematic
 import alert_episodes as episodes
+from number_format import decimal
 from contextlib import nullcontext
 from demo_locations import complete_demo_locations
 from reference_data import BRIDGE_REFERENCES, reference_inventory
@@ -63,6 +64,7 @@ def create_app(config=None):
     photo_store=PhotoStorage(app.config)
     app.add_template_filter(chile_datetime)
     app.add_template_filter(calendar_date)
+    app.add_template_filter(decimal)
 
     def db():
         if 'db' not in g:
@@ -184,9 +186,9 @@ def create_app(config=None):
         # Un elemento por episodio de sensor: las lecturas repetidas no desplazan otros avisos.
         active,episode_total=episodes.dashboard_queue(rows)
         rules=one("SELECT count(*) AS n FROM rules WHERE active=1 AND standard='EV2'")['n']
-        pending=rows("SELECT t.*,b.name,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id LEFT JOIN components c ON c.id=t.component_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
-        plans=rows("SELECT p.*,b.name,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date") if feature_enabled('inspection_plans') else []
-        visual=rows('SELECT i.*,b.name,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
+        pending=rows("SELECT t.*,b.name,b.code AS bridge_code,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id LEFT JOIN components c ON c.id=t.component_id WHERE t.status!='Completada'"+(' AND t.assignee_id=?' if g.user['role']=='Mantención' else '')+' ORDER BY planned_date', (g.user['id'],) if g.user['role']=='Mantención' else ())
+        plans=rows("SELECT p.*,b.name,b.code AS bridge_code,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN users u ON u.id=p.inspector_id WHERE p.status='Programada' ORDER BY planned_date") if feature_enabled('inspection_plans') else []
+        visual=rows('SELECT i.*,b.name,b.code AS bridge_code,c.name AS component FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id WHERE i.id=(SELECT id FROM inspections WHERE bridge_id=b.id ORDER BY inspected_at DESC,id DESC LIMIT 1)')
         kpi=dict(alerts=metrics.alert_summary(rows),sensors=metrics.sensor_summary(one,moment),maintenance=metrics.maintenance_summary(rows,one,g.user,today) if feature_enabled('maintenance') else None,inspections=metrics.inspection_summary(one,moment))
         return render_template('dashboard.html',bridges=bridges,latest=latest,alerts=active,episode_total=episode_total,rule_count=rules,pending=pending,plans=plans,visual=visual,kpi=kpi,daily=metrics.alerts_by_day(rows,moment))
 
@@ -347,8 +349,8 @@ def create_app(config=None):
         where=' WHERE '+' AND '.join(filters) if filters else ''
         source=' FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'
         pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
-        data=rows('SELECT m.*,s.code,s.kind,b.name,c.name AS component'+source+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
-        return render_template('measurements.html',measurements=data,pager=pager,sensors=rows('SELECT s.*,b.name,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.code AS bridge_code FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY c.bridge_id,c.id'))
+        data=rows('SELECT m.*,s.code,s.kind,b.name,b.code AS bridge_code,c.name AS component'+source+where+' ORDER BY m.measured_at DESC,m.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
+        return render_template('measurements.html',measurements=data,pager=pager,sensors=rows('SELECT s.*,b.name,b.code AS bridge_code,c.bridge_id FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.code AS bridge_code FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY c.bridge_id,c.id'))
 
     @app.post('/api/v1/measurements')
     def iot():
@@ -378,7 +380,7 @@ def create_app(config=None):
     @app.get('/measurements/<int:mid>')
     @access()
     def measurement(mid):
-        m=one('SELECT m.*,s.code,s.kind,b.name,c.bridge_id,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE m.id=?',(mid,))
+        m=one('SELECT m.*,s.code,s.kind,b.name,b.code AS bridge_code,c.bridge_id,c.name AS component FROM measurements m JOIN sensors s ON s.id=m.sensor_id JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id WHERE m.id=?',(mid,))
         if not m: abort(404)
         return render_template('measurement.html',m=m,associated_alerts=[] if not feature_enabled('alerts') else rows('SELECT id,status,severity,standard FROM alerts WHERE measurement_id=? ORDER BY id DESC',(mid,)))
 
@@ -440,14 +442,14 @@ def create_app(config=None):
                     session['pending_photos']=[n for n in session.get('pending_photos',[]) if n not in staged]
                     try:photo_store.delete_staged(staged)
                     except PhotoStorageError:app.logger.error('Limpieza temporal de fotografías pendiente.')
-        query='SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id'
+        query='SELECT i.*,b.name,b.code AS bridge_code,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id'
         args=()
         if request.args.get('bridge_id'): query+=' WHERE i.bridge_id=?'; args=(request.args['bridge_id'],)
-        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=[] if not feature_enabled('inspection_plans') else rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
+        return render_template('inspections.html',inspections=rows(query+' ORDER BY inspected_at DESC',args),bridges=rows('SELECT * FROM bridges'),plans=[] if not feature_enabled('inspection_plans') else rows("SELECT * FROM inspection_plans WHERE status='Programada' AND inspector_id=?",(g.user['id'],)),components=rows('SELECT c.*,b.code AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'))
     @app.get('/inspections/<int:iid>')
     @access()
     def inspection(iid):
-        i=one('SELECT i.*,b.name,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id WHERE i.id=?',(iid,))
+        i=one('SELECT i.*,b.name,b.code AS bridge_code,c.name AS component,u.username FROM inspections i JOIN bridges b ON b.id=i.bridge_id JOIN components c ON c.id=i.component_id JOIN users u ON u.id=i.inspector_id WHERE i.id=?',(iid,))
         if not i: abort(404)
         return render_template('inspection.html',i=i,photos=rows('SELECT * FROM photos WHERE inspection_id=?',(iid,)))
     @app.post('/uploads/prepare')
@@ -502,7 +504,7 @@ def create_app(config=None):
                     rid=insert('rules',bridge_id=request.form['bridge_id'],kind=kind,threshold=threshold,condition=condition,label=request.form['label'].strip(),comparison='gte',severity=severity,standard='EV2',unit=KINDS.get(kind),author_id=g.user['id'],created_at=now()); audit('Configurar regla','rules',rid)
                 db().commit(); flash('Regla guardada. Se aplica a nuevos registros.','success'); return redirect(url_for('rules'))
             except (ValueError,sqlite3.IntegrityError) as e: db().rollback(); flash(str(e),'error')
-        return render_template('rules.html',rules=rows('SELECT r.*,b.name FROM rules r JOIN bridges b ON b.id=r.bridge_id ORDER BY r.id DESC'),bridges=rows('SELECT * FROM bridges'))
+        return render_template('rules.html',rules=rows('SELECT r.*,b.name,b.code AS bridge_code FROM rules r JOIN bridges b ON b.id=r.bridge_id ORDER BY r.id DESC'),bridges=rows('SELECT * FROM bridges'))
 
     def positive_integer(value, field, allow_zero=False):
         try:
@@ -545,7 +547,7 @@ def create_app(config=None):
         where=' WHERE '+' AND '.join(filters) if filters else ''
         source=' FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id'
         pager=pagination(one('SELECT count(*) AS total'+source+where,args)['total'])
-        data=rows('SELECT a.*,b.name,r.label'+source+where+' ORDER BY a.created_at DESC,a.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
+        data=rows('SELECT a.*,b.name,b.code AS bridge_code,r.label'+source+where+' ORDER BY a.created_at DESC,a.id DESC LIMIT ? OFFSET ?',(*args,20,pager['offset']))
         return render_template('alerts.html',alerts=data,pager=pager,bridges=rows('SELECT * FROM bridges ORDER BY code'),sensors=rows('SELECT s.id,s.code,b.code AS bridge_code FROM sensors s JOIN components c ON c.id=s.component_id JOIN bridges b ON b.id=c.bridge_id ORDER BY b.code,s.code'))
 
     @app.get('/api/v1/alert-notifications')
@@ -562,12 +564,12 @@ def create_app(config=None):
         if cursor is not None and not reset and cursor<maximum:
             # Episodios: una lectura repetida del mismo sensor no genera aviso, salvo que suba el nivel abierto.
             earlier="SELECT 1 FROM alerts p JOIN measurements pm ON pm.id=p.measurement_id WHERE p.bridge_id=a.bridge_id AND p.status!='Resuelta' AND p.id<a.id AND pm.sensor_id=m.sensor_id"
-            fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,r.label,CASE WHEN EXISTS('+earlier+') THEN 1 ELSE 0 END AS escalation FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id LEFT JOIN measurements m ON m.id=a.measurement_id'
+            fresh=rows('SELECT a.id,a.status,a.severity,a.standard,b.name,b.code AS bridge_code,r.label,CASE WHEN EXISTS('+earlier+') THEN 1 ELSE 0 END AS escalation FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id LEFT JOIN measurements m ON m.id=a.measurement_id'
                        ' WHERE a.id>? AND a.id<=? AND NOT EXISTS('+earlier+' AND '+episodes.rank('p')+'>='+episodes.rank('a')+') ORDER BY a.id LIMIT 20',(cursor,maximum))
         # Una página incompleta ya recorrió todo el intervalo, incluidas las repeticiones omitidas.
         next_cursor=fresh[-1]['id'] if len(fresh)==20 else maximum
         return jsonify(session_epoch=session.get('notification_epoch'),open_count=summary['open_count'],cursor=str(next_cursor),reset=reset,has_more=next_cursor<maximum,
-                       alerts=[dict(id=str(a['id']),title=a['name']+' · '+a['label']+(' · sube de nivel' if a['escalation'] else ''),
+                       alerts=[dict(id=str(a['id']),title=a['bridge_code']+' · '+a['name']+' · '+a['label']+(' · sube de nivel' if a['escalation'] else ''),
                                     severity=a['severity'] if a['standard']=='EV2' else 'Histórica',
                                     status=a['status'],url=url_for('alert',aid=a['id'])) for a in fresh])
 
@@ -584,18 +586,23 @@ def create_app(config=None):
         if a['id']>int(until): raise ValueError('El episodio mostrado no incluye esta alerta. Vuelve a cargarla.')
         applied=one('SELECT count(*) AS n FROM alerts a WHERE '+scope,params)['n']
         if not applied: raise ValueError('No quedan alertas abiertas en el episodio mostrado.')
-        stamp=now(); detail=status+': '+note+' (episodio del sensor '+episode['sensor_code']+', desde alerta #'+str(a['id'])+')'
+        # Solo DOM cambia estados (B-04 P5). Para otros roles cada alerta conserva el suyo: el estado del
+        # formulario es el de la alerta de origen y no puede propagarse a alertas con estado distinto.
+        changes_status=g.user['role']=='DOM'
+        stamp=now(); suffix=' (episodio del sensor '+episode['sensor_code']+', desde alerta #'+str(a['id'])+')'
+        # La auditoría registra el estado resultante de cada alerta: el nuevo (DOM) o el que ya tenía.
+        detail_sql,detail_args=("CAST(? AS TEXT)",(status+': '+note+suffix,)) if changes_status else ("a.status||CAST(? AS TEXT)",(': '+note+suffix,))
         # CAST explícito: PostgreSQL no infiere el tipo de un parámetro en la lista de un INSERT ... SELECT.
         db().execute('INSERT INTO alert_notes(alert_id,author_id,created_at,note,inspection_id) SELECT a.id,CAST(? AS INTEGER),CAST(? AS TEXT),CAST(? AS TEXT),CAST(? AS INTEGER) FROM alerts a WHERE '+scope,(g.user['id'],stamp,note,inspection_id,*params))
-        db().execute("INSERT INTO audit(author,action,entity,entity_id,details,created_at) SELECT CAST(? AS TEXT),'Seguimiento de alerta','alerts',a.id,CAST(? AS TEXT),CAST(? AS TEXT) FROM alerts a WHERE "+scope,(g.user['username'],detail,stamp,*params))
-        db().execute('UPDATE alerts SET status=? WHERE id IN (SELECT a.id FROM alerts a WHERE '+scope+')',(status,*params))
+        db().execute("INSERT INTO audit(author,action,entity,entity_id,details,created_at) SELECT CAST(? AS TEXT),'Seguimiento de alerta','alerts',a.id,"+detail_sql+",CAST(? AS TEXT) FROM alerts a WHERE "+scope,(g.user['username'],*detail_args,stamp,*params))
+        if changes_status: db().execute('UPDATE alerts SET status=? WHERE id IN (SELECT a.id FROM alerts a WHERE '+scope+')',(status,*params))
         return applied
 
     @app.route('/alerts/<int:aid>',methods=['GET','POST'])
     @access()
     def alert(aid):
         # La regla se muestra como condición legible (variable, límite, nivel) junto al valor que la activó.
-        a=one('SELECT a.*,b.name,r.label,r.kind AS rule_kind,r.threshold,r.condition AS rule_condition,r.unit AS rule_unit,r.severity AS rule_severity,r.standard AS rule_standard,r.active AS rule_active,'
+        a=one('SELECT a.*,b.name,b.code AS bridge_code,r.label,r.kind AS rule_kind,r.threshold,r.condition AS rule_condition,r.unit AS rule_unit,r.severity AS rule_severity,r.standard AS rule_standard,r.active AS rule_active,'
               'm.value AS reading_value,m.variation AS reading_variation,m.unit AS reading_unit,i.condition AS finding_condition '
               'FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id LEFT JOIN measurements m ON m.id=a.measurement_id LEFT JOIN inspections i ON i.id=a.inspection_id WHERE a.id=?',(aid,))
         if not a: abort(404)
@@ -649,12 +656,19 @@ def create_app(config=None):
                     tid=insert('tasks',bridge_id=request.form['bridge_id'],component_id=cid,alert_id=aid,description=request.form['description'].strip(),assignee_id=assignee['id'],planned_date=request.form['planned_date'],author_id=g.user['id'],created_at=now()); audit('Planificar mantenimiento','tasks',tid)
                 db().commit(); flash('Actividad guardada. La alerta conserva su estado.','success'); return redirect(url_for('maintenance'))
             except (ValueError,sqlite3.IntegrityError) as e: db().rollback(); flash(str(e),'error')
-        query='SELECT t.*,b.name,u.username,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id JOIN users u ON u.id=t.assignee_id LEFT JOIN components c ON c.id=t.component_id'
+        query='SELECT t.*,b.name,b.code AS bridge_code,u.username,c.name AS component FROM tasks t JOIN bridges b ON b.id=t.bridge_id JOIN users u ON u.id=t.assignee_id LEFT JOIN components c ON c.id=t.component_id'
         args=[]; filters=[]
         if g.user['role']=='Mantención': filters.append('t.assignee_id=?'); args.append(g.user['id'])
         if request.args.get('bridge_id'): filters.append('t.bridge_id=?'); args.append(request.args['bridge_id'])
         if filters: query+=' WHERE '+' AND '.join(filters)
-        return render_template('maintenance.html',tasks=rows(query+' ORDER BY t.planned_date,t.id',args),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT c.*,b.name AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id'),assignees=rows("SELECT id,username FROM users WHERE role='Mantención'"),alerts=rows('SELECT a.*,b.name FROM alerts a JOIN bridges b ON b.id=a.bridge_id'))
+        # «Planificar actividad» desde una alerta: preselecciona alerta, puente y componente de origen.
+        prefill={}
+        if request.args.get('alert_id') and g.user['role']=='DOM':
+            origin=one('SELECT a.id,a.bridge_id,COALESCE(s.component_id,i.component_id) AS component_id FROM alerts a LEFT JOIN measurements m ON m.id=a.measurement_id LEFT JOIN sensors s ON s.id=m.sensor_id LEFT JOIN inspections i ON i.id=a.inspection_id WHERE a.id=?',(positive_integer(request.args['alert_id'],'alert_id'),))
+            if not origin: abort(404)
+            prefill=dict(alert_id=origin['id'],bridge_id=origin['bridge_id'],component_id=origin['component_id'])
+        return render_template('maintenance.html',tasks=rows(query+' ORDER BY t.planned_date,t.id',args),bridges=rows('SELECT * FROM bridges ORDER BY code'),components=rows('SELECT c.*,b.code AS bridge FROM components c JOIN bridges b ON b.id=c.bridge_id ORDER BY b.code,c.name'),assignees=rows("SELECT id,username FROM users WHERE role='Mantención'"),
+                               alerts=rows("SELECT a.id,a.bridge_id,a.status,b.code,b.name,b.code AS bridge_code,r.label FROM alerts a JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id WHERE a.status!='Resuelta' OR a.id=? ORDER BY a.id DESC",(prefill.get('alert_id',0),)),prefill=prefill)
 
     @app.get('/audit')
     @access('DOM')
@@ -816,7 +830,7 @@ def create_app(config=None):
                 audit('Programar/cancelar inspección','inspection_plans',pid);db().commit()
                 return redirect(url_for('inspection_plans'))
             except (ValueError,sqlite3.IntegrityError) as error: db().rollback();flash(str(error),'error')
-        return render_template('inspection_plans.html',plans=rows('SELECT p.*,b.name,c.name AS component,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN components c ON c.id=p.component_id JOIN users u ON u.id=p.inspector_id ORDER BY planned_date'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT * FROM components'),inspectors=rows("SELECT * FROM users WHERE role='Inspector'"))
+        return render_template('inspection_plans.html',plans=rows('SELECT p.*,b.name,b.code AS bridge_code,c.name AS component,u.username FROM inspection_plans p JOIN bridges b ON b.id=p.bridge_id JOIN components c ON c.id=p.component_id JOIN users u ON u.id=p.inspector_id ORDER BY planned_date'),bridges=rows('SELECT * FROM bridges'),components=rows('SELECT * FROM components'),inspectors=rows("SELECT * FROM users WHERE role='Inspector'"))
 
 
     def configure_ev2_demo():

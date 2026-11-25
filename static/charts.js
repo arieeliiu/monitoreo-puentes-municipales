@@ -35,7 +35,7 @@
   function formatValue(value) {
     const size = Math.abs(value);
     const digits = size >= 100 ? 0 : size >= 10 ? 1 : size >= 1 ? 2 : 3;
-    return String(Number(value.toFixed(digits)));
+    return String(Number(value.toFixed(digits))).replace('.', ',');
   }
   function nearest(points, time) {
     let low = 0, high = points.length - 1;

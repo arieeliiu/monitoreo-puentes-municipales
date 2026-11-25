@@ -1,10 +1,10 @@
-{% extends 'base.html' %}{% from 'macros.html' import measurement_status,badge,metric,icon,page_header,level with context %}
+{% extends 'base.html' %}{% from 'macros.html' import bridge_label,measurement_status,badge,metric,icon,page_header,level with context %}
 {% block title %}Medición #{{ m.id }} · Puentes{% endblock %}
 {% block content %}
-{% call page_header(m.name,m.component+' · '+m.code,[('Monitoreo' if feature_enabled('alerts') else 'Mediciones','/measurements'),('Medición #'+m.id|string,None)]) %}<a class="button secondary" href="/measurements?sensor_id={{ m.sensor_id }}">{{ icon('activity') }}Historial del sensor</a><a class="button secondary" href="/inspections?bridge_id={{ m.bridge_id }}">{{ icon('clipboard') }}Ver inspecciones visuales del puente</a>{% endcall %}
+{% call page_header(bridge_label(m),m.component+' · '+m.code,[('Monitoreo' if feature_enabled('alerts') else 'Mediciones','/measurements'),('Medición #'+m.id|string,None)]) %}<a class="button secondary" href="/measurements?sensor_id={{ m.sensor_id }}">{{ icon('activity') }}Historial del sensor</a><a class="button secondary" href="/inspections?bridge_id={{ m.bridge_id }}">{{ icon('clipboard') }}Ver inspecciones visuales del puente</a>{% endcall %}
 <div class="grid-main"><div class="stack"><section class="panel"><div class="panel-header"><h2>{{ icon('sensor') }}{{ 'Velocidad de vibración histórica' if m.unit=='mm/s' and m.kind=='vibracion' else labels[m.kind] }}</h2>{{ measurement_status(m.status) }}</div>
 <dl class="facts">
-<div><dt>Valor registrado</dt><dd class="big">{{ m.value if m.value is not none else 'Sin valor disponible' }} <em>{{ m.unit }}</em></dd></div>
+<div><dt>Valor registrado</dt><dd class="big">{{ m.value|decimal if m.value is not none else 'Sin valor disponible' }} <em>{{ m.unit }}</em></dd></div>
 <div><dt>Evaluación</dt><dd>{{ m.evaluation }}</dd></div>
 {% if m.kind=='inclinacion' or m.specification!='EV2' %}<div class="wide"><dt>Interpretación</dt><dd>{{ metric(m) }}</dd></div>{% endif %}
 <div><dt>Medida</dt><dd class="num">{{ m.measured_at|chile_datetime }}</dd></div>

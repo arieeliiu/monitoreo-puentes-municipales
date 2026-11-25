@@ -120,7 +120,7 @@ class CorrectionsTests(SystemTests):
         self.assertNotIn('Entorno de demostración',page)
         self.assertNotIn('PRUEBA',page)
         page=self.client.get('/measurements?bridge_id=1').get_data(as_text=True)
-        for value in ['Puente de prueba','S1','Aceleración vertical pico','9.0','01/01/2026 10:00:00 (UTC-03:00)']:self.assertIn(value,page)
+        for value in ['Puente de prueba','S1','Aceleración vertical pico','<strong>9</strong> m/s²','01/01/2026 10:00:00 (UTC-03:00)']:self.assertIn(value,page)
         count=self.count('tasks')
         response=self.task(description='',follow_redirects=True)
         self.assertIn('obligatorio',response.get_data(as_text=True));self.assertEqual(self.count('tasks'),count)

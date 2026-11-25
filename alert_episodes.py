@@ -81,7 +81,7 @@ def dashboard_queue(rows, limit=10):
         items.append(dict(id=e['top_id'], name=e['name'], label=e['label'], severity=e['severity'], standard=e['standard'],
                           status=e['status'], created_at=e['last_at'], first_at=e['first_at'], count=e['n'],
                           sensor_id=e['sensor_id'], sensor_code=e['sensor_code'], origin='Medición'))
-    visual = rows("SELECT a.id,a.severity,a.standard,a.status,a.created_at,b.name,r.label FROM alerts a "
+    visual = rows("SELECT a.id,a.severity,a.standard,a.status,a.created_at,b.name,b.code AS bridge_code,r.label FROM alerts a "
                   "JOIN bridges b ON b.id=a.bridge_id JOIN rules r ON r.id=a.rule_id "
                   f"WHERE a.inspection_id IS NOT NULL AND {OPEN.format(a='a')} "
                   f"ORDER BY {rank('a')} DESC,a.created_at DESC,a.id DESC LIMIT ?", (limit,))

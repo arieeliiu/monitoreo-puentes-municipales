@@ -25,9 +25,10 @@ document.querySelectorAll('form').forEach(form=>{
     update();
   }
   const bridge=form.querySelector('select[data-bridge]');
-  const components=form.querySelector('[data-components]');
-  if(bridge && components){
-    const update=()=>{for(const option of components.options){option.hidden=!!option.value && option.dataset.bridge!==bridge.value;option.disabled=option.hidden;}if(components.selectedOptions[0]?.disabled)components.value='';};
+  // Componentes y alertas dependientes del puente: se ocultan las opciones de otros puentes.
+  const scoped=bridge?[...form.querySelectorAll('[data-components],[data-bridge-options]')]:[];
+  if(scoped.length){
+    const update=()=>{for(const select of scoped){for(const option of select.options){option.hidden=!!option.value && option.dataset.bridge!==bridge.value;option.disabled=option.hidden;}if(select.selectedOptions[0]?.disabled)select.value='';}};
     bridge.addEventListener('change',update);update();
   }
   const sensor=form.querySelector('[name=sensor_code]'), unit=form.querySelector('[name=unit]');

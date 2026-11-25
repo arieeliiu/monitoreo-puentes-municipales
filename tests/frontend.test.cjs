@@ -29,7 +29,11 @@ function run(nodes) {
        match[2] === 'data-measurement-bridge' ? n.entryBridge :
        match[2] === 'data-measurement-components' ? n.entryComponents :
        match[2] === 'data-measurement-sensors' ? n.entrySensors :
+       match[2] === 'data-bridge-options' ? n.bridgeOptions :
        match[2] === 'name' ? n.name === match[3] : false)) || null;
+  },
+  querySelectorAll(selector) {
+    return selector.split(',').map(s => this.querySelector(s.trim())).filter(Boolean);
   }};
   runInNewContext(script, {document: {querySelectorAll: () => [form], addEventListener() {}}});
 }
@@ -104,4 +108,18 @@ test('registro manual exige puente y componente antes de ofrecer sensores y limp
  components.value='10';components.listeners.change();assert.deepEqual(sensors.options.map(o=>o.value),['','abc']);
  sensors.value='abc';sensors.listeners.change();assert.equal(unit.value,'m/s²');
  bridge.value='2';bridge.listeners.change();assert.equal(components.value,'');assert.equal(sensors.value,'');assert.equal(sensors.options.length,1);
+});
+
+test('bridge selector also filters related alerts and clears an alert from another bridge', () => {
+  let change;
+  const bridge = {tag: 'select', value: '1', dataset: {bridge: ''}, addEventListener: (_, fn) => {change = fn;}};
+  const components = componentSelect();
+  const alerts = componentSelect(); delete alerts.components; alerts.bridgeOptions = true;
+  run([bridge, components, alerts, ...components.options]);
+  assert.equal(alerts.options[2].disabled, true);
+  assert.equal(alerts.value, '10');
+  bridge.value = '2'; change();
+  assert.equal(alerts.options[1].disabled, true);
+  assert.equal(alerts.value, '');
+  assert.equal(components.value, '');
 });

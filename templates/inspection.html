@@ -1,10 +1,10 @@
-{% extends 'base.html' %}{% from 'macros.html' import badge,icon,page_header,empty with context %}
+{% extends 'base.html' %}{% from 'macros.html' import bridge_label,badge,icon,page_header,empty with context %}
 {% block title %}Inspección #{{ i.id }} · Puentes{% endblock %}
 {% block content %}
-{% call page_header(i.name,i.component+' · '+i.inspected_at|chile_datetime,[('Inspecciones visuales','/inspections'),('Inspección #'+i.id|string,None)]) %}<span class="badges">{{ badge(i.condition) }}</span>{% endcall %}
+{% call page_header(bridge_label(i),i.component+' · '+i.inspected_at|chile_datetime,[('Inspecciones visuales','/inspections'),('Inspección #'+i.id|string,None)]) %}<span class="badges">{{ badge(i.condition) }}</span>{% endcall %}
 {% if i.standard!='EV2' %}<p class="notice">{{ icon('info') }}<small class="notice-body">Categoría histórica sin equivalencia asignada</small></p>{% endif %}
 <dl class="facts">
-<div><dt>Puente</dt><dd><a href="/bridges/{{ i.bridge_id }}">{{ i.name }}</a></dd></div>
+<div><dt>Puente</dt><dd><a href="/bridges/{{ i.bridge_id }}">{{ bridge_label(i) }}</a></dd></div>
 <div><dt>Componente</dt><dd>{{ i.component }}</dd></div>
 <div><dt>Condición visual</dt><dd>{{ i.condition }}</dd></div>
 <div><dt>Fecha y hora</dt><dd class="num">{{ i.inspected_at|chile_datetime }}</dd></div>

@@ -165,6 +165,6 @@ class SystemTests(unittest.TestCase):
         self.post('/measurements',self.measurement())
         app2=create_app(dict(self.app.config));client=app2.test_client()
         with client.session_transaction() as s:s['user_id']=1
-        self.assertIn(b'9.0',client.get('/measurements').data)
+        self.assertIn('<strong>9</strong> m/s²',client.get('/measurements').text)
 
 if __name__=='__main__': unittest.main()
